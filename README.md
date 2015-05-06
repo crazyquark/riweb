@@ -1,6 +1,7 @@
 **Quick Start**
+(Or at least, how I did it)
 
-Get nodejs dependecies:
+Get NodeJS dependencies:
 *npm install*
 
 Install docker:
