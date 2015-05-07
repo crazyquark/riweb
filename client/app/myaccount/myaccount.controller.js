@@ -8,6 +8,7 @@ angular.module('riwebApp')
     };
 
     $scope.message = 'Not connected to any server';
+    $scope.ballance = '0 XRPs :(';
 
     var Remote = ripple.Remote;
     var remote = new Remote({
@@ -25,6 +26,10 @@ angular.module('riwebApp')
             }
             $scope.$apply();
 
+        });
+        remote.requestAccountInfo({account: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"}, function(err, info) {
+            $scope.ballance = info.account_data.Balance;
+            $scope.$apply();
         });
     });
   });
