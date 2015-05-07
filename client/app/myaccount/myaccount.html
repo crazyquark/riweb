@@ -1,0 +1,12 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+
+<div class="container">
+  <ul class="list-group">
+    <strong>{{getMyAccountUser().name}}</strong>
+      <div class="row">
+          <button type="button" class="btn btn-default" aria-label="Left Align" ng-click="createWallet()">
+              <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+          </button>
+      </div>
+  </ul>
+</div>
