@@ -12,8 +12,7 @@ angular.module('riwebApp')
     var Remote = ripple.Remote;
     var remote = new Remote({
         // see the API Reference for available options
-        servers: [ 'wss://s1.ripple.com:443' ]
-//        servers: [ 'wss://localhost:6006' ]
+        servers: [ 'ws://localhost:6006' ]
     });
 
     remote.connect(function() {
