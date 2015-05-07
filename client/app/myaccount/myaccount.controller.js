@@ -2,6 +2,12 @@
 
 angular.module('riwebApp')
   .controller('MyaccountCtrl', function ($scope, Auth) {
+    var Remote = ripple.Remote;
+    var remote = new Remote({
+        // see the API Reference for available options
+        servers: [ 'ws://localhost:6006' ]
+    });
+
     $scope.getMyAccountUser = Auth.getCurrentUser;
     $scope.createWallet = function () {
         swal("Good job!", "You created an new wallet!", "success")
@@ -12,11 +18,6 @@ angular.module('riwebApp')
     $scope.ledger_closed = '';
     $scope.error = '';
 
-    var Remote = ripple.Remote;
-    var remote = new Remote({
-        // see the API Reference for available options
-        servers: [ 'ws://localhost:6006' ]
-    });
 
     remote.connect(function() {
         console.log('Remote connected');
