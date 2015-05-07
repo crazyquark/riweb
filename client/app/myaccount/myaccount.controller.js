@@ -5,6 +5,6 @@ angular.module('riwebApp')
     $scope.message = 'Hello';
     $scope.getMyAccountUser = Auth.getCurrentUser;
     $scope.createWallet = function () {
-        alert('hello');
+        swal("Good job!", "You created an new wallet!", "success")
     };
   });
