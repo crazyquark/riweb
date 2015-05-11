@@ -54,8 +54,11 @@ angular.module('riwebApp')
         remote.requestServerInfo(function(err, info) {
             if(info.info.pubkey_node){
                 $scope.message = 'Connected to server ' + info.info.pubkey_node;
+                $scope.server_name = info.info.pubkey_node;
+                $scope.server_error = '';
             } else {
-                $scope.message = 'Error ' + err;
+                $scope.server_name = '';
+                $scope.server_error = 'Error ' + err;
             }
             $scope.$apply();
 
