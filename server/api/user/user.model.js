@@ -12,9 +12,6 @@ var UserSchema = new Schema({
     default: 'user'
   },
   hashedPassword: String,
-  passphrase: String,
-  xrpWallet: String,
-  euroWallet: String,
   provider: String,
   salt: String
 });

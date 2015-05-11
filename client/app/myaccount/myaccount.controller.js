@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('MyaccountCtrl', function ($scope, Auth, User) {
+  .controller('MyaccountCtrl', function ($scope, Auth, User, Wallet) {
     var Remote = ripple.Remote;
     var remote = new Remote({
         // see the API Reference for available options
@@ -9,23 +9,27 @@ angular.module('riwebApp')
     });
 
     $scope.getMyAccountUser = Auth.getCurrentUser;
-    $scope.createWallet = function () {
-        var currentUser = $scope.getMyAccountUser();
-        if (currentUser.email === 'admin@admin.com') {
-            currentUser.xrpWallet = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
-        }
-        if(!currentUser.passphrase){
-            currentUser.passphrase = 'masterpassphrase';
-        }
-        return User.update(currentUser,
-            function() {
-                swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + currentUser.xrpWallet, 'success');
-                currentUser = User.get();
-            },
-            function() {
-                swal('Error', 'Sorry there was a problem processing your request!', 'error');
-            }.bind(this)).$promise;
-    };
+        $scope.createWallet = function () {
+            var currentUser = $scope.getMyAccountUser();
+
+            return Wallet.get({userId: currentUser._id}, function (data) {
+                console.log(' asdfa' + Wallet);
+                if (currentUser.email === 'admin@admin.com') {
+                    currentUser.xrpWallet = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
+                }
+                if (!currentUser.passphrase) {
+                    currentUser.passphrase = 'masterpassphrase';
+                }
+                return User.update(currentUser,
+                    function () {
+                        swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + currentUser.xrpWallet, 'success');
+                        currentUser = User.get();
+                    },
+                    function () {
+                        swal('Error', 'Sorry there was a problem processing your request!', 'error');
+                    }.bind(this)).$promise;
+            });
+        };
 
     $scope.message = 'Not connected to any server';
     $scope.ballance = '0 XRPs :(';

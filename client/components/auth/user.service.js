@@ -22,4 +22,17 @@ angular.module('riwebApp')
         method: 'PUT'
       }
 	  });
+  })
+  .factory('Wallet', function ($resource) {
+    return $resource('/api/wallets/:id', {
+      id: '@_id'
+    },
+    {
+      get: {
+        method: 'GET'
+      },
+      update: {
+        method: 'PUT'
+      }
+	  });
   });

@@ -4,9 +4,10 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var WalletSchema = new Schema({
-  name: String,
-  info: String,
-  active: Boolean
+  userId: String,
+  publicKey: String,
+  passphrase: String,
+  walletType: String
 });
 
 module.exports = mongoose.model('Wallet', WalletSchema);
