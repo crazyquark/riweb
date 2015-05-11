@@ -21,7 +21,7 @@ Install packages with bower:
 
 Start server:  
 *npm install -g grunt-cli*  
-*grunt server*
+*grunt serve*  
 
 
 
