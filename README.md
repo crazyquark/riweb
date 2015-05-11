@@ -20,7 +20,7 @@ Install packages with bower:
 *bower install*  
 
 Start server:  
-*npm install -g grunt-cli*
+*npm install -g grunt-cli*  
 *grunt server*
 
 
