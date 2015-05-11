@@ -38,6 +38,26 @@ angular.module('riwebApp')
                                 function (data) {
                                     loadCurrentUserBalance();
                                     swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + data.publicKey, 'success');
+
+                                    remote.setSecret('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'masterpassphrase');
+
+                                    var transaction = remote.createTransaction('Payment', {
+                                        account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+                                        destination: newWallet.publicKey,
+                                        amount: 300000
+                                    });
+
+                                    transaction.on('resubmitted', function() {
+                                        console.log('resubmitted');
+                                    });
+
+                                    transaction.submit(function(err, res) {
+                                        console.log('submit' + res);
+                                        console.error('err' + err);
+                                        // submission has finalized with either an error or success.
+                                        // the transaction will not be retried after this point
+                                    });
+
                                 },
                                 function () {
                                     swal('Error', 'Sorry there was a problem processing your request!', 'error');
