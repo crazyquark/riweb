@@ -12,7 +12,7 @@ angular.module('riwebApp')
         $scope.createWallet = function () {
             var currentUser = $scope.getMyAccountUser();
 
-            return Wallet.get({userId: currentUser._id}, function (data) {
+            return Wallet.getByOwnerEmail({ownerEmail: currentUser.email}, function (data) {
                 console.log(' asdfa' + Wallet);
                 if (currentUser.email === 'admin@admin.com') {
                     currentUser.xrpWallet = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
@@ -28,6 +28,8 @@ angular.module('riwebApp')
                     function () {
                         swal('Error', 'Sorry there was a problem processing your request!', 'error');
                     }.bind(this)).$promise;
+            }, function(error){
+                console.log(error);
             });
         };
 

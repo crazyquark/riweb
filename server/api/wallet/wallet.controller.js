@@ -20,6 +20,14 @@ exports.show = function(req, res) {
   });
 };
 
+exports.showByOwnerEmail = function(req, res) {
+  Wallet.find({ownerEmail: req.query.ownerEmail}, function (err, wallet) {
+    if(err) { return handleError(res, err); }
+    if(!wallet) { return res.send(404); }
+    return res.json(wallet);
+  });
+};
+
 // Creates a new wallet in the DB.
 exports.create = function(req, res) {
   Wallet.create(req.body, function(err, wallet) {
