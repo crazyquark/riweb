@@ -17,6 +17,9 @@ angular.module('riwebApp')
         params: {
           id:'me'
         }
+      },
+      update: {
+        method: 'PUT'
       }
 	  });
   });

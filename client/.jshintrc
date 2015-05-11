@@ -33,6 +33,8 @@
     "expect": true,
     "browser": true,
     "element": true,
+    "swal": true,
+    "ripple": true,
     "by": true
   }
 }

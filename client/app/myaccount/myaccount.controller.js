@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('MyaccountCtrl', function ($scope, Auth) {
+  .controller('MyaccountCtrl', function ($scope, Auth, User) {
     var Remote = ripple.Remote;
     var remote = new Remote({
         // see the API Reference for available options
@@ -10,12 +10,26 @@ angular.module('riwebApp')
 
     $scope.getMyAccountUser = Auth.getCurrentUser;
     $scope.createWallet = function () {
-        swal("Good job!", "You created an new wallet!", "success")
+        var currentUser = $scope.getMyAccountUser();
+        if (currentUser.email === 'admin@admin.com') {
+            currentUser.xrpWallet = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
+        }
+        if(!currentUser.passphrase){
+            currentUser.passphrase = 'masterpassphrase';
+        }
+        return User.update(currentUser,
+            function() {
+                swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + currentUser.xrpWallet, 'success');
+                currentUser = User.get();
+            },
+            function() {
+                swal('Error', 'Sorry there was a problem processing your request!', 'error');
+            }.bind(this)).$promise;
     };
 
     $scope.message = 'Not connected to any server';
     $scope.ballance = '0 XRPs :(';
-    $scope.ledger_closed = '';
+    $scope.ledgerClosed = '';
     $scope.error = '';
 
 
@@ -38,7 +52,8 @@ angular.module('riwebApp')
         // since the request for subscribe is finalized after the success return
         // the streaming events will still come in, but not on the initial request
         remote.on('ledger_closed', function(ledger) {
-            $scope.ledger_closed = ledger.ledger_hash;
+            /*jshint camelcase: false */
+            $scope.ledgerClosed = ledger.ledger_hash;
             $scope.$apply();
         });
 
@@ -52,9 +67,11 @@ angular.module('riwebApp')
 
         /* remote connected */
         remote.requestServerInfo(function(err, info) {
-            if(info.info.pubkey_node){
-                $scope.message = 'Connected to server ' + info.info.pubkey_node;
-                $scope.server_name = info.info.pubkey_node;
+            /*jshint camelcase: false */
+            var pubkeyNode = info.info.pubkey_node;
+            if(pubkeyNode){
+                $scope.message = 'Connected to server ' + pubkeyNode;
+                $scope.server_name = pubkeyNode;
                 $scope.server_error = '';
             } else {
                 $scope.server_name = '';
@@ -63,8 +80,9 @@ angular.module('riwebApp')
             $scope.$apply();
 
         });
-        remote.requestAccountInfo({account: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"}, function(err, info) {
-            $scope.ballance = info.account_data.Balance;
+        remote.requestAccountInfo({account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'}, function(err, info) {
+            /*jshint camelcase: false */
+            $scope.xrpBallance = info.account_data.Balance;
             $scope.$apply();
         });
 

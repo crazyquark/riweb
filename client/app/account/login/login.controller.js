@@ -15,7 +15,7 @@ angular.module('riwebApp')
         })
         .then( function() {
           // Logged in, redirect to home
-          $location.path('/');
+          $location.path('/myaccount');
         })
         .catch( function(err) {
           $scope.errors.other = err.message;
