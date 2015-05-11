@@ -33,25 +33,33 @@ angular.module('riwebApp')
             return Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise
                 .then(function (data) {
                     if (data.length < 1) {
+                        var saveWallet = function(newWallet){
+                            Wallet.save(newWallet,
+                                function (data) {
+                                    loadCurrentUserBalance();
+                                    swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + data.publicKey, 'success');
+                                },
+                                function () {
+                                    swal('Error', 'Sorry there was a problem processing your request!', 'error');
+                                }.bind(this));
+                        };
                         var newWallet = {};
-                        if (currentUser.email === 'admin@admin.com') {
-                            newWallet.publicKey = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
-                        }
-                        if (!currentUser.passphrase) {
-                            newWallet.passphrase = 'masterpassphrase';
-                        }
-
                         newWallet.ownerEmail = currentUser.email;
                         newWallet.currency = "XRP";
-
-                        return Wallet.save(newWallet,
-                            function (data) {
-                                loadCurrentUserBalance();
-                                swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + data.publicKey, 'success');
-                            },
-                            function () {
-                                swal('Error', 'Sorry there was a problem processing your request!', 'error');
-                            }.bind(this)).$promise;
+                        if (currentUser.email === 'admin@admin.com') {
+                            //reuse existing known wallet
+                            newWallet.publicKey = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
+                            if (!currentUser.passphrase) {
+                                newWallet.passphrase = 'masterpassphrase';
+                            }
+                            saveWallet(newWallet);
+                        } else {
+                            // generate new wallet
+                            var wallet = ripple.Wallet.generate();
+                            newWallet.publicKey = wallet.address;
+                            newWallet.passphrase = wallet.secret;
+                            saveWallet(newWallet);
+                        }
                     }
                 });
         };
@@ -67,7 +75,8 @@ angular.module('riwebApp')
 
             var streams = [
                 'ledger',
-                'transactions'
+                'transactions',
+                'random'
             ];
 
             var request = remote.requestSubscribe(streams);
@@ -107,7 +116,6 @@ angular.module('riwebApp')
                     $scope.server_error = 'Error ' + err;
                 }
                 $scope.$apply();
-
             });
 
             loadCurrentUserBalance();
