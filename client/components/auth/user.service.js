@@ -31,7 +31,8 @@ angular.module('riwebApp')
                     url: '/api/wallets/ownerEmail',
                     params: {
                         ownerEmail: '@_ownerEmail'
-                    }
+                    },
+                    isArray: true
                 }
             });
     });

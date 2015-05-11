@@ -8,15 +8,10 @@
         <div class="panel-body">
             <h4 ng-show="xrpBallance">Current ballance: <strong>{{xrpBallance}}</strong> XRP's</h4>
 
-            <button ng-hide="getMyAccountUser().xrpWallet" type="button" class="btn btn-default btn-lg btn-success" aria-label="Left Align"
+            <button ng-hide="wallet" type="button" class="btn btn-default btn-lg btn-success" aria-label="Left Align"
                     ng-click="createWallet()">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                Create a new XRP wallet
-            </button>
-            <button type="button" class="btn btn-default btn-lg btn-success" aria-label="Left Align"
-                    ng-click="createWallet()">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                Create a new XRP wallet
+                Create a new wallet
             </button>
         </div>
     </div>
