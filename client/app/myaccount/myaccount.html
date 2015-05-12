@@ -14,11 +14,13 @@
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                 Create a new wallet
             </button>
+
             <button ng-show="ballance" type="button" class="btn btn-default btn-lg btn-success" aria-label="Left Align"
                     ng-click="transferMoney()">
                 <span class="glyphicon glyphicon-euro" aria-hidden="true"></span>
                 Transfer money
             </button>
+            Amount to transfer <input ng-model="amountToTransfer" ng-show="ballance"></input>
         </div>
     </div>
     <div class="panel panel-info">
