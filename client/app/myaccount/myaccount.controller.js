@@ -19,7 +19,12 @@ angular.module('riwebApp')
                 $scope.$apply();
             });
             remote.requestAccountTransactions({account: $scope.account, ledger_index_min: -1}, function(err, info){
-                $scope.transactions = info.transactions;
+                $scope.transactions = [];
+                info.transactions.forEach(function(item){
+                    if (item.tx.Destination) {
+                        $scope.transactions.push(item);
+                    }
+                });
                 $scope.$apply();
             });
         };
