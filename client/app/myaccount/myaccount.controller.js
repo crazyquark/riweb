@@ -282,6 +282,6 @@ angular.module('riwebApp')
             });
 
             loadCurrentUserBalance();
-
+            refreshPeers(); 
         });
     });
