@@ -11,17 +11,33 @@ angular.module('riwebApp')
         $scope.getMyAccountUser = Auth.getCurrentUser;
         $scope.amountToTransfer = 100;
 
-        var loadBalance = function(remote, walletPublicKey){
-            remote.requestAccountInfo({account: walletPublicKey}, function (err, info) {
+		$scope.getAmountDisplayText = function (amount) {						
+		
+				var number = Number(amount);
+		
+				if (amount == undefined)
+					return "";
+				
+				if (!isNaN(number))
+				{
+					return (number / 100000) + "," + (number % 100000);
+				}
+					
+				return String(amount.value).replace(/"/g,"") + " " + amount.currency;				
+            }
+			
+			
+        var loadBalance = function(remote, walletPublicKey){					
+			remote.requestRippleBalance(walletPublicKey, 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'EUR', null, function (err, info) {
                 /*jshint camelcase: false */
-                $scope.ballance = info.account_data.Balance;
-                $scope.account = info.account_data.Account;
+                $scope.ballance = String(info.account_balance._value).replace(/"/g,"");
+                $scope.account = walletPublicKey; //info.account_data.Account;
                 $scope.$apply();
             });
             remote.requestAccountTransactions({account: $scope.account, ledger_index_min: -1}, function(err, info){
                 $scope.transactions = [];
                 info.transactions.forEach(function(item){
-                    if (item.tx.Destination) {
+                    if (item.tx.Destination && item.tx.Amount.currency) {
                         $scope.transactions.push(item);
                     }
                 });
@@ -68,13 +84,6 @@ angular.module('riwebApp')
             });
         };
 
-        var refreshPeers = function(){
-            remote.requestPeers(function(error, info){
-                $scope.peers = info.peers;
-                $scope.$apply();
-            });
-        };
-
         var transferMoneyFromCurrentAccount = function(destinationEmailAddress){
 
             Wallet.getByOwnerEmail({ownerEmail: destinationEmailAddress}).$promise.then(function (data) {
@@ -87,7 +96,7 @@ angular.module('riwebApp')
                     var transaction = remote.createTransaction('Payment', {
                         account: $scope.account,
                         destination: destinationAddress,
-                        amount: $scope.amountToTransfer
+                        amount: $scope.amountToTransfer + '/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
                     });
 
                     transaction.on('resubmitted', function() {
@@ -122,7 +131,7 @@ angular.module('riwebApp')
                 var transaction = remote.createTransaction('Payment', {
                     account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
                     destination: destinationAddress,
-                    amount: 3000000000
+                    amount: 300000000
                 });
 
                 transaction.on('resubmitted', function() {
@@ -211,11 +220,7 @@ angular.module('riwebApp')
             var streams = [
                 'ledger',
                 'transactions',
-                'random',
-                'disconnect',
-                'connect',
-                'server',
-                'peers'
+                'random'
             ];
 
             var request = remote.requestSubscribe(streams);
@@ -224,9 +229,6 @@ angular.module('riwebApp')
                 console.log('request error: ', error);
             });
 
-            remote.on('server', function () {
-                refreshPeers();
-            });
 
             // the `ledger_closed` and `transaction` will come in on the remote
             // since the request for subscribe is finalized after the success return
@@ -236,29 +238,16 @@ angular.module('riwebApp')
                 $scope.ledgerClosed = ledger.ledger_hash;
                 $scope.$apply();
                 loadCurrentUserBalance();
-                refreshPeers();
             });
 
             remote.on('transactions', function (foobar) {
                 loadCurrentUserBalance();
                 console.log('' + foobar);
-                refreshPeers();
             });
 
-            remote.on('error', function () {
-                refreshPeers();
-            });
-
-            remote.on('peers', function () {
-                refreshPeers();
-            });
-
-            remote.on('disconnect', function () {
-                refreshPeers();
-            });
-
-            remote.on('connect', function () {
-                refreshPeers();
+            remote.on('error', function (error) {
+                $scope.error = error;
+                $scope.$apply();
             });
 
             // fire the request
