@@ -31,6 +31,10 @@ angular.module('riwebApp')
         };
 
 
+        $scope.transferMoney = function () {
+
+        };
+
         $scope.createWallet = function () {
             var currentUser = $scope.getMyAccountUser();
             return Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise
