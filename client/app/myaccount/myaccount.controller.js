@@ -188,6 +188,10 @@ angular.module('riwebApp')
                 $scope.$apply();
             });
 
+            remote.on('transactions', function () {
+                loadCurrentUserBalance();
+            });
+
             remote.on('error', function (error) {
                 $scope.error = error;
                 $scope.$apply();
