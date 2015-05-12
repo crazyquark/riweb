@@ -28,12 +28,18 @@ angular.module('riwebApp')
 			
 			
         var loadBalance = function(remote, walletPublicKey){					
-			remote.requestRippleBalance(walletPublicKey, 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'EUR', null, function (err, info) {
-                /*jshint camelcase: false */
-                $scope.ballance = String(info.account_balance._value).replace(/"/g,"");
-                $scope.account = walletPublicKey; //info.account_data.Account;
-                $scope.$apply();
-            });
+        	if (walletPublicKey !== 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh') {
+				remote.requestRippleBalance(walletPublicKey, 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'EUR', null, function (err, info) {
+					/*jshint camelcase: false */
+					$scope.ballance = String(info.account_balance._value).replace(/"/g,"");
+					$scope.account = walletPublicKey; //info.account_data.Account;
+					$scope.$apply();
+				});
+			} else {
+					$scope.ballance = 0;
+					$scope.account = walletPublicKey; //info.account_data.Account;
+					$scope.$apply();				
+			}
             remote.requestAccountTransactions({account: $scope.wallet.publicKey, ledger_index_min: -1}, function(err, info){
                 $scope.transactions = [];
                 info.transactions.forEach(function(item){
