@@ -204,7 +204,10 @@ angular.module('riwebApp')
             var streams = [
                 'ledger',
                 'transactions',
-                'random'
+                'random',
+                'disconnect',
+                'connect',
+                'peers'
             ];
 
             var request = remote.requestSubscribe(streams);
@@ -222,6 +225,10 @@ angular.module('riwebApp')
                 $scope.ledgerClosed = ledger.ledger_hash;
                 $scope.$apply();
                 loadCurrentUserBalance();
+                remote.requestPeers(function(error, info){
+                    $scope.peers = info.peers;
+                    $scope.$apply();
+                });
             });
 
             remote.on('transactions', function (foobar) {
@@ -230,6 +237,21 @@ angular.module('riwebApp')
             });
 
             remote.on('error', function (error) {
+                $scope.error = error;
+                $scope.$apply();
+            });
+
+            remote.on('peers', function (error) {
+                $scope.error = error;
+                $scope.$apply();
+            });
+
+            remote.on('disconnect', function (error) {
+                $scope.error = error;
+                $scope.$apply();
+            });
+
+            remote.on('connect', function (error) {
                 $scope.error = error;
                 $scope.$apply();
             });
