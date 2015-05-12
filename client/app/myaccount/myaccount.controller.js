@@ -23,11 +23,39 @@ angular.module('riwebApp')
             });
         };
 
-        var loadCurrentUserBalance = function(){
+        var makeInitialTrustlines = function(destinationAddress){
+            remote.setSecret($scope.account, $scope.wallet.passphrase);
+
+            var transaction = remote.createTransaction('TrustSet', {
+                account: destinationAddress,
+                limit: '10000/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+                set_flag: 'NoRipple'
+            });
+
+            transaction.on('resubmitted', function() {
+                console.log('resubmitted');
+            });
+
+            transaction.submit(function(err, res) {
+                console.log('submit' + res);
+                console.error('err' + err);
+                if(err){
+                    swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
+                }
+                if(res){
+                    swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You created an new wallet! ' + destinationAddress, 'success');
+                }
+            });
+        };
+
+        var loadCurrentUserBalance = function(callback){
             Wallet.getByOwnerEmail({ownerEmail: $scope.getMyAccountUser().email}).$promise.then(function (data) {
                 if (data.length === 1) {
                     $scope.wallet = data[0];
                     loadBalance(remote, $scope.wallet.publicKey);
+                    if(callback){
+                        callback($scope.wallet.publicKey);
+                    }
                 } else {
                     $scope.wallet = undefined;
                 }
@@ -94,13 +122,11 @@ angular.module('riwebApp')
                     if(err){
                         swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                     }
-                    if(res){
-                        swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You created an new wallet! ' + destinationAddress, 'success');
-                    }
-                    loadCurrentUserBalance();
+                    loadCurrentUserBalance(makeInitialTrustlines);
                     // submission has finalized with either an error or success.
                     // the transaction will not be retried after this point
                 });
+
             } else {
                 loadCurrentUserBalance();
                 swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You created an new wallet! ' + destinationAddress, 'success');
