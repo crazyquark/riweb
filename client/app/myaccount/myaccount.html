@@ -25,6 +25,31 @@
     </div>
     <div class="panel panel-info">
         <div class="panel-heading">
+            <h3 id="panel-title" class="panel-title">Transactions</strong></h3>
+        </div>
+        <div class="panel-body">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Amount</th>
+                    <th>Fee</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="transaction in transactions">
+                    <td>{{transaction.tx.Account}}</td>
+                    <td>{{transaction.tx.Destination}}</td>
+                    <td>{{transaction.tx.Amount}}</td>
+                    <td>{{transaction.tx.Fee}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="panel panel-info">
+        <div class="panel-heading">
             <h3 id="panel-title" class="panel-title">Network status</strong></h3>
         </div>
         <div class="panel-body">
