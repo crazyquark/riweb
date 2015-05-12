@@ -18,6 +18,9 @@ angular.module('riwebApp')
                 $scope.account = info.account_data.Account;
                 $scope.$apply();
             });
+            remote.requestAccountTransactions({account: $scope.account, ledger_index_min: -1}, function(err, info){
+                $scope.transactions = info.transactions;
+            });
         };
 
         var loadCurrentUserBalance = function(){
@@ -189,8 +192,9 @@ angular.module('riwebApp')
                 loadCurrentUserBalance();
             });
 
-            remote.on('transactions', function () {
+            remote.on('transactions', function (foobar) {
                 loadCurrentUserBalance();
+                console.log('' + foobar);
             });
 
             remote.on('error', function (error) {
