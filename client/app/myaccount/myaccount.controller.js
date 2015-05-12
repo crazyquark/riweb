@@ -34,7 +34,7 @@ angular.module('riwebApp')
                 $scope.account = walletPublicKey; //info.account_data.Account;
                 $scope.$apply();
             });
-            remote.requestAccountTransactions({account: $scope.account, ledger_index_min: -1}, function(err, info){
+            remote.requestAccountTransactions({account: $scope.wallet.publicKey, ledger_index_min: -1}, function(err, info){
                 $scope.transactions = [];
                 info.transactions.forEach(function(item){
                     if (item.tx.Destination && item.tx.Amount.currency) {
@@ -46,7 +46,7 @@ angular.module('riwebApp')
         };
 
         var makeInitialTrustlines = function(destinationAddress){
-            remote.setSecret($scope.account, $scope.wallet.passphrase);
+            remote.setSecret($scope.wallet.publicKey, $scope.wallet.passphrase);
 
             var transaction = remote.createTransaction('TrustSet', {
                 account: destinationAddress,
@@ -91,10 +91,10 @@ angular.module('riwebApp')
                     var wallet = data[0];
                     var destinationAddress = wallet.publicKey;
 
-                    remote.setSecret($scope.account, $scope.wallet.passphrase);
+                    remote.setSecret($scope.wallet.publicKey, $scope.wallet.passphrase);
 
                     var transaction = remote.createTransaction('Payment', {
-                        account: $scope.account,
+                        account: $scope.wallet.publicKey,
                         destination: destinationAddress,
                         amount: $scope.amountToTransfer + '/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
                     });
@@ -213,6 +213,12 @@ angular.module('riwebApp')
         $scope.ledgerClosed = '';
         $scope.error = '';
 
+		var refreshPeers = function(){
+            remote.requestPeers(function(error, info){
+                $scope.peers = info.peers;
+                $scope.$apply();
+            });
+        };
 
         remote.connect(function () {
             console.log('Remote connected');
@@ -237,6 +243,7 @@ angular.module('riwebApp')
                 /*jshint camelcase: false */
                 $scope.ledgerClosed = ledger.ledger_hash;
                 $scope.$apply();
+				refreshPeers();
                 loadCurrentUserBalance();
             });
 
