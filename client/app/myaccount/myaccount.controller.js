@@ -13,7 +13,8 @@ angular.module('riwebApp')
         var loadBalance = function(remote, walletPublicKey){
             remote.requestAccountInfo({account: walletPublicKey}, function (err, info) {
                 /*jshint camelcase: false */
-                $scope.xrpBallance = info.account_data.Balance;
+                $scope.ballance = info.account_data.Balance;
+                $scope.account = info.account_data.Account;
                 $scope.$apply();
             });
         };
@@ -23,6 +24,8 @@ angular.module('riwebApp')
                 if (data.length === 1) {
                     $scope.wallet = data[0];
                     loadBalance(remote, $scope.wallet.publicKey);
+                } else {
+                    $scope.wallet = undefined;
                 }
             });
         };
@@ -36,9 +39,6 @@ angular.module('riwebApp')
                         var saveWallet = function(newWallet){
                             Wallet.save(newWallet,
                                 function (data) {
-                                    loadCurrentUserBalance();
-                                    swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + data.publicKey, 'success');
-
                                     remote.setSecret('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'masterpassphrase');
 
                                     var transaction = remote.createTransaction('Payment', {
@@ -54,6 +54,13 @@ angular.module('riwebApp')
                                     transaction.submit(function(err, res) {
                                         console.log('submit' + res);
                                         console.error('err' + err);
+                                        if(err){
+                                            swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
+                                        }
+                                        if(res){
+                                            swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + data.publicKey, 'success');
+                                        }
+                                        loadCurrentUserBalance();
                                         // submission has finalized with either an error or success.
                                         // the transaction will not be retried after this point
                                     });
@@ -73,6 +80,7 @@ angular.module('riwebApp')
                                 newWallet.passphrase = 'masterpassphrase';
                             }
                             saveWallet(newWallet);
+                            swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + data.publicKey, 'success');
                         } else {
                             // generate new wallet
                             var wallet = ripple.Wallet.generate();
@@ -85,7 +93,6 @@ angular.module('riwebApp')
         };
 
         $scope.message = 'Not connected to any server';
-        $scope.ballance = '0 XRPs :(';
         $scope.ledgerClosed = '';
         $scope.error = '';
 
