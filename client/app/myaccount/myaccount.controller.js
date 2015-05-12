@@ -44,7 +44,7 @@ angular.module('riwebApp')
                                     var transaction = remote.createTransaction('Payment', {
                                         account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
                                         destination: newWallet.publicKey,
-                                        amount: 300000
+                                        amount: 3000000000
                                     });
 
                                     transaction.on('resubmitted', function() {
