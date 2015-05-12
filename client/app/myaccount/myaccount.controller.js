@@ -68,6 +68,13 @@ angular.module('riwebApp')
             });
         };
 
+        var refreshPeers = function(){
+            remote.requestPeers(function(error, info){
+                $scope.peers = info.peers;
+                $scope.$apply();
+            });
+        };
+
         var transferMoneyFromCurrentAccount = function(destinationEmailAddress){
 
             Wallet.getByOwnerEmail({ownerEmail: destinationEmailAddress}).$promise.then(function (data) {
@@ -207,6 +214,7 @@ angular.module('riwebApp')
                 'random',
                 'disconnect',
                 'connect',
+                'server',
                 'peers'
             ];
 
@@ -216,6 +224,9 @@ angular.module('riwebApp')
                 console.log('request error: ', error);
             });
 
+            remote.on('server', function () {
+                refreshPeers();
+            });
 
             // the `ledger_closed` and `transaction` will come in on the remote
             // since the request for subscribe is finalized after the success return
@@ -225,35 +236,29 @@ angular.module('riwebApp')
                 $scope.ledgerClosed = ledger.ledger_hash;
                 $scope.$apply();
                 loadCurrentUserBalance();
-                remote.requestPeers(function(error, info){
-                    $scope.peers = info.peers;
-                    $scope.$apply();
-                });
+                refreshPeers();
             });
 
             remote.on('transactions', function (foobar) {
                 loadCurrentUserBalance();
                 console.log('' + foobar);
+                refreshPeers();
             });
 
-            remote.on('error', function (error) {
-                $scope.error = error;
-                $scope.$apply();
+            remote.on('error', function () {
+                refreshPeers();
             });
 
-            remote.on('peers', function (error) {
-                $scope.error = error;
-                $scope.$apply();
+            remote.on('peers', function () {
+                refreshPeers();
             });
 
-            remote.on('disconnect', function (error) {
-                $scope.error = error;
-                $scope.$apply();
+            remote.on('disconnect', function () {
+                refreshPeers();
             });
 
-            remote.on('connect', function (error) {
-                $scope.error = error;
-                $scope.$apply();
+            remote.on('connect', function () {
+                refreshPeers();
             });
 
             // fire the request
