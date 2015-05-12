@@ -9,7 +9,7 @@ angular.module('riwebApp')
         });
 
         $scope.getMyAccountUser = Auth.getCurrentUser;
-        $scope.amountToTransfer = 1000000000;
+        $scope.amountToTransfer = 100;
 
         var loadBalance = function(remote, walletPublicKey){
             remote.requestAccountInfo({account: walletPublicKey}, function (err, info) {
@@ -186,6 +186,7 @@ angular.module('riwebApp')
                 /*jshint camelcase: false */
                 $scope.ledgerClosed = ledger.ledger_hash;
                 $scope.$apply();
+                loadCurrentUserBalance();
             });
 
             remote.on('transactions', function () {
