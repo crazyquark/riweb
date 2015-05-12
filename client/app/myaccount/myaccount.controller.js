@@ -11,6 +11,16 @@ angular.module('riwebApp')
         $scope.getMyAccountUser = Auth.getCurrentUser;
         $scope.amountToTransfer = 100;
 
+        $scope.getAmountDisplayText = function (amount) {
+            var number = Number(amount);
+            if (amount == undefined)
+                return "";
+            if (!isNaN(number)) {
+                return (number / 100000) + "," + (number % 100000);
+            }
+            return String(amount.value).replace(/"/g, "") + " " + amount.currency;
+        };
+
         var loadBalance = function(remote, walletPublicKey){
             remote.requestRippleBalance(walletPublicKey, 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'EUR', null, function (err, info) {
                 /*jshint camelcase: false */
@@ -21,7 +31,7 @@ angular.module('riwebApp')
             remote.requestAccountTransactions({account: $scope.account, ledger_index_min: -1}, function(err, info){
                 $scope.transactions = [];
                 info.transactions.forEach(function(item){
-                    if (item.tx.Destination) {
+                    if (item.tx.Destination && item.tx.Amount.currency) {
                         $scope.transactions.push(item);
                     }
                 });
@@ -29,7 +39,7 @@ angular.module('riwebApp')
             });
         };
 
-        var makeInitialTrustlines = function(destinationAddress){
+        var makeInitialTrustlines = function (destinationAddress) {
             remote.setSecret($scope.account, $scope.wallet.passphrase);
 
             var transaction = remote.createTransaction('TrustSet', {
@@ -38,28 +48,28 @@ angular.module('riwebApp')
                 set_flag: 'NoRipple'
             });
 
-            transaction.on('resubmitted', function() {
+            transaction.on('resubmitted', function () {
                 console.log('resubmitted');
             });
 
-            transaction.submit(function(err, res) {
+            transaction.submit(function (err, res) {
                 console.log('submit' + res);
                 console.error('err' + err);
-                if(err){
+                if (err) {
                     swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                 }
-                if(res){
+                if (res) {
                     swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You created an new wallet! ' + destinationAddress, 'success');
                 }
             });
         };
 
-        var loadCurrentUserBalance = function(callback){
+        var loadCurrentUserBalance = function (callback) {
             Wallet.getByOwnerEmail({ownerEmail: $scope.getMyAccountUser().email}).$promise.then(function (data) {
                 if (data.length === 1) {
                     $scope.wallet = data[0];
                     loadBalance(remote, $scope.wallet.publicKey);
-                    if(callback){
+                    if (callback) {
                         callback($scope.wallet.publicKey);
                     }
                 } else {
@@ -107,9 +117,9 @@ angular.module('riwebApp')
             });
         };
 
-        var makeInitialXRPTransfer = function(destinationAddress){
+        var makeInitialXRPTransfer = function (destinationAddress) {
             //do not send money to self
-            if(destinationAddress!=='rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'){
+            if (destinationAddress !== 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh') {
                 remote.setSecret('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'masterpassphrase');
 
                 var transaction = remote.createTransaction('Payment', {
@@ -118,14 +128,14 @@ angular.module('riwebApp')
                     amount: 3000000000
                 });
 
-                transaction.on('resubmitted', function() {
+                transaction.on('resubmitted', function () {
                     console.log('resubmitted');
                 });
 
-                transaction.submit(function(err, res) {
+                transaction.submit(function (err, res) {
                     console.log('submit' + res);
                     console.error('err' + err);
-                    if(err){
+                    if (err) {
                         swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                     }
                     loadCurrentUserBalance(makeInitialTrustlines);
@@ -148,7 +158,7 @@ angular.module('riwebApp')
                     closeOnConfirm: false,
                     inputPlaceholder: 'Write something'
                 },
-                function(inputValue){
+                function (inputValue) {
                     if (inputValue === false) return false;
 
                     if (inputValue === "") {
@@ -164,7 +174,7 @@ angular.module('riwebApp')
             return Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise
                 .then(function (data) {
                     if (data.length < 1) {
-                        var saveWallet = function(newWallet){
+                        var saveWallet = function (newWallet) {
                             Wallet.save(newWallet,
                                 function (data) {
                                     makeInitialXRPTransfer(newWallet.publicKey);

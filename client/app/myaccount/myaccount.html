@@ -41,7 +41,7 @@
                 <tr ng-repeat="transaction in transactions">
                     <td>{{transaction.tx.Account}}</td>
                     <td>{{transaction.tx.Destination}}</td>
-                    <td>{{transaction.tx.Amount}}</td>
+                    <td>{{getAmountDisplayText(transaction.tx.Amount)}}</td>
                     <td>{{transaction.tx.Fee}}</td>
                 </tr>
                 </tbody>
