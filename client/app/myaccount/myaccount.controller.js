@@ -38,7 +38,7 @@ angular.module('riwebApp')
                     var wallet = data[0];
                     var destinationAddress = wallet.publicKey;
 
-                    remote.setSecret($scope.account, Auth.getCurrentUser().email);
+                    remote.setSecret($scope.account, $scope.wallet.passphrase);
 
                     var transaction = remote.createTransaction('Payment', {
                         account: $scope.account,
