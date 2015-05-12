@@ -30,6 +30,39 @@ angular.module('riwebApp')
             });
         };
 
+        var makeInitialXRPTransfer = function(destinationAddress){
+            //do not send money to self
+            if(destinationAddress!=='rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'){
+                remote.setSecret('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'masterpassphrase');
+
+                var transaction = remote.createTransaction('Payment', {
+                    account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+                    destination: destinationAddress,
+                    amount: 3000000000
+                });
+
+                transaction.on('resubmitted', function() {
+                    console.log('resubmitted');
+                });
+
+                transaction.submit(function(err, res) {
+                    console.log('submit' + res);
+                    console.error('err' + err);
+                    if(err){
+                        swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
+                    }
+                    if(res){
+                        swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You created an new wallet! ' + destinationAddress, 'success');
+                    }
+                    loadCurrentUserBalance();
+                    // submission has finalized with either an error or success.
+                    // the transaction will not be retried after this point
+                });
+            } else {
+                loadCurrentUserBalance();
+                swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You created an new wallet! ' + destinationAddress, 'success');
+            }
+        };
 
         $scope.transferMoney = function () {
 
@@ -43,32 +76,7 @@ angular.module('riwebApp')
                         var saveWallet = function(newWallet){
                             Wallet.save(newWallet,
                                 function (data) {
-                                    remote.setSecret('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'masterpassphrase');
-
-                                    var transaction = remote.createTransaction('Payment', {
-                                        account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
-                                        destination: newWallet.publicKey,
-                                        amount: 3000000000
-                                    });
-
-                                    transaction.on('resubmitted', function() {
-                                        console.log('resubmitted');
-                                    });
-
-                                    transaction.submit(function(err, res) {
-                                        console.log('submit' + res);
-                                        console.error('err' + err);
-                                        if(err){
-                                            swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
-                                        }
-                                        if(res){
-                                            swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + data.publicKey, 'success');
-                                        }
-                                        loadCurrentUserBalance();
-                                        // submission has finalized with either an error or success.
-                                        // the transaction will not be retried after this point
-                                    });
-
+                                    makeInitialXRPTransfer(newWallet.publicKey);
                                 },
                                 function () {
                                     swal('Error', 'Sorry there was a problem processing your request!', 'error');
