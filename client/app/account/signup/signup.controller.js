@@ -16,7 +16,7 @@ angular.module('riwebApp')
         })
         .then( function() {
           // Account created, redirect to home
-          $location.path('/');
+          $location.path('/myaccount');
         })
         .catch( function(err) {
           err = err.data;

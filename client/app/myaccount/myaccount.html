@@ -35,12 +35,14 @@
             </div>
         </div>
     </div>
-    <div class="panel panel-info">
+    <div class="panel panel-info" ng-show="transactions" ng-show="account">
         <div class="panel-heading">
             <h3 id="panel-title" class="panel-title">Transactions</strong></h3>
         </div>
         <div class="panel-body">
-            <table class="table">
+            <div class="alert alert-warning" ng-hide="transactions" role="alert">No transactions yet</div>
+
+            <table class="table" ng-show="transactions">
                 <thead>
                 <tr>
                     <th>From</th>
@@ -65,17 +67,19 @@
             <h3 id="panel-title" class="panel-title">Network status</strong></h3>
         </div>
         <div class="panel-body">
+            <div class="alert alert-warning" ng-hide="server_name" role="alert">Not connected to server yet</div>
             <h4 ng-show="server_name">Connected to server: <strong>{{server_name}}</strong></h4>
             <h4 ng-show="ledgerClosed">Last ledger closed: <strong>{{ledgerClosed}}</strong></h4>
             <h4>{{error}}</h4>
         </div>
     </div>
-    <div class="panel panel-info">
+    <div class="panel panel-info" ng-show="server_name">
         <div class="panel-heading">
             <h3 id="panel-title" class="panel-title">Peers</strong></h3>
         </div>
         <div class="panel-body">
-            <table class="table">
+            <div class="alert alert-warning" ng-hide="peers" role="alert">Not connected to peers</div>
+            <table class="table" ng-show="peers">
                 <thead>
                 <tr>
                     <th>IP</th>

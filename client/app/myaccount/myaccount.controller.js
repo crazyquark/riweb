@@ -11,39 +11,45 @@ angular.module('riwebApp')
         $scope.getMyAccountUser = Auth.getCurrentUser;
         $scope.amountToTransfer = 100;
 
-		$scope.getAmountDisplayText = function (amount) {						
-		
-				var number = Number(amount);
-		
-				if (amount == undefined)
-					return "";
-				
-				if (!isNaN(number))
-				{
-					return (number / 100000) + "," + (number % 100000);
-				}
-					
-				return String(amount.value).replace(/"/g,"") + " " + amount.currency;				
+        $scope.getAmountDisplayText = function (amount) {
+            var number = Number(amount);
+            if (amount == undefined) {
+                return "";
             }
-			
-			
-        var loadBalance = function(remote, walletPublicKey){					
-        	if (walletPublicKey !== 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh') {
-				remote.requestRippleBalance(walletPublicKey, 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'EUR', null, function (err, info) {
-					/*jshint camelcase: false */
-					$scope.ballance = String(info.account_balance._value).replace(/"/g,"");
-					$scope.account = walletPublicKey; //info.account_data.Account;
-					$scope.$apply();
-				});
-			} else {
-					$scope.ballance = 0;
-					$scope.account = walletPublicKey; //info.account_data.Account;
-					$scope.$apply();				
-			}
-            remote.requestAccountTransactions({account: $scope.wallet.publicKey, ledger_index_min: -1}, function(err, info){
-                $scope.transactions = [];
-                info.transactions.forEach(function(item){
+            if (!isNaN(number)) {
+                return (number / 100000) + "," + (number % 100000);
+            }
+
+            return String(amount.value).replace(/"/g, "") + " " + amount.currency;
+        };
+
+
+        var loadBalance = function (remote, walletPublicKey) {
+            if (walletPublicKey !== 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh') {
+                remote.requestRippleBalance(walletPublicKey, 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'EUR', null, function (err, info) {
+                    /*jshint camelcase: false */
+                    $scope.ballance = String(info.account_balance._value).replace(/"/g, "");
+                    $scope.account = walletPublicKey; //info.account_data.Account;
+                    $scope.$apply();
+                });
+            } else {
+                $scope.ballance = 0;
+                $scope.account = walletPublicKey; //info.account_data.Account;
+                $scope.$apply();
+            }
+
+            remote.requestAccountTransactions({account: $scope.wallet.publicKey, ledger_index_min: -1}, function (err, info) {
+                //delete old transactions first if they exist
+                if ($scope.transactions) {
+                    delete $scope.transactions;
+                }
+                info.transactions.forEach(function (item) {
+
                     if (item.tx.Destination && item.tx.Amount.currency) {
+                        if (!$scope.transactions) {
+                            //make transactions lazy so we can have a relevant message
+                            $scope.transactions = [];
+                        }
                         $scope.transactions.push(item);
                     }
                 });
@@ -51,7 +57,7 @@ angular.module('riwebApp')
             });
         };
 
-        var makeInitialTrustlines = function(destinationAddress){
+        var makeInitialTrustlines = function (destinationAddress) {
             remote.setSecret($scope.wallet.publicKey, $scope.wallet.passphrase);
 
             var transaction = remote.createTransaction('TrustSet', {
@@ -60,28 +66,28 @@ angular.module('riwebApp')
                 set_flag: 'NoRipple'
             });
 
-            transaction.on('resubmitted', function() {
+            transaction.on('resubmitted', function () {
                 console.log('resubmitted');
             });
 
-            transaction.submit(function(err, res) {
+            transaction.submit(function (err, res) {
                 console.log('submit' + res);
                 console.error('err' + err);
-                if(err){
+                if (err) {
                     swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                 }
-                if(res){
+                if (res) {
                     swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You created an new wallet! ' + destinationAddress, 'success');
                 }
             });
         };
 
-        var loadCurrentUserBalance = function(callback){
+        var loadCurrentUserBalance = function (callback) {
             Wallet.getByOwnerEmail({ownerEmail: $scope.getMyAccountUser().email}).$promise.then(function (data) {
                 if (data.length === 1) {
                     $scope.wallet = data[0];
                     loadBalance(remote, $scope.wallet.publicKey);
-                    if(callback){
+                    if (callback) {
                         callback($scope.wallet.publicKey);
                     }
                 } else {
@@ -90,7 +96,7 @@ angular.module('riwebApp')
             });
         };
 
-        var transferMoneyFromCurrentAccount = function(destinationEmailAddress){
+        var transferMoneyFromCurrentAccount = function (destinationEmailAddress) {
 
             Wallet.getByOwnerEmail({ownerEmail: destinationEmailAddress}).$promise.then(function (data) {
                 if (data.length === 1) {
@@ -105,17 +111,17 @@ angular.module('riwebApp')
                         amount: $scope.amountToTransfer + '/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
                     });
 
-                    transaction.on('resubmitted', function() {
+                    transaction.on('resubmitted', function () {
                         console.log('resubmitted');
                     });
 
-                    transaction.submit(function(err, res) {
+                    transaction.submit(function (err, res) {
                         console.log('submit' + res);
                         console.error('err' + err);
-                        if(err){
+                        if (err) {
                             swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                         }
-                        if(res){
+                        if (res) {
                             swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You transfered ' + $scope.amountToTransfer + ' to ' + destinationEmailAddress, 'success');
                         }
                         loadCurrentUserBalance();
@@ -129,9 +135,9 @@ angular.module('riwebApp')
             });
         };
 
-        var makeInitialXRPTransfer = function(destinationAddress){
+        var makeInitialXRPTransfer = function (destinationAddress) {
             //do not send money to self
-            if(destinationAddress!=='rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'){
+            if (destinationAddress !== 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh') {
                 remote.setSecret('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'masterpassphrase');
 
                 var transaction = remote.createTransaction('Payment', {
@@ -140,14 +146,14 @@ angular.module('riwebApp')
                     amount: 300000000
                 });
 
-                transaction.on('resubmitted', function() {
+                transaction.on('resubmitted', function () {
                     console.log('resubmitted');
                 });
 
-                transaction.submit(function(err, res) {
+                transaction.submit(function (err, res) {
                     console.log('submit' + res);
                     console.error('err' + err);
-                    if(err){
+                    if (err) {
                         swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                     }
                     loadCurrentUserBalance(makeInitialTrustlines);
@@ -170,7 +176,7 @@ angular.module('riwebApp')
                     closeOnConfirm: false,
                     inputPlaceholder: 'Write something'
                 },
-                function(inputValue){
+                function (inputValue) {
                     if (inputValue === false) return false;
 
                     if (inputValue === "") {
@@ -186,7 +192,7 @@ angular.module('riwebApp')
             return Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise
                 .then(function (data) {
                     if (data.length < 1) {
-                        var saveWallet = function(newWallet){
+                        var saveWallet = function (newWallet) {
                             Wallet.save(newWallet,
                                 function (data) {
                                     makeInitialXRPTransfer(newWallet.publicKey);
@@ -219,8 +225,8 @@ angular.module('riwebApp')
         $scope.ledgerClosed = '';
         $scope.error = '';
 
-		var refreshPeers = function(){
-            remote.requestPeers(function(error, info){
+        var refreshPeers = function () {
+            remote.requestPeers(function (error, info) {
                 $scope.peers = info.peers;
                 $scope.$apply();
             });
@@ -249,7 +255,7 @@ angular.module('riwebApp')
                 /*jshint camelcase: false */
                 $scope.ledgerClosed = ledger.ledger_hash;
                 $scope.$apply();
-				refreshPeers();
+                refreshPeers();
                 loadCurrentUserBalance();
             });
 
@@ -282,6 +288,6 @@ angular.module('riwebApp')
             });
 
             loadCurrentUserBalance();
-            refreshPeers(); 
+            refreshPeers();
         });
     });
