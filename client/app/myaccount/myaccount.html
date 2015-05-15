@@ -9,19 +9,29 @@
             <h4 id="panel-title" class="panel-title" ng-show="account">Account: <strong>{{account}}</strong></h4>
             <h4 ng-show="ballance">Current ballance: <strong>{{ballance}}</strong> €</h4>
 
-            <button ng-hide="account" type="button" class="btn btn-default btn-lg btn-success" aria-label="Left Align"
-                    ng-click="createWallet()">
-                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                Create a new wallet
-            </button>
+            <div class="row">
+                <div class="col-xs-12">
+                    <button ng-hide="account" type="button" class="btn btn-default btn-lg btn-success"
+                            aria-label="Left Align"
+                            ng-click="createWallet()">
+                        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                        Create a new wallet
+                    </button>
+                </div>
+            </div>
 
-            <button ng-show="account" type="button" class="btn btn-default btn-lg btn-success" aria-label="Left Align"
-                    ng-click="transferMoney()">
-                <span class="glyphicon glyphicon-euro" aria-hidden="true"></span>
-                Transfer money
-            </button>
-            <div ng-show="account">
-                Amount to transfer <input ng-model="amountToTransfer"></input>
+            <div class="row">
+                <div class="col-xs-12">
+                    <button ng-show="account" type="button" class="btn btn-default btn-lg btn-success"
+                            aria-label="Left Align"
+                            ng-click="transferMoney()">
+                        <span class="glyphicon glyphicon-euro" aria-hidden="true"></span>
+                        Transfer money
+                    </button>
+                <span ng-show="account">
+                    Amount to transfer <input ng-model="amountToTransfer"></input>
+                </span>
+                </div>
             </div>
         </div>
     </div>
