@@ -11,21 +11,11 @@ angular.module('riwebApp')
         $scope.getMyAccountUser = Auth.getCurrentUser;
         $scope.amountToTransfer = 100;
 
-        $scope.getAmountDisplayText = function (amount) {
-            var number = Number(amount);
-            if (amount == undefined)
-                return "";
-            if (!isNaN(number)) {
-                return (number / 100000) + "," + (number % 100000);
-            }
-            return String(amount.value).replace(/"/g, "") + " " + amount.currency;
-        };
-
         var loadBalance = function(remote, walletPublicKey){
-            remote.requestRippleBalance(walletPublicKey, 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'EUR', null, function (err, info) {
+            remote.requestAccountInfo({account: walletPublicKey}, function (err, info) {
                 /*jshint camelcase: false */
-                $scope.ballance = String(info.account_balance._value).replace(/"/g,"");
-                $scope.account = walletPublicKey; //info.account_data.Account;
+                $scope.ballance = info.account_data.Balance;
+                $scope.account = info.account_data.Account;
                 $scope.$apply();
             });
             remote.requestAccountTransactions({account: $scope.account, ledger_index_min: -1}, function(err, info){
@@ -39,7 +29,7 @@ angular.module('riwebApp')
             });
         };
 
-        var makeInitialTrustlines = function (destinationAddress) {
+        var makeInitialTrustlines = function(destinationAddress){
             remote.setSecret($scope.account, $scope.wallet.passphrase);
 
             var transaction = remote.createTransaction('TrustSet', {
@@ -85,10 +75,10 @@ angular.module('riwebApp')
                     var wallet = data[0];
                     var destinationAddress = wallet.publicKey;
 
-                    remote.setSecret($scope.account, $scope.wallet.passphrase);
+                    remote.setSecret($scope.wallet.publicKey, $scope.wallet.passphrase);
 
                     var transaction = remote.createTransaction('Payment', {
-                        account: $scope.account,
+                        account: $scope.wallet.publicKey,
                         destination: destinationAddress,
                         amount: $scope.amountToTransfer + '/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
                     });
@@ -125,7 +115,7 @@ angular.module('riwebApp')
                 var transaction = remote.createTransaction('Payment', {
                     account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
                     destination: destinationAddress,
-                    amount: 3000000000
+                    amount: 300000000
                 });
 
                 transaction.on('resubmitted', function () {
@@ -207,6 +197,12 @@ angular.module('riwebApp')
         $scope.ledgerClosed = '';
         $scope.error = '';
 
+		var refreshPeers = function(){
+            remote.requestPeers(function(error, info){
+                $scope.peers = info.peers;
+                $scope.$apply();
+            });
+        };
 
         remote.connect(function () {
             console.log('Remote connected');
@@ -231,6 +227,7 @@ angular.module('riwebApp')
                 /*jshint camelcase: false */
                 $scope.ledgerClosed = ledger.ledger_hash;
                 $scope.$apply();
+				refreshPeers();
                 loadCurrentUserBalance();
             });
 
@@ -263,6 +260,6 @@ angular.module('riwebApp')
             });
 
             loadCurrentUserBalance();
-
+            refreshPeers(); 
         });
     });
