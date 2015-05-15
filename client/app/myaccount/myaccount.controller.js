@@ -30,12 +30,12 @@ angular.module('riwebApp')
                     /*jshint camelcase: false */
                     $scope.ballance = String(info.account_balance._value).replace(/"/g, "");
                     $scope.account = walletPublicKey; //info.account_data.Account;
-                    $scope.$apply();
+                    _.defer(function(){$scope.$apply();});
                 });
             } else {
                 $scope.ballance = 0;
                 $scope.account = walletPublicKey; //info.account_data.Account;
-                $scope.$apply();
+                _.defer(function(){$scope.$apply();});
             }
 
             remote.requestAccountTransactions({account: $scope.wallet.publicKey, ledger_index_min: -1}, function (err, info) {
@@ -45,7 +45,7 @@ angular.module('riwebApp')
                 }
                 info.transactions.forEach(function (item) {
 
-                    if (item.tx.Destination && item.tx.Amount.currency) {
+                    if (item.tx.Destination && item.tx.Amount.currency && item.meta.TransactionResult==='tesSUCCESS') {
                         if (!$scope.transactions) {
                             //make transactions lazy so we can have a relevant message
                             $scope.transactions = [];
@@ -53,7 +53,7 @@ angular.module('riwebApp')
                         $scope.transactions.push(item);
                     }
                 });
-                $scope.$apply();
+                _.defer(function(){$scope.$apply();});
             });
         };
 
@@ -223,7 +223,7 @@ angular.module('riwebApp')
         var refreshPeers = function () {
             remote.requestPeers(function (error, info) {
                 $scope.peers = info.peers;
-                $scope.$apply();
+                _.defer(function(){$scope.$apply();});
             });
         };
 
@@ -249,7 +249,7 @@ angular.module('riwebApp')
             remote.on('ledger_closed', function (ledger) {
                 /*jshint camelcase: false */
                 $scope.ledgerClosed = ledger.ledger_hash;
-                $scope.$apply();
+                _.defer(function(){$scope.$apply();});
                 refreshPeers();
                 loadCurrentUserBalance();
             });
@@ -261,7 +261,7 @@ angular.module('riwebApp')
 
             remote.on('error', function (error) {
                 $scope.error = error;
-                $scope.$apply();
+                _.defer(function(){$scope.$apply();});
             });
 
             // fire the request
@@ -279,7 +279,7 @@ angular.module('riwebApp')
                     $scope.server_name = '';
                     $scope.server_error = 'Error ' + err;
                 }
-                $scope.$apply();
+                _.defer(function(){$scope.$apply();});
             });
 
             loadCurrentUserBalance();
