@@ -30,12 +30,16 @@ angular.module('riwebApp')
                     /*jshint camelcase: false */
                     $scope.ballance = String(info.account_balance._value).replace(/"/g, "");
                     $scope.account = walletPublicKey; //info.account_data.Account;
-                    _.defer(function(){$scope.$apply();});
+                    _.defer(function () {
+                        $scope.$apply();
+                    });
                 });
             } else {
                 $scope.ballance = 0;
                 $scope.account = walletPublicKey; //info.account_data.Account;
-                _.defer(function(){$scope.$apply();});
+                _.defer(function () {
+                    $scope.$apply();
+                });
             }
 
             remote.requestAccountTransactions({account: $scope.wallet.publicKey, ledger_index_min: -1}, function (err, info) {
@@ -45,7 +49,7 @@ angular.module('riwebApp')
                 }
                 info.transactions.forEach(function (item) {
 
-                    if (item.tx.Destination && item.tx.Amount.currency && item.meta.TransactionResult==='tesSUCCESS') {
+                    if (item.tx.Destination && item.tx.Amount.currency && item.meta.TransactionResult === 'tesSUCCESS') {
                         if (!$scope.transactions) {
                             //make transactions lazy so we can have a relevant message
                             $scope.transactions = [];
@@ -53,7 +57,9 @@ angular.module('riwebApp')
                         $scope.transactions.push(item);
                     }
                 });
-                _.defer(function(){$scope.$apply();});
+                _.defer(function () {
+                    $scope.$apply();
+                });
             });
         };
 
@@ -81,7 +87,7 @@ angular.module('riwebApp')
         };
 
         var loadCurrentUserBalance = function (callback) {
-            if($scope.getMyAccountUser().email){
+            if ($scope.getMyAccountUser().email) {
                 Wallet.getByOwnerEmail({ownerEmail: $scope.getMyAccountUser().email}).$promise.then(function (data) {
                     if (data.length >= 1) {
                         $scope.wallet = data[0];
@@ -183,36 +189,39 @@ angular.module('riwebApp')
 
         $scope.createWallet = function () {
             var currentUser = $scope.getMyAccountUser();
-            if(currentUser){
-                Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise
-                    .then(function (data) {
-                        if (data.length < 1) {
-                            var saveWallet = function (newWallet) {
-                                Wallet.save(newWallet,
-                                    function (data) {
-                                        makeInitialXRPTransfer(newWallet.publicKey);
-                                    },
-                                    function () {
-                                        swal('Error', 'Sorry there was a problem processing your request!', 'error');
-                                    }.bind(this));
-                            };
-                            var newWallet = {};
-                            newWallet.ownerEmail = currentUser.email;
-                            newWallet.currency = "XRP";
-                            if (currentUser.email === 'admin@admin.com') {
-                                //reuse existing known wallet
-                                newWallet.publicKey = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
-                                newWallet.passphrase = 'masterpassphrase';
-                                saveWallet(newWallet);
-                            } else {
-                                // generate new wallet
-                                var wallet = ripple.Wallet.generate();
-                                newWallet.publicKey = wallet.address;
-                                newWallet.passphrase = wallet.secret;
-                                saveWallet(newWallet);
+            if (currentUser) {
+                if (currentUser.email !== $scope.makingWalletForEmail) {
+                    $scope.makingWalletForEmail = currentUser.email;
+                    Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise
+                        .then(function (data) {
+                            if (data.length < 1) {
+                                var saveWallet = function (newWallet) {
+                                    Wallet.save(newWallet,
+                                        function (data) {
+                                            makeInitialXRPTransfer(newWallet.publicKey);
+                                        },
+                                        function () {
+                                            swal('Error', 'Sorry there was a problem processing your request!', 'error');
+                                        }.bind(this));
+                                };
+                                var newWallet = {};
+                                newWallet.ownerEmail = currentUser.email;
+                                newWallet.currency = "XRP";
+                                if (currentUser.email === 'admin@admin.com') {
+                                    //reuse existing known wallet
+                                    newWallet.publicKey = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
+                                    newWallet.passphrase = 'masterpassphrase';
+                                    saveWallet(newWallet);
+                                } else {
+                                    // generate new wallet
+                                    var wallet = ripple.Wallet.generate();
+                                    newWallet.publicKey = wallet.address;
+                                    newWallet.passphrase = wallet.secret;
+                                    saveWallet(newWallet);
+                                }
                             }
-                        }
-                    });
+                        });
+                }
             }
         };
 
@@ -223,7 +232,9 @@ angular.module('riwebApp')
         var refreshPeers = function () {
             remote.requestPeers(function (error, info) {
                 $scope.peers = info.peers;
-                _.defer(function(){$scope.$apply();});
+                _.defer(function () {
+                    $scope.$apply();
+                });
             });
         };
 
@@ -249,7 +260,9 @@ angular.module('riwebApp')
             remote.on('ledger_closed', function (ledger) {
                 /*jshint camelcase: false */
                 $scope.ledgerClosed = ledger.ledger_hash;
-                _.defer(function(){$scope.$apply();});
+                _.defer(function () {
+                    $scope.$apply();
+                });
                 refreshPeers();
                 loadCurrentUserBalance();
             });
@@ -261,7 +274,9 @@ angular.module('riwebApp')
 
             remote.on('error', function (error) {
                 $scope.error = error;
-                _.defer(function(){$scope.$apply();});
+                _.defer(function () {
+                    $scope.$apply();
+                });
             });
 
             // fire the request
@@ -279,7 +294,9 @@ angular.module('riwebApp')
                     $scope.server_name = '';
                     $scope.server_error = 'Error ' + err;
                 }
-                _.defer(function(){$scope.$apply();});
+                _.defer(function () {
+                    $scope.$apply();
+                });
             });
 
             loadCurrentUserBalance();
