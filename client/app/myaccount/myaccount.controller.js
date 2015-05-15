@@ -71,35 +71,35 @@ angular.module('riwebApp')
             });
 
             transaction.submit(function (err, res) {
-                console.log('submit' + res);
-                console.error('err' + err);
                 if (err) {
                     swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                 }
                 if (res) {
-                    swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You created an new wallet! ' + destinationAddress, 'success');
+                    swal('Congratulations, ' + Auth.getCurrentUser().name + '!', 'You just got a new wallet! ' + destinationAddress, 'success');
                 }
             });
         };
 
         var loadCurrentUserBalance = function (callback) {
-            Wallet.getByOwnerEmail({ownerEmail: $scope.getMyAccountUser().email}).$promise.then(function (data) {
-                if (data.length === 1) {
-                    $scope.wallet = data[0];
-                    loadBalance(remote, $scope.wallet.publicKey);
-                    if (callback) {
-                        callback($scope.wallet.publicKey);
+            if($scope.getMyAccountUser().email){
+                Wallet.getByOwnerEmail({ownerEmail: $scope.getMyAccountUser().email}).$promise.then(function (data) {
+                    if (data.length >= 1) {
+                        $scope.wallet = data[0];
+                        loadBalance(remote, $scope.wallet.publicKey);
+                        if (callback) {
+                            callback($scope.wallet.publicKey);
+                        }
+                    } else {
+                        $scope.createWallet();
                     }
-                } else {
-                    $scope.wallet = undefined;
-                }
-            });
+                });
+            }
         };
 
         var transferMoneyFromCurrentAccount = function (destinationEmailAddress) {
 
             Wallet.getByOwnerEmail({ownerEmail: destinationEmailAddress}).$promise.then(function (data) {
-                if (data.length === 1) {
+                if (data.length >= 1) {
                     var wallet = data[0];
                     var destinationAddress = wallet.publicKey;
 
@@ -116,13 +116,11 @@ angular.module('riwebApp')
                     });
 
                     transaction.submit(function (err, res) {
-                        console.log('submit' + res);
-                        console.error('err' + err);
                         if (err) {
                             swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                         }
                         if (res) {
-                            swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You transfered ' + $scope.amountToTransfer + ' to ' + destinationEmailAddress, 'success');
+                            swal('Transfer success!', 'Congratulations ' + Auth.getCurrentUser().name + '! You transfered ' + $scope.amountToTransfer + ' to ' + destinationEmailAddress, 'success');
                         }
                         loadCurrentUserBalance();
                         // submission has finalized with either an error or success.
@@ -151,8 +149,6 @@ angular.module('riwebApp')
                 });
 
                 transaction.submit(function (err, res) {
-                    console.log('submit' + res);
-                    console.error('err' + err);
                     if (err) {
                         swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                     }
@@ -160,10 +156,8 @@ angular.module('riwebApp')
                     // submission has finalized with either an error or success.
                     // the transaction will not be retried after this point
                 });
-
             } else {
                 loadCurrentUserBalance();
-                swal('Good job!', 'Congratulations ' + Auth.getCurrentUser().name + '! You created an new wallet! ' + destinationAddress, 'success');
             }
         };
 
@@ -189,36 +183,37 @@ angular.module('riwebApp')
 
         $scope.createWallet = function () {
             var currentUser = $scope.getMyAccountUser();
-            return Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise
-                .then(function (data) {
-                    if (data.length < 1) {
-                        var saveWallet = function (newWallet) {
-                            Wallet.save(newWallet,
-                                function (data) {
-                                    makeInitialXRPTransfer(newWallet.publicKey);
-                                },
-                                function () {
-                                    swal('Error', 'Sorry there was a problem processing your request!', 'error');
-                                }.bind(this));
-                        };
-                        var newWallet = {};
-                        newWallet.ownerEmail = currentUser.email;
-                        newWallet.currency = "XRP";
-                        if (currentUser.email === 'admin@admin.com') {
-                            //reuse existing known wallet
-                            newWallet.publicKey = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
-                            newWallet.passphrase = 'masterpassphrase';
-                            saveWallet(newWallet);
-                            swal('Good job!', 'Congratulations ' + currentUser.name + '! You created an new wallet! ' + data.publicKey, 'success');
-                        } else {
-                            // generate new wallet
-                            var wallet = ripple.Wallet.generate();
-                            newWallet.publicKey = wallet.address;
-                            newWallet.passphrase = wallet.secret;
-                            saveWallet(newWallet);
+            if(currentUser){
+                Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise
+                    .then(function (data) {
+                        if (data.length < 1) {
+                            var saveWallet = function (newWallet) {
+                                Wallet.save(newWallet,
+                                    function (data) {
+                                        makeInitialXRPTransfer(newWallet.publicKey);
+                                    },
+                                    function () {
+                                        swal('Error', 'Sorry there was a problem processing your request!', 'error');
+                                    }.bind(this));
+                            };
+                            var newWallet = {};
+                            newWallet.ownerEmail = currentUser.email;
+                            newWallet.currency = "XRP";
+                            if (currentUser.email === 'admin@admin.com') {
+                                //reuse existing known wallet
+                                newWallet.publicKey = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
+                                newWallet.passphrase = 'masterpassphrase';
+                                saveWallet(newWallet);
+                            } else {
+                                // generate new wallet
+                                var wallet = ripple.Wallet.generate();
+                                newWallet.publicKey = wallet.address;
+                                newWallet.passphrase = wallet.secret;
+                                saveWallet(newWallet);
+                            }
                         }
-                    }
-                });
+                    });
+            }
         };
 
         $scope.message = 'Not connected to any server';
