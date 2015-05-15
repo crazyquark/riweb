@@ -170,7 +170,7 @@ angular.module('riwebApp')
         $scope.transferMoney = function () {
             swal({
                     title: 'Transfer money!',
-                    text: 'Transfer ' + $scope.amountToTransfer + ' to the following address: ',
+                    text: 'Transfer ' + $scope.amountToTransfer + ' to the following email address: ',
                     type: 'input',
                     showCancelButton: true,
                     closeOnConfirm: false,
