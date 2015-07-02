@@ -1,8 +1,13 @@
 **Quick Start**  
 (Or at least, how I did it)  
 
-Get NodeJS dependencies:  
-*npm install*  
+Install [ndenv](https://github.com/riywo/ndenv#install) and [node-build](https://github.com/riywo/node-build#install) if not already installed:  
+
+Install exact NodeJS version for project
+*ndenv install && ndenv rehash*  
+
+Get NodeJS dependencies from cache:  
+*npm install --cache-min 999999*  
 
 Install docker:  
 https://docs.docker.com/installation/ubuntulinux/  
@@ -16,8 +21,8 @@ Start mongoDB server:
 Install bower:  
 *sudo npm install -g bower*  
 
-Install packages with bower:  
-*bower install*  
+Install packages with bower from cache:  
+*bower install --offline*  
 
 Start server:  
 *npm install -g grunt-cli*  

@@ -1,3 +1,19 @@
 {
-    "directory": "client/bower_components"
+    "directory": "client/bower_components",
+    "storage": {
+        "packages" : "bower_cache/bower_packages",
+        "registry" : "bower_cache/bower_registry"
+    },
+    "ignore": [
+        "source",
+        "spec",
+        ".bowerrc",
+        ".gitignore",
+        ".jshintignore",
+        ".jshintrc",
+        "bower.json",
+        "gruntfile.js",
+        "package.json",
+        "README.md"
+    ]
 }
