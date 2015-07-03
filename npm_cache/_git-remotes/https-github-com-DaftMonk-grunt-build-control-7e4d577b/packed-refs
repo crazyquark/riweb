@@ -1,0 +1,8 @@
+# pack-refs with: peeled fully-peeled 
+039bdef9de8bfbf426b68f55fa8c8c160a967eac refs/heads/allFiles
+2749527df5480a150e997831ca951d4adefe9217 refs/heads/blargh
+3d03ebbe49f8f963ef43c50af1084a15f56611fa refs/heads/master
+d5c00ee053b54b3ee04a805bfe1caac2cc778bda refs/heads/prod
+517b33101a2c5f9a5d6e6997cacbb91da25fc8c5 refs/heads/rw/fix-heroku
+aeb8ace62819c37bbf26fa6d8daa555d148399d3 refs/tags/0.1.2
+3d03ebbe49f8f963ef43c50af1084a15f56611fa refs/tags/0.1.3

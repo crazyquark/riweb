@@ -4,14 +4,4 @@ public
 client/bower_components
 dist
 /server/config/local.env.js
-node_modules/**/source
-node_modules/**/spec
-node_modules/**/.bowerrc
-node_modules/**/.gitignore
-node_modules/**/.jshintignore
-node_modules/**/.jshintrc
-node_modules/**/bower.json
-node_modules/**/gruntfile.js
-node_modules/**/package.json
-node_modules/**/README.md
-node_modules/**/README.markdown
+node_modules
