@@ -6,8 +6,7 @@ var mongoose = require('mongoose'),
 var WalletSchema = new Schema({
   ownerEmail: String,
   publicKey: String,
-  passphrase: String,
-  currency: String
+  passphrase: String
 });
 
 module.exports = mongoose.model('Wallet', WalletSchema);
