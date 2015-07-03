@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-    .controller('MyaccountCtrl', function ($scope, Auth, User, Wallet) {
+    .controller('MyaccountCtrl', function ($scope, Auth, User, Wallet, RIPPLE_ROOT_ACCOUNT) {
         var Remote = ripple.Remote;
         var remote = new Remote({
             // see the API Reference for available options
@@ -25,8 +25,9 @@ angular.module('riwebApp')
 
 
         var loadBalance = function (remote, walletPublicKey) {
-            if (walletPublicKey !== 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh') {
-                remote.requestRippleBalance(walletPublicKey, 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'EUR', null, function (err, info) {
+            var rootAddress = RIPPLE_ROOT_ACCOUNT.address;
+            if (walletPublicKey !== rootAddress) {
+                remote.requestRippleBalance(walletPublicKey, rootAddress, 'EUR', null, function (err, info) {
                     /*jshint camelcase: false */
                     $scope.ballance = String(info.account_balance._value).replace(/"/g, "");
                     $scope.account = walletPublicKey; //info.account_data.Account;
@@ -63,17 +64,13 @@ angular.module('riwebApp')
             });
         };
 
-        var makeInitialTrustlines = function (destinationAddress) {
+        var makeInitialTrustlines = function (rippleAddress) {
             remote.setSecret($scope.wallet.publicKey, $scope.wallet.passphrase);
 
             var transaction = remote.createTransaction('TrustSet', {
-                account: destinationAddress,
-                limit: '10000/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+                account: rippleAddress,
+                limit: '10000/EUR/' + RIPPLE_ROOT_ACCOUNT.address,
                 set_flag: 'NoRipple'
-            });
-
-            transaction.on('resubmitted', function () {
-                console.log('resubmitted');
             });
 
             transaction.submit(function (err, res) {
@@ -81,7 +78,7 @@ angular.module('riwebApp')
                     swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                 }
                 if (res) {
-                    swal('Congratulations, ' + Auth.getCurrentUser().name + '!', 'You just got a new wallet! ' + destinationAddress, 'success');
+                    swal('Congratulations, ' + Auth.getCurrentUser().name + '!', 'You just got a new wallet! ' + rippleAddress, 'success');
                 }
             });
         };
@@ -114,7 +111,7 @@ angular.module('riwebApp')
                     var transaction = remote.createTransaction('Payment', {
                         account: $scope.wallet.publicKey,
                         destination: destinationAddress,
-                        amount: $scope.amountToTransfer + '/EUR/rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
+                        amount: $scope.amountToTransfer + '/EUR/' + RIPPLE_ROOT_ACCOUNT.address
                     });
 
                     transaction.on('resubmitted', function () {
@@ -141,11 +138,11 @@ angular.module('riwebApp')
 
         var makeInitialXRPTransfer = function (destinationAddress) {
             //do not send money to self
-            if (destinationAddress !== 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh') {
-                remote.setSecret('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh', 'masterpassphrase');
+            if (destinationAddress !== RIPPLE_ROOT_ACCOUNT.address) {
+                remote.setSecret(RIPPLE_ROOT_ACCOUNT.address, RIPPLE_ROOT_ACCOUNT.secret);
 
                 var transaction = remote.createTransaction('Payment', {
-                    account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+                    account: RIPPLE_ROOT_ACCOUNT.address,
                     destination: destinationAddress,
                     amount: 300000000
                 });
@@ -206,11 +203,10 @@ angular.module('riwebApp')
                                 };
                                 var newWallet = {};
                                 newWallet.ownerEmail = currentUser.email;
-                                newWallet.currency = "XRP";
                                 if (currentUser.email === 'admin@admin.com') {
                                     //reuse existing known wallet
-                                    newWallet.publicKey = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
-                                    newWallet.passphrase = 'masterpassphrase';
+                                    newWallet.publicKey = RIPPLE_ROOT_ACCOUNT.address;
+                                    newWallet.passphrase = RIPPLE_ROOT_ACCOUNT.secret;
                                     saveWallet(newWallet);
                                 } else {
                                     // generate new wallet

@@ -44,6 +44,11 @@ angular.module('riwebApp', [
     };
   })
 
+  .constant('RIPPLE_ROOT_ACCOUNT', {
+        address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+        secret: 'masterpassphrase'
+  })
+
   .run(function ($rootScope, $location, Auth) {
     // Redirect to login if route requires auth and you're not logged in
     $rootScope.$on('$routeChangeStart', function (event, next) {
