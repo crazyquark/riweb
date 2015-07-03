@@ -16,8 +16,7 @@ module.exports = function (grunt) {
     ngtemplates: 'grunt-angular-templates',
     cdnify: 'grunt-google-cdn',
     protractor: 'grunt-protractor-runner',
-    injector: 'grunt-asset-injector',
-    buildcontrol: 'grunt-build-control'
+    injector: 'grunt-asset-injector'
   });
 
   // Time how long tasks take. Can help when optimizing build times
