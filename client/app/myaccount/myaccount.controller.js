@@ -201,8 +201,28 @@ angular.module('riwebApp')
                                                     swal('Error', 'There was an error communicating with the server: ' + err.message, 'error');
                                                 }
                                                 else {
-                                                    if (flags & 0x00800000 == 0) {
-                                                        // CS Need to set flags
+                                                    if (!(flags & 0x00800000)) {
+                                                        // OK, let's set the DefaultRipple flag if it's not there
+                                                        remote.setSecret(RIPPLE_ROOT_ACCOUNT.address, RIPPLE_ROOT_ACCOUNT.secret);
+
+                                                        var transaction = remote.createTransaction('AccountSet', {
+                                                          account: RIPPLE_ROOT_ACCOUNT.address,
+                                                          set: 'DefaultRipple'
+                                                        });
+
+                                                        transaction.on('resubmitted', function() {
+                                                            console.log('resubmitted');
+                                                        });
+
+                                                        transaction.submit(function(err, res) {
+                                                            if (err) {
+                                                              swal('Error', 'Failed to set the DefaultRipple flag on the cold wallet account: ' + err.message, 'error');
+                                                            }
+                                                            else {
+                                                              swal('Info', 'Set the DefaultRipple flag on the cold wallet account', 'info');
+                                                            }
+                                                        });
+
                                                     } else {
                                                         swal('Info', 'The admin account wallet has the DefaultRipple flag active, flags are: ' + flags, 'info');
                                                     }
