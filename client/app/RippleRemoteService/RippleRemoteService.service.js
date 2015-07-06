@@ -8,11 +8,27 @@ angular.module('riwebApp')
             servers: [ 'ws://localhost:6006' ]
         });
 
+        var streams = [
+            'ledger',
+            'transactions',
+            'random'
+        ];
+
         var deferred = $q.defer();
         var theRemote;
 
         remote.connect(function () {
+
             console.log('Remote connected');
+            var request = remote.requestSubscribe(streams);
+
+            request.on('error', function (error) {
+                console.log('request error: ', error);
+            });
+
+            // fire the request
+            request.request();
+
             theRemote = remote;
             deferred.resolve(remote);
         });

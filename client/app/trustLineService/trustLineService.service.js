@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .service('TrustLineService', function (RIPPLE_ROOT_ACCOUNT) {
+  .service('TrustLineService', function (Auth, RIPPLE_ROOT_ACCOUNT) {
         function makeInitialTrustLines(remote, rippleAddress, $scope) {
             remote.setSecret($scope.wallet.publicKey, $scope.wallet.passphrase);
 

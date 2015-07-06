@@ -246,18 +246,6 @@ angular.module('riwebApp')
         };
 
         RippleRemoteService.onRemotePresent(function (remote) {
-            var streams = [
-                'ledger',
-                'transactions',
-                'random'
-            ];
-
-            var request = remote.requestSubscribe(streams);
-
-            request.on('error', function (error) {
-                console.log('request error: ', error);
-            });
-
 
             // the `ledger_closed` and `transaction` will come in on the remote
             // since the request for subscribe is finalized after the success return
@@ -284,9 +272,6 @@ angular.module('riwebApp')
                 });
             });
 
-            // fire the request
-            request.request();
-
             /* remote connected */
             remote.requestServerInfo(function (err, info) {
                 /*jshint camelcase: false */
@@ -305,6 +290,9 @@ angular.module('riwebApp')
             });
 
             loadCurrentUserBalance();
+            Auth.isLoggedInAsync(function(){
+                loadCurrentUserBalance();
+            });
             refreshPeers();
         });
     });
