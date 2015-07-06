@@ -12,7 +12,8 @@ angular.module('riwebApp')
         Auth.createUser({
           name: $scope.user.name,
           email: $scope.user.email,
-          password: $scope.user.password
+          password: $scope.user.password,
+          bank: 'ing'// TODO CS: Hardcode for now, should link to $scope.user.bank
         })
         .then( function() {
           // Account created, redirect to home
