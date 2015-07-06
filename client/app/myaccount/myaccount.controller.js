@@ -2,7 +2,7 @@
 
 angular.module('riwebApp')
     .controller('MyaccountCtrl', function ($scope, Auth, User, Wallet, RIPPLE_ROOT_ACCOUNT, TrustLineService,
-                                           RippleRemoteService, FormattingService) {
+                                           RippleRemoteService, FormattingService, RipplePeersService) {
 
         $scope.getMyAccountUser = Auth.getCurrentUser;
         $scope.amountToTransfer = 100;
@@ -243,17 +243,6 @@ angular.module('riwebApp')
         $scope.ledgerClosed = '';
         $scope.error = '';
 
-        var refreshPeers = function () {
-            RippleRemoteService.onRemotePresent(function (remote){
-                remote.requestPeers(function (error, info) {
-                    $scope.peers = info.peers;
-                    _.defer(function () {
-                        $scope.$apply();
-                    });
-                });
-            });
-        };
-
         RippleRemoteService.onRemotePresent(function (remote) {
 
             // the `ledger_closed` and `transaction` will come in on the remote
@@ -265,7 +254,7 @@ angular.module('riwebApp')
                 _.defer(function () {
                     $scope.$apply();
                 });
-                refreshPeers();
+                RipplePeersService.refreshPeers($scope);
                 loadCurrentUserBalance();
             });
 
@@ -302,6 +291,6 @@ angular.module('riwebApp')
             Auth.isLoggedInAsync(function(){
                 loadCurrentUserBalance();
             });
-            refreshPeers();
+            RipplePeersService.refreshPeers($scope);
         });
     });
