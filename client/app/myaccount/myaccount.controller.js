@@ -188,32 +188,35 @@ angular.module('riwebApp')
                                 var newWallet = {};
                                 newWallet.ownerEmail = currentUser.email;
                                 if (currentUser.email === 'admin@admin.com') {
-                                    var checkColdWalletFlags = function(remote) {
-                                      var reqOptions = {
-                                        account: RIPPLE_ROOT_ACCOUNT.address,
-                                        ledger: 'validated'
-                                      };
+                                    var checkColdWalletFlags = function () {
+                                        RippleRemoteService.onRemotePresent(function (remote) {
 
-                                      remote.requestAccountInfo(reqOptions, function(err, info) {
-                                        if (err) {
-                                            swal('Error', 'There was an error communicating with the server: ' + err.message, 'error');
-                                        }
-                                        else {
-                                            var crtFlags = info.account_data.Flags;
-                                            if (crtFlags & 0x00800000 == 0) {
-                                                // CS Need to set flags
-                                            } else {
-                                              swal('Info', 'The admin account wallet has the DefaultRipple flag active, flags are: ' + crtFlags, 'info');
-                                            }
-                                        }
-                                      });
+                                            var reqOptions = {
+                                                account: RIPPLE_ROOT_ACCOUNT.address,
+                                                ledger: 'validated'
+                                            };
+
+                                            remote.requestAccountInfo(reqOptions, function (err, info) {
+                                                if (err) {
+                                                    swal('Error', 'There was an error communicating with the server: ' + err.message, 'error');
+                                                }
+                                                else {
+                                                    var crtFlags = info.account_data.Flags;
+                                                    if (crtFlags & 0x00800000 == 0) {
+                                                        // CS Need to set flags
+                                                    } else {
+                                                        swal('Info', 'The admin account wallet has the DefaultRipple flag active, flags are: ' + crtFlags, 'info');
+                                                    }
+                                                }
+                                            });
+                                        })
                                     };
 
                                     //reuse existing known wallet
                                     newWallet.publicKey = RIPPLE_ROOT_ACCOUNT.address;
                                     newWallet.passphrase = RIPPLE_ROOT_ACCOUNT.secret;
                                     saveWallet(newWallet);
-                                    checkColdWalletFlags(remote);
+                                    checkColdWalletFlags();
                                 } else {
                                     // generate new wallet
                                     var wallet = ripple.Wallet.generate();
