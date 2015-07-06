@@ -6,6 +6,13 @@ var mongoose = require('mongoose'),
 var BankaccountSchema = new Schema({
   name: String,
   info: String,
+  coldWallet: {
+    address: String
+  },
+  hotWallet: {
+    address: String,
+    secret: String
+  },
   active: Boolean
 });
 
