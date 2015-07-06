@@ -5,6 +5,19 @@ angular.module('riwebApp')
     $scope.user = {};
     $scope.errors = {};
 
+    $scope.availableBanks = [];
+
+    $scope.listAvailableBanks = function() {
+      $scope.availableBanks = [
+        {name: 'abnamro', info: 'ABN Amro'},
+        {name: 'ing', info: 'ING Bank N.V.'}
+        ];
+      $scope.user.bank = $scope.availableBanks[0];
+      // TODO CS Extract from DB the list of banks available
+    }
+
+    $scope.listAvailableBanks();
+
     $scope.register = function(form) {
       $scope.submitted = true;
 

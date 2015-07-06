@@ -19,6 +19,20 @@
           </p>
         </div>
 
+        <div class="form-group" ng-class="{ 'has-success': form.bank.$valid && submitted,
+                                            'has-error': form.bank.$invalid && submitted }">
+          <label>Bank</label>
+
+          <!--<input type="text" name="name" class="form-control" ng-model="user.bank"
+                 required/>-->
+          <select name="bank" class="form-control" ng-model="user.bank" ng-options="bank.info for bank in availableBanks">
+          </select>
+
+          <p class="help-block" ng-show="form.bank.$error.required && submitted">
+            A bank is required
+          </p>
+        </div>
+
         <div class="form-group" ng-class="{ 'has-success': form.email.$valid && submitted,
                                             'has-error': form.email.$invalid && submitted }">
           <label>Email</label>
