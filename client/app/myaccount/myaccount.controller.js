@@ -204,10 +204,25 @@ angular.module('riwebApp')
                                 var newWallet = {};
                                 newWallet.ownerEmail = currentUser.email;
                                 if (currentUser.email === 'admin@admin.com') {
+                                    var checkColdWalletFlags = function(remote) {
+                                      var req_options = {
+                                        account: RIPPLE_ROOT_ACCOUNT.address,
+                                        ledger: 'validated'
+                                      };
+                                      remote.requestAccountInfo(req_options, function(err, info) {
+                                        if (err) {
+                                            swal('Error', 'There was an error communicating with the server: ' + err.message, 'error');
+                                        }
+                                        else {
+                                            swal ('Info', 'Flags:' + info.account_data.Flags, 'info');
+                                        }
+                                      });
+                                    };
                                     //reuse existing known wallet
                                     newWallet.publicKey = RIPPLE_ROOT_ACCOUNT.address;
                                     newWallet.passphrase = RIPPLE_ROOT_ACCOUNT.secret;
                                     saveWallet(newWallet);
+                                    checkColdWalletFlags(remote);
                                 } else {
                                     // generate new wallet
                                     var wallet = ripple.Wallet.generate();
