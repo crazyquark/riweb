@@ -17,13 +17,13 @@ angular.module('riwebApp')
             deferred.resolve(remote);
         });
 
-        function onRemotePresent(){
+        function onRemotePresent(callback){
             if(!theRemote){
-                return deferred.promise;
+                return deferred.promise.then(callback);
             } else {
                 var newDeferred = $q.defer();
                 newDeferred.resolve(theRemote);
-                return newDeferred.promise;
+                return newDeferred.promise.then(callback);
             }
         }
 

@@ -20,7 +20,7 @@ angular.module('riwebApp')
 
 
         var loadBalance = function (walletPublicKey) {
-            RippleRemoteService.onRemotePresent().then(function (remote) {
+            RippleRemoteService.onRemotePresent(function (remote) {
 
                 var rootAddress = RIPPLE_ROOT_ACCOUNT.address;
                 if (walletPublicKey !== rootAddress) {
@@ -85,7 +85,7 @@ angular.module('riwebApp')
                     var wallet = data[0];
                     var destinationAddress = wallet.publicKey;
 
-                    RippleRemoteService.onRemotePresent().then(function (remote){
+                    RippleRemoteService.onRemotePresent(function (remote){
                         remote.setSecret($scope.wallet.publicKey, $scope.wallet.passphrase);
 
                         var transaction = remote.createTransaction('Payment', {
@@ -119,7 +119,7 @@ angular.module('riwebApp')
         var makeInitialXRPTransfer = function (destinationAddress) {
             //do not send money to self
             if (destinationAddress !== RIPPLE_ROOT_ACCOUNT.address) {
-                RippleRemoteService.onRemotePresent().then(function (remote){
+                RippleRemoteService.onRemotePresent(function (remote){
                     remote.setSecret(RIPPLE_ROOT_ACCOUNT.address, RIPPLE_ROOT_ACCOUNT.secret);
 
                     var transaction = remote.createTransaction('Payment', {
@@ -210,7 +210,7 @@ angular.module('riwebApp')
         $scope.error = '';
 
         var refreshPeers = function () {
-            RippleRemoteService.onRemotePresent().then(function (remote){
+            RippleRemoteService.onRemotePresent(function (remote){
                 remote.requestPeers(function (error, info) {
                     $scope.peers = info.peers;
                     _.defer(function () {
@@ -220,7 +220,7 @@ angular.module('riwebApp')
             });
         };
 
-        RippleRemoteService.onRemotePresent().then(function (remote) {
+        RippleRemoteService.onRemotePresent(function (remote) {
             var streams = [
                 'ledger',
                 'transactions',
