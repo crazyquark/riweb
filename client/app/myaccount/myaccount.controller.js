@@ -2,62 +2,19 @@
 
 angular.module('riwebApp')
     .controller('MyaccountCtrl', function ($scope, Auth, User, Wallet, RIPPLE_ROOT_ACCOUNT, TrustLineService,
-                                           RippleRemoteService, FormattingService) {
+                                           RippleRemoteService, FormattingService, RipplePeersService, RippleAccountService) {
 
-        $scope.getMyAccountUser = Auth.getCurrentUser;
         $scope.amountToTransfer = 100;
 
+        $scope.getMyAccountUser = Auth.getCurrentUser;
         $scope.getAmountDisplayText = FormattingService.getAmountDisplayText;
-
-        var loadBalance = function (walletPublicKey) {
-            RippleRemoteService.onRemotePresent(function (remote) {
-
-                var rootAddress = RIPPLE_ROOT_ACCOUNT.address;
-                if (walletPublicKey !== rootAddress) {
-                    remote.requestRippleBalance(walletPublicKey, rootAddress, 'EUR', null, function (err, info) {
-                        /*jshint camelcase: false */
-                        $scope.ballance = String(info.account_balance._value).replace(/"/g, '');
-                        $scope.account = walletPublicKey; //info.account_data.Account;
-                        _.defer(function () {
-                            $scope.$apply();
-                        });
-                    });
-                } else {
-                    $scope.ballance = 0;
-                    $scope.account = walletPublicKey; //info.account_data.Account;
-                    _.defer(function () {
-                        $scope.$apply();
-                    });
-                }
-
-                remote.requestAccountTransactions({account: $scope.wallet.publicKey, ledger_index_min: -1}, function (err, info) {
-                    //delete old transactions first if they exist
-                    if ($scope.transactions) {
-                        delete $scope.transactions;
-                    }
-                    info.transactions.forEach(function (item) {
-
-                        if (item.tx.Destination && item.tx.Amount.currency && item.meta.TransactionResult === 'tesSUCCESS') {
-                            if (!$scope.transactions) {
-                                //make transactions lazy so we can have a relevant message
-                                $scope.transactions = [];
-                            }
-                            $scope.transactions.push(item);
-                        }
-                    });
-                    _.defer(function () {
-                        $scope.$apply();
-                    });
-                });
-            });
-        };
 
         var loadCurrentUserBalance = function (callback) {
             if ($scope.getMyAccountUser().email) {
                 Wallet.getByOwnerEmail({ownerEmail: $scope.getMyAccountUser().email}).$promise.then(function (data) {
                     if (data.length >= 1) {
                         $scope.wallet = data[0];
-                        loadBalance($scope.wallet.publicKey);
+                        RippleAccountService.loadBalance($scope, $scope.wallet.publicKey);
                         if (callback) {
                             callback($scope.wallet.publicKey);
                         }
@@ -243,17 +200,6 @@ angular.module('riwebApp')
         $scope.ledgerClosed = '';
         $scope.error = '';
 
-        var refreshPeers = function () {
-            RippleRemoteService.onRemotePresent(function (remote){
-                remote.requestPeers(function (error, info) {
-                    $scope.peers = info.peers;
-                    _.defer(function () {
-                        $scope.$apply();
-                    });
-                });
-            });
-        };
-
         RippleRemoteService.onRemotePresent(function (remote) {
 
             // the `ledger_closed` and `transaction` will come in on the remote
@@ -265,7 +211,7 @@ angular.module('riwebApp')
                 _.defer(function () {
                     $scope.$apply();
                 });
-                refreshPeers();
+                RipplePeersService.refreshPeers($scope);
                 loadCurrentUserBalance();
             });
 
@@ -302,6 +248,6 @@ angular.module('riwebApp')
             Auth.isLoggedInAsync(function(){
                 loadCurrentUserBalance();
             });
-            refreshPeers();
+            RipplePeersService.refreshPeers($scope);
         });
     });
