@@ -2,20 +2,22 @@
 
 angular.module('riwebApp')
     .service('RipplePeersService', function (RippleRemoteService) {
+        var peersInfo = {
+            peers: []
+        };
         return {
-            refreshPeers: function ($scope) {
+            refreshPeers: function () {
                 RippleRemoteService.onRemotePresent(function (remote) {
                     remote.requestPeers(function (error, info) {
                         if(info && info.peers){
-                            $scope.peers = info.peers;
+                            peersInfo.peers = info.peers;
                         } else {
-                            $scope.peers = undefined;
+                            peersInfo.peers = undefined;
                         }
-                        _.defer(function () {
-                            $scope.$apply();
-                        });
+                        peersInfo.peers = [{address:'foo', ledger:'bar'}];
                     });
                 });
-            }
+            },
+            peersInfo: peersInfo
         };
     });

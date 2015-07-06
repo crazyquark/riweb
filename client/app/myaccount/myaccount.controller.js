@@ -6,22 +6,24 @@ angular.module('riwebApp')
                                            RippleAccountService, RippleWalletService, RippleTransactionService) {
 
         $scope.amountToTransfer = 100;
-        $scope.message = 'Not connected to any server';
-        $scope.ledgerClosed = '';
 
         $scope.getMyAccountUser = Auth.getCurrentUser;
         $scope.getAmountDisplayText = FormattingService.getAmountDisplayText;
+
         $scope.transferMoney = function(){
             RippleTransactionService.transferMoney($scope);
         };
+
         $scope.serverInfo = RippleRemoteService.serverInfo;
+        $scope.peersInfo = RipplePeersService.peersInfo;
 
         var loadCurrentUserBalance = RippleWalletService.loadCurrentUserBalance;
+        var refreshPeers = RipplePeersService.refreshPeers;
 
         RippleRemoteService.onRemotePresent(function (remote) {
 
             remote.on('ledger_closed', function () {
-                RipplePeersService.refreshPeers($scope);
+                refreshPeers();
                 loadCurrentUserBalance($scope);
             });
 
@@ -32,6 +34,6 @@ angular.module('riwebApp')
             Auth.isLoggedInAsync(function(){
                 loadCurrentUserBalance($scope);
             });
-            RipplePeersService.refreshPeers($scope);
+            refreshPeers($scope);
         });
     });

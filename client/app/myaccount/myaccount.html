@@ -73,8 +73,8 @@
             <h3 id="panel-title" class="panel-title">Peers</strong></h3>
         </div>
         <div class="panel-body">
-            <div class="alert alert-warning" ng-hide="peers" role="alert">Not connected to peers</div>
-            <table class="table" ng-show="peers">
+            <div class="alert alert-warning" ng-hide="peersInfo.peers" role="alert">Not connected to peers</div>
+            <table class="table" ng-show="peersInfo.peers">
                 <thead>
                 <tr>
                     <th>IP</th>
@@ -82,7 +82,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="peer in peers">
+                <tr ng-repeat="peer in peersInfo.peers">
                     <td>{{peer.address}}</td>
                     <td>{{peer.ledger}}</td>
                 </tr>
