@@ -209,7 +209,7 @@ angular.module('riwebApp')
                                                     }
                                                 }
                                             });
-                                        })
+                                        });
                                     };
 
                                     //reuse existing known wallet
