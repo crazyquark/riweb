@@ -14,5 +14,5 @@ angular.module('riwebApp')
 
                 return String(amount.value).replace(/"/g, '') + ' ' + amount.currency;
             }
-        }
+        };
     });

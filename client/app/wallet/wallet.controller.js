@@ -1,5 +1,5 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('WalletCtrl', function ($scope) {
+  .controller('WalletCtrl', function () {
   });

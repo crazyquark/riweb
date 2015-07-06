@@ -3,9 +3,10 @@
 angular.module('riwebApp')
   .service('TrustLineService', function (Auth, RIPPLE_ROOT_ACCOUNT) {
 
-        function makeInitialTrustLines(remote, rippleAddress, $scope) {
+        function makeInitialTrustLines($scope, remote, rippleAddress) {
             remote.setSecret($scope.wallet.publicKey, $scope.wallet.passphrase);
 
+            /*jshint camelcase: false */
             var transaction = remote.createTransaction('TrustSet', {
                 account: rippleAddress,
                 limit: '10000/EUR/' + RIPPLE_ROOT_ACCOUNT.address,
@@ -22,13 +23,13 @@ angular.module('riwebApp')
             });
         }
 
-        function buildMakeInitialTrustLines(remote, $scope){
+        function buildMakeInitialTrustLines($scope, remote){
             return function(rippleAddress){
-                makeInitialTrustLines(remote, rippleAddress, $scope);
-            }
+                makeInitialTrustLines($scope, remote, rippleAddress);
+            };
         }
 
         return {
             buildMakeInitialTrustLines: buildMakeInitialTrustLines
-        }
+        };
   });

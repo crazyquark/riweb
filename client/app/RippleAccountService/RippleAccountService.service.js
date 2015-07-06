@@ -5,16 +5,19 @@ angular.module('riwebApp')
         return {
             loadBalance: function ($scope, walletPublicKey) {
                 RippleRemoteService.onRemotePresent(function (remote) {
-
                     var rootAddress = RIPPLE_ROOT_ACCOUNT.address;
                     if (walletPublicKey !== rootAddress) {
                         remote.requestRippleBalance(walletPublicKey, rootAddress, 'EUR', null, function (err, info) {
-                            /*jshint camelcase: false */
-                            $scope.ballance = String(info.account_balance._value).replace(/"/g, '');
-                            $scope.account = walletPublicKey; //info.account_data.Account;
-                            _.defer(function () {
-                                $scope.$apply();
-                            });
+                            if(!err){
+                                /*jshint camelcase: false */
+                                $scope.ballance = String(info.account_balance._value).replace(/"/g, '');
+                                $scope.account = walletPublicKey; //info.account_data.Account;
+                                _.defer(function () {
+                                    $scope.$apply();
+                                });
+                            } else {
+                                console.error(err);
+                            }
                         });
                     } else {
                         $scope.ballance = 0;
@@ -24,6 +27,7 @@ angular.module('riwebApp')
                         });
                     }
 
+                    /*jshint camelcase: false */
                     remote.requestAccountTransactions({account: $scope.wallet.publicKey, ledger_index_min: -1}, function (err, info) {
                         //delete old transactions first if they exist
                         if ($scope.transactions) {
