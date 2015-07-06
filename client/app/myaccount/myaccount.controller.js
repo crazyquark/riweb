@@ -196,16 +196,15 @@ angular.module('riwebApp')
                                                 ledger: 'validated'
                                             };
 
-                                            remote.requestAccountInfo(reqOptions, function (err, info) {
+                                            remote.requestAccountFlags(reqOptions, function (err, flags) {
                                                 if (err) {
                                                     swal('Error', 'There was an error communicating with the server: ' + err.message, 'error');
                                                 }
                                                 else {
-                                                    var crtFlags = info.account_data.Flags;
-                                                    if (crtFlags & 0x00800000 == 0) {
+                                                    if (flags & 0x00800000 == 0) {
                                                         // CS Need to set flags
                                                     } else {
-                                                        swal('Info', 'The admin account wallet has the DefaultRipple flag active, flags are: ' + crtFlags, 'info');
+                                                        swal('Info', 'The admin account wallet has the DefaultRipple flag active, flags are: ' + flags, 'info');
                                                     }
                                                 }
                                             });
