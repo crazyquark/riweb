@@ -134,7 +134,7 @@ angular.module('riwebApp')
                                 };
                                 var newWallet = {};
                                 newWallet.ownerEmail = currentUser.email;
-                                if (currentUser.email === 'admin@admin.com') {
+                                if (currentUser.role == 'admin') {
                                     var checkColdWalletFlags = function () {
                                         RippleRemoteService.onRemotePresent(function (remote) {
 
