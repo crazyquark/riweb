@@ -2,6 +2,7 @@
 
 angular.module('riwebApp')
   .service('TrustLineService', function (Auth, RIPPLE_ROOT_ACCOUNT) {
+
         function makeInitialTrustLines(remote, rippleAddress, $scope) {
             remote.setSecret($scope.wallet.publicKey, $scope.wallet.passphrase);
 
@@ -28,7 +29,6 @@ angular.module('riwebApp')
         }
 
         return {
-            makeInitialTrustLines: makeInitialTrustLines,
             buildMakeInitialTrustLines: buildMakeInitialTrustLines
         }
   });
