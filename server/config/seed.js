@@ -14,13 +14,15 @@ User.find({}).remove(function() {
     provider: 'local',
     name: 'Test User',
     email: 'test@test.com',
-    password: 'test'
+    password: 'test',
+    bank: 'ing'
   }, {
     provider: 'local',
     role: 'admin',
     name: 'Admin',
     email: 'admin@admin.com',
-    password: 'admin'
+    password: 'admin',
+    bank: 'ing'
   }, function() {
       console.log('finished populating users');
     }
@@ -29,8 +31,8 @@ User.find({}).remove(function() {
 
 BankAccount.find({}).remove(function() {
   BankAccount.create({
-    name: 'ING',
-    info: 'Cool Bank',
+    name: 'ing',
+    info: 'ING Bank N.V.',
     coldWallet: {
       address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
     },
