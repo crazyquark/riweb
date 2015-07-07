@@ -1,18 +1,18 @@
 'use strict';
 
-describe('Service: trustLineService', function () {
+describe('Service: TrustLineService', function () {
 
   // load the service's module
   beforeEach(module('riwebApp'));
 
   // instantiate service
-  var trustLineService;
+  var TrustLineService;
   beforeEach(inject(function (_trustLineService_) {
-    trustLineService = _trustLineService_;
+    TrustLineService = _trustLineService_;
   }));
 
   it('should do something', function () {
-    expect(!!trustLineService).toBe(true);
+    expect(!!TrustLineService).toBe(true);
   });
 
 });
