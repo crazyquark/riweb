@@ -6,38 +6,38 @@
             <h3 id="panel-title" class="panel-title">My account: <strong>{{getMyAccountUser().email}}</strong></h3>
         </div>
         <div class="panel-body">
-            <h4 id="panel-title" class="panel-title" ng-show="account">Account: <strong>{{account}}</strong></h4>
-            <h4 ng-show="ballance">Current ballance: <strong>{{ballance}}</strong> €</h4>
+            <h4 id="panel-title" class="panel-title" ng-show="accountInfo.account">Account: <strong>{{accountInfo.account}}</strong></h4>
+            <h4 ng-show="accountInfo.balance">Current balance: <strong>{{accountInfo.balance}}</strong> €</h4>
 
             <div class="row">
                 <div class="col-xs-12">
-                    <div class="alert alert-warning" ng-hide="account" role="alert">Please wait, you do not have an wallet yet.</div>
+                    <div class="alert alert-warning" ng-hide="accountInfo.account" role="alert">Please wait, you do not have an wallet yet.</div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-xs-12">
-                    <button ng-show="account" type="button" class="btn btn-default btn-lg btn-success"
+                    <button ng-show="accountInfo.account" type="button" class="btn btn-default btn-lg btn-success"
                             aria-label="Left Align"
                             ng-click="transferMoney()">
                         <span class="glyphicon glyphicon-euro" aria-hidden="true"></span>
                         Transfer money
                     </button>
-                <span ng-show="account">
+                <span ng-show="accountInfo.account">
                     Amount to transfer <input ng-model="amountToTransfer"></input>
                 </span>
                 </div>
             </div>
         </div>
     </div>
-    <div class="panel panel-info" ng-show="transactions" ng-show="account">
+    <div class="panel panel-info" ng-show="accountInfo.transactions">
         <div class="panel-heading">
             <h3 id="panel-title" class="panel-title">Transactions</strong></h3>
         </div>
         <div class="panel-body">
-            <div class="alert alert-warning" ng-hide="transactions" role="alert">No transactions yet</div>
+            <div class="alert alert-warning" ng-hide="accountInfo.transactions" role="alert">No transactions yet</div>
 
-            <table class="table" ng-show="transactions">
+            <table class="table" ng-show="accountInfo.transactions">
                 <thead>
                 <tr>
                     <th>From</th>
@@ -47,7 +47,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="transaction in transactions">
+                <tr ng-repeat="transaction in accountInfo.transactions">
                     <td>{{transaction.tx.Account}}</td>
                     <td>{{transaction.tx.Destination}}</td>
                     <td>{{getAmountDisplayText(transaction.tx.Amount)}}</td>

@@ -14,6 +14,7 @@ angular.module('riwebApp')
             'random'
         ];
 
+        /*jshint camelcase: false */
         var serverInfo = {
             errorMessage: '',
             ledgerClosed: '',

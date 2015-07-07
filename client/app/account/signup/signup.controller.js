@@ -14,7 +14,7 @@ angular.module('riwebApp')
         ];
       $scope.user.bank = $scope.availableBanks[0];
       // TODO CS Extract from DB the list of banks available
-    }
+    };
 
     $scope.listAvailableBanks();
 

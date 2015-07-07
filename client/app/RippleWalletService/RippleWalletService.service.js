@@ -4,33 +4,34 @@ angular.module('riwebApp')
   .service('RippleWalletService', function (Wallet, RippleRemoteService, RippleAccountService, TrustLineService,
                                             Auth, RIPPLE_ROOT_ACCOUNT) {
 
-        function loadCurrentUserBalance($scope, callback) {
+        var walletInfo = {
+          wallet: undefined
+        };
+
+        function loadCurrentUserBalance(callback) {
             if (Auth.getCurrentUser().email) {
                 Wallet.getByOwnerEmail({ownerEmail: Auth.getCurrentUser().email}).$promise.then(function (data) {
                     if (data.length >= 1) {
-                        $scope.wallet = data[0];
-                        RippleAccountService.loadBalance($scope, $scope.wallet.publicKey);
-                        if (callback) {
-                            callback($scope.wallet.publicKey);
-                        }
+                        walletInfo.wallet = data[0];
+                        RippleAccountService.loadBalance(walletInfo.wallet.publicKey, callback);
                     } else {
-                        createWallet($scope);
+                        createWallet();
                     }
                 });
             }
         }
 
-        function saveWallet($scope, newWallet) {
+        function saveWallet(newWallet) {
             Wallet.save(newWallet,
                 function () {
-                    makeInitialXRPTransfer($scope, newWallet.publicKey);
+                    makeInitialXRPTransfer(newWallet.publicKey);
                 },
                 function () {
                     swal('Error', 'Sorry there was a problem processing your request!', 'error');
                 });
         }
 
-        function makeInitialXRPTransfer($scope, destinationAddress) {
+        function makeInitialXRPTransfer(destinationAddress) {
             //do not send money to self
             if (destinationAddress !== RIPPLE_ROOT_ACCOUNT.address) {
                 RippleRemoteService.onRemotePresent(function (remote){
@@ -42,30 +43,26 @@ angular.module('riwebApp')
                         amount: 300000000
                     });
 
-                    transaction.on('resubmitted', function () {
-                        console.log('resubmitted');
-                    });
-
                     transaction.submit(function (err) {
                         if (err) {
                             swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                         }
-                        loadCurrentUserBalance($scope, TrustLineService.buildMakeInitialTrustLines($scope, remote));
+                        loadCurrentUserBalance(TrustLineService.buildMakeInitialTrustLines(walletInfo, remote));
                         // submission has finalized with either an error or success.
                         // the transaction will not be retried after this point
                     });
                 });
             } else {
-                loadCurrentUserBalance($scope);
+                loadCurrentUserBalance();
             }
         }
 
-        function createWallet($scope) {
+        function createWallet() {
             console.log('Creating wallet');
             var currentUser = Auth.getCurrentUser();
             if (currentUser) {
-                if (currentUser.email !== $scope.makingWalletForEmail) {
-                    $scope.makingWalletForEmail = currentUser.email;
+                if (currentUser.email !== walletInfo.makingWalletForEmail) {
+                    walletInfo.makingWalletForEmail = currentUser.email;
                     Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise
                         .then(function (data) {
                             if (data.length < 1) {
@@ -119,14 +116,14 @@ angular.module('riwebApp')
                                     //reuse existing known wallet
                                     newWallet.publicKey = RIPPLE_ROOT_ACCOUNT.address;
                                     newWallet.passphrase = RIPPLE_ROOT_ACCOUNT.secret;
-                                    saveWallet($scope, newWallet);
+                                    saveWallet(newWallet);
                                     checkColdWalletFlags();
                                 } else {
                                     // generate new wallet
                                     var wallet = ripple.Wallet.generate();
                                     newWallet.publicKey = wallet.address;
                                     newWallet.passphrase = wallet.secret;
-                                    saveWallet($scope, newWallet);
+                                    saveWallet(newWallet);
                                 }
                             }
                         });
@@ -136,6 +133,7 @@ angular.module('riwebApp')
 
         return {
             createWallet: createWallet,
-            loadCurrentUserBalance: loadCurrentUserBalance
+            loadCurrentUserBalance: loadCurrentUserBalance,
+            walletInfo: walletInfo
         };
   });

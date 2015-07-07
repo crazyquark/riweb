@@ -11,29 +11,36 @@ angular.module('riwebApp')
         $scope.getAmountDisplayText = FormattingService.getAmountDisplayText;
 
         $scope.transferMoney = function(){
-            RippleTransactionService.transferMoney($scope);
+            RippleTransactionService.transferMoney($scope.amountToTransfer);
         };
 
         $scope.serverInfo = RippleRemoteService.serverInfo;
         $scope.peersInfo = RipplePeersService.peersInfo;
+        $scope.accountInfo = RippleAccountService.accountInfo;
 
         var loadCurrentUserBalance = RippleWalletService.loadCurrentUserBalance;
         var refreshPeers = RipplePeersService.refreshPeers;
 
+        function refreshAngular(){
+            _.defer(function () {
+                $scope.$apply();
+            });
+        }
+
         RippleRemoteService.onRemotePresent(function (remote) {
 
             remote.on('ledger_closed', function () {
-                refreshPeers();
-                loadCurrentUserBalance($scope);
+                refreshPeers(refreshAngular);
+                loadCurrentUserBalance(refreshAngular);
             });
 
             remote.on('transactions', function () {
-                loadCurrentUserBalance($scope);
+                loadCurrentUserBalance(refreshAngular);
             });
 
             Auth.isLoggedInAsync(function(){
-                loadCurrentUserBalance($scope);
+                loadCurrentUserBalance(refreshAngular);
             });
-            refreshPeers($scope);
+            refreshPeers(refreshAngular);
         });
     });

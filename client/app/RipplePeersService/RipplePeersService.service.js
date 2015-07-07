@@ -6,7 +6,7 @@ angular.module('riwebApp')
             peers: []
         };
         return {
-            refreshPeers: function () {
+            refreshPeers: function (callback) {
                 RippleRemoteService.onRemotePresent(function (remote) {
                     remote.requestPeers(function (error, info) {
                         if(info && info.peers){
@@ -14,7 +14,9 @@ angular.module('riwebApp')
                         } else {
                             peersInfo.peers = undefined;
                         }
-                        peersInfo.peers = [{address:'foo', ledger:'bar'}];
+                        if(callback){
+                            callback(peersInfo);
+                        }
                     });
                 });
             },

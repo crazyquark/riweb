@@ -2,49 +2,54 @@
 
 angular.module('riwebApp')
     .service('RippleAccountService', function (RippleRemoteService, RIPPLE_ROOT_ACCOUNT) {
+        var accountInfo = {
+            balance: '',
+            account: '',
+            transactions: []
+        };
         return {
-            loadBalance: function ($scope, walletPublicKey) {
+            accountInfo: accountInfo,
+            loadBalance: function (walletPublicKey, callback) {
                 RippleRemoteService.onRemotePresent(function (remote) {
                     var rootAddress = RIPPLE_ROOT_ACCOUNT.address;
                     if (walletPublicKey !== rootAddress) {
                         remote.requestRippleBalance(walletPublicKey, rootAddress, 'EUR', null, function (err, info) {
                             if(!err){
                                 /*jshint camelcase: false */
-                                $scope.ballance = String(info.account_balance._value).replace(/"/g, '');
-                                $scope.account = walletPublicKey; //info.account_data.Account;
-                                _.defer(function () {
-                                    $scope.$apply();
-                                });
+                                accountInfo.balance = String(info.account_balance._value).replace(/"/g, '');
+                                accountInfo.account = walletPublicKey; //info.account_data.Account;
                             } else {
+                                accountInfo.balance = undefined;
+                                accountInfo.account = undefined;
                                 console.error(err);
+                            }
+                            if(callback){
+                                callback(accountInfo);
                             }
                         });
                     } else {
-                        $scope.ballance = 0;
-                        $scope.account = walletPublicKey; //info.account_data.Account;
-                        _.defer(function () {
-                            $scope.$apply();
-                        });
+                        accountInfo.balance = 0;
+                        accountInfo.account = walletPublicKey; //info.account_data.Account;
                     }
 
                     /*jshint camelcase: false */
-                    remote.requestAccountTransactions({account: $scope.wallet.publicKey, ledger_index_min: -1}, function (err, info) {
+                    remote.requestAccountTransactions({account: walletPublicKey, ledger_index_min: -1}, function (err, info) {
                         //delete old transactions first if they exist
-                        if ($scope.transactions) {
-                            delete $scope.transactions;
+                        if (accountInfo.transactions) {
+                            delete accountInfo.transactions;
                         }
                         info.transactions.forEach(function (item) {
 
                             if (item.tx.Destination && item.tx.Amount.currency && item.meta.TransactionResult === 'tesSUCCESS') {
-                                if (!$scope.transactions) {
+                                if (!accountInfo.transactions) {
                                     //make transactions lazy so we can have a relevant message
-                                    $scope.transactions = [];
+                                    accountInfo.transactions = [];
                                 }
-                                $scope.transactions.push(item);
+                                accountInfo.transactions.push(item);
+                                if(callback){
+                                    callback(accountInfo);
+                                }
                             }
-                        });
-                        _.defer(function () {
-                            $scope.$apply();
                         });
                     });
                 });
