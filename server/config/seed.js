@@ -32,13 +32,24 @@ User.find({}).remove(function() {
 BankAccount.find({}).remove(function() {
   BankAccount.create({
     name: 'ing',
-    info: 'ING Bank N.V.',
+    info: 'ING Bank',
     coldWallet: {
       address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
     },
     hotWallet : {
       address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
       secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
+    }
+  },
+  {
+    name: 'abnamro',
+    info: 'ABN Amro Bank',
+    coldWallet: {
+      address: ''
+    },
+    hotWallet: {
+      address: '',
+      secret: ''
     }
   }, function() {
       console.log('finished creating bank account data');
