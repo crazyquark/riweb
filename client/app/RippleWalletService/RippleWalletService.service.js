@@ -1,10 +1,11 @@
 'use strict';
 
 angular.module('riwebApp')
-    .service('RippleWalletService', function (Wallet, RippleRemoteService, RippleAccountService, TrustLineService, Auth, RIPPLE_ROOT_ACCOUNT) {
+    .service('RippleWalletService', function (Wallet, RippleRemoteService, RippleAccountService, TrustLineService,
+                                              Auth, RIPPLE_ROOT_ACCOUNT) {
 
         var walletInfo = {
-            wallet: undefined
+            wallet: {}
         };
 
         var theRemote;
@@ -22,6 +23,11 @@ angular.module('riwebApp')
         function getCurrentUserWallet(callback){
             currentUser = Auth.getCurrentUser();
             Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise.then(function(data){
+                if(data.length >= 1){
+                    walletInfo.wallet = data[0];
+                } else {
+                    walletInfo.wallet = {};
+                }
                 callback(data);
             });
         }
@@ -81,9 +87,11 @@ angular.module('riwebApp')
         function saveWallet(newWallet) {
             Wallet.save(newWallet,
                 function () {
+                    walletInfo.wallet = newWallet;
                     makeInitialXRPTransfer(newWallet.publicKey);
                 },
                 function () {
+                    walletInfo.wallet = {};
                     swal('Error', 'Sorry there was a problem processing your request!', 'error');
                 });
         }
@@ -160,6 +168,7 @@ angular.module('riwebApp')
         }
 
         return {
+            getCurrentUserWallet: getCurrentUserWallet,
             createWallet: createWallet,
             loadCurrentUserBalance: loadCurrentUserBalance,
             walletInfo: walletInfo

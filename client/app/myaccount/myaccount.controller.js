@@ -38,8 +38,14 @@ angular.module('riwebApp')
                 loadCurrentUserBalance(refreshAngular);
             });
 
-            Auth.isLoggedInAsync(function(){
-                loadCurrentUserBalance(refreshAngular);
+            Auth.isLoggedInAsync(function(loggedIn){
+                RippleWalletService.getCurrentUserWallet(function(){
+                    if (loggedIn) {
+                        loadCurrentUserBalance(refreshAngular);
+                    } else {
+                        refreshAngular();
+                    }
+                });
             });
             refreshPeers(refreshAngular);
         });
