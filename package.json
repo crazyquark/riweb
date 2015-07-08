@@ -25,7 +25,8 @@
     "socket.io": "^1.0.6",
     "socket.io-client": "^1.0.6",
     "socketio-jwt": "^2.0.2",
-    "ripple-lib": "^0.12.4"
+    "ripple-lib": "^0.12.4",
+    "ripple-wallet": "1.0.0"
   },
   "devDependencies": {
     "connect-livereload": "~0.4.0",

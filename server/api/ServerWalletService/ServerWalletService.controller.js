@@ -1,6 +1,8 @@
 'use strict';
 
 var _ = require('lodash');
+//var Ripple = require('ripple-lib');
+var RippleWallet = require('ripple-wallet');
 
 // Get list of ServerWalletServices
 exports.index = function(req, res) {
@@ -10,10 +12,11 @@ exports.index = function(req, res) {
 };
 
 exports.new = function(req, res) {
+  wallet = RippleWallet.generate();
   return res.json(200, {
     status: 'success',
-    address: 'rBlabLaaaah.......Xx',
-    secret:  'sSuperSecreeeetxxxxYx'
+    address: wallet.address,
+    secret:  wallet.secret
   })
 };
 
