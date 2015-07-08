@@ -2,13 +2,18 @@
 
 angular.module('riwebApp')
     .service('RippleAccountService', function (RippleRemoteService, RIPPLE_ROOT_ACCOUNT) {
-        var accountInfo = {
-            balance: '',
-            account: '',
-            transactions: []
-        };
+        var accountInfo = {};
+
+        function resetAccount() {
+            accountInfo.balance = '';
+            accountInfo.account = '';
+            accountInfo.transactions = [];
+        }
+        resetAccount();
+
         return {
             accountInfo: accountInfo,
+            resetAccount: resetAccount,
             loadBalance: function (walletPublicKey, callback) {
                 RippleRemoteService.onRemotePresent(function (remote) {
                     var rootAddress = RIPPLE_ROOT_ACCOUNT.address;

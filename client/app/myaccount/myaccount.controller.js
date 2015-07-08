@@ -34,8 +34,6 @@ angular.module('riwebApp')
         }
 
         $scope.$on('currentUser', function(event, currentUser){
-            console.log('currentUser');
-            console.log(currentUser);
             refreshCurrentUserWallet();
         });
 

@@ -71,6 +71,7 @@ angular.module('riwebApp')
         }
 
         function loadCurrentUserBalance(callback) {
+            RippleAccountService.resetAccount();
             if (Auth.getCurrentUser().email) {
 
                 getCurrentUserWallet(function (data) {

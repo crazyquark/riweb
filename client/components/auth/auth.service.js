@@ -6,7 +6,9 @@ angular.module('riwebApp')
 
     function broadcastCurrentUser(currentUser) {
       if(currentUser.hasOwnProperty('$promise')) {
+        $rootScope.$broadcast('currentUser', {});
         currentUser.$promise.then(function(theCurrentUser) {
+            delete theCurrentUser.$promise;
             $rootScope.$broadcast('currentUser', theCurrentUser);
         });
       } else {
