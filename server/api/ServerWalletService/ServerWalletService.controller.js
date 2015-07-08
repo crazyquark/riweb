@@ -2,7 +2,7 @@
 
 var _ = require('lodash');
 //var Ripple = require('ripple-lib');
-var RippleWallet = require('ripple-wallet');
+var WalletGenerator = require('ripple-wallet').Generator;
 
 // Get list of ServerWalletServices
 exports.index = function(req, res) {
@@ -12,7 +12,9 @@ exports.index = function(req, res) {
 };
 
 exports.new = function(req, res) {
-  wallet = RippleWallet.generate();
+  var walletGenerator = new WalletGenerator();
+  var wallet = walletGenerator.generate();
+
   return res.json(200, {
     status: 'success',
     address: wallet.address,
