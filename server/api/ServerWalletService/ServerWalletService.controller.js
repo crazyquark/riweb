@@ -4,7 +4,17 @@ var _ = require('lodash');
 
 // Get list of ServerWalletServices
 exports.index = function(req, res) {
-    return res.json(200, []);
+    return res.json(200, {
+        status: 'success'
+      });
+};
+
+exports.new = function(req, res) {
+  return res.json(200, {
+    status: 'success',
+    address: 'rBlabLaaaah.......Xx',
+    secret:  'sSuperSecreeeetxxxxYx'
+  })
 };
 
 // Get a single ServerWalletService
