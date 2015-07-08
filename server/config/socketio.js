@@ -18,6 +18,7 @@ function onConnect(socket) {
   });
 
   // Insert sockets below
+  require('../api/ServerWalletService/ServerWalletService.socket').register(socket);
   require('../api/bankaccount/bankaccount.socket').register(socket);
   require('../api/wallet/wallet.socket').register(socket);
 }
