@@ -27,6 +27,12 @@ angular.module('riwebApp')
             });
         }
 
+        function refreshCurrentUserWallet() {
+            RippleWalletService.getCurrentUserWallet(function(){
+                loadCurrentUserBalance(refreshAngular);
+            });
+        }
+
         RippleRemoteService.onRemotePresent(function (remote) {
 
             remote.on('ledger_closed', function () {
@@ -38,15 +44,10 @@ angular.module('riwebApp')
                 loadCurrentUserBalance(refreshAngular);
             });
 
-            Auth.isLoggedInAsync(function(loggedIn){
-                RippleWalletService.getCurrentUserWallet(function(){
-                    if (loggedIn) {
-                        loadCurrentUserBalance(refreshAngular);
-                    } else {
-                        refreshAngular();
-                    }
-                });
+            $scope.$on('currentUser', function(currentUser){
+              refreshCurrentUserWallet();
             });
+            refreshCurrentUserWallet();
             refreshPeers(refreshAngular);
         });
     });

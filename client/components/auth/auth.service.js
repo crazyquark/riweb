@@ -5,6 +5,7 @@ angular.module('riwebApp')
     var currentUser = {};
     if($cookieStore.get('token')) {
       currentUser = User.get();
+      $rootScope.$broadcast('currentUser', currentUser);
     }
 
     return {
@@ -28,6 +29,7 @@ angular.module('riwebApp')
           $cookieStore.put('token', data.token);
           currentUser = User.get();
           deferred.resolve(data);
+          $rootScope.$broadcast('currentUser', currentUser);
           return cb();
         }).
         error(function(err) {
@@ -47,6 +49,7 @@ angular.module('riwebApp')
       logout: function() {
         $cookieStore.remove('token');
         currentUser = {};
+        $rootScope.$broadcast('currentUser', currentUser);
       },
 
       /**
@@ -63,6 +66,7 @@ angular.module('riwebApp')
           function(data) {
             $cookieStore.put('token', data.token);
             currentUser = User.get();
+            $rootScope.$broadcast('currentUser', currentUser);
             return cb(user);
           },
           function(err) {

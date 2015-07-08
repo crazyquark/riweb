@@ -17,9 +17,6 @@ angular.module('riwebApp')
                 if (err) {
                     swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                 }
-                if (res) {
-                    swal('Congratulations, ' + Auth.getCurrentUser().name + '!', 'You just got a new wallet! ' + rippleAddress, 'success');
-                }
             });
         }
 
