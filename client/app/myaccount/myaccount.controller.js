@@ -33,6 +33,13 @@ angular.module('riwebApp')
             });
         }
 
+        $scope.$on('currentUser', function(event, currentUser){
+            console.log('currentUser');
+            console.log(currentUser);
+            refreshCurrentUserWallet();
+        });
+
+        refreshCurrentUserWallet();
         RippleRemoteService.onRemotePresent(function (remote) {
 
             remote.on('ledger_closed', function () {
@@ -43,11 +50,5 @@ angular.module('riwebApp')
             remote.on('transactions', function () {
                 loadCurrentUserBalance(refreshAngular);
             });
-
-            $scope.$on('currentUser', function(currentUser){
-              refreshCurrentUserWallet();
-            });
-            refreshCurrentUserWallet();
-            refreshPeers(refreshAngular);
         });
     });

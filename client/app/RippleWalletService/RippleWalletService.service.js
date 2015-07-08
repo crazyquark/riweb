@@ -50,7 +50,7 @@ angular.module('riwebApp')
                     transaction.submit(showTransactionResultMessage);
 
                 } else {
-                    swal('Info', 'The admin account wallet has the DefaultRipple flag active, flags are: ' + flags, 'info');
+                    console.log('The admin account wallet has the DefaultRipple flag active, flags are: ' + flags);
                 }
             }
         }

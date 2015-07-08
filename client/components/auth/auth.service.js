@@ -3,9 +3,20 @@
 angular.module('riwebApp')
   .factory('Auth', function Auth($location, $rootScope, $http, User, $cookieStore, $q) {
     var currentUser = {};
+
+    function broadcastCurrentUser(currentUser) {
+      if(currentUser.hasOwnProperty('$promise')) {
+        currentUser.$promise.then(function(theCurrentUser) {
+            $rootScope.$broadcast('currentUser', theCurrentUser);
+        });
+      } else {
+          $rootScope.$broadcast('currentUser', currentUser);
+      }
+    }
+
     if($cookieStore.get('token')) {
       currentUser = User.get();
-      $rootScope.$broadcast('currentUser', currentUser);
+      broadcastCurrentUser(currentUser);
     }
 
     return {
@@ -28,8 +39,8 @@ angular.module('riwebApp')
         success(function(data) {
           $cookieStore.put('token', data.token);
           currentUser = User.get();
-          deferred.resolve(data);
-          $rootScope.$broadcast('currentUser', currentUser);
+          broadcastCurrentUser(currentUser);
+          deferred.resolve(currentUser);
           return cb();
         }).
         error(function(err) {
@@ -49,7 +60,7 @@ angular.module('riwebApp')
       logout: function() {
         $cookieStore.remove('token');
         currentUser = {};
-        $rootScope.$broadcast('currentUser', currentUser);
+        broadcastCurrentUser(currentUser);
       },
 
       /**
@@ -66,7 +77,7 @@ angular.module('riwebApp')
           function(data) {
             $cookieStore.put('token', data.token);
             currentUser = User.get();
-            $rootScope.$broadcast('currentUser', currentUser);
+            broadcastCurrentUser(currentUser);
             return cb(user);
           },
           function(err) {
