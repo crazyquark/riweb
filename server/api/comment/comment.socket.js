@@ -7,6 +7,11 @@
 var Comment = require('./comment.model');
 
 exports.register = function(socket) {
+
+  socket.on('new_comment', function(data){
+    console.log('new_comment + data' + data.content);
+  });
+
   Comment.schema.post('save', function (doc) {
     onSave(socket, doc);
   });
