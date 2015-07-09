@@ -30,7 +30,7 @@ function create_wallet(callback) {
   remote.once('random', function(err, info) {
     var wallet = ripple.Wallet.generate();
     callback(wallet);
-  }
+  });
 }
 
 function fund_wallet(ripple_address, amount) {
