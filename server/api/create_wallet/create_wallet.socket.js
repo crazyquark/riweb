@@ -5,12 +5,38 @@
 'use strict';
 
 var Wallet = require('./../wallet/wallet.model');
-var WalletGenerator = require('ripple-wallet').Generator;
+var ripple = require('ripple-lib');
+
+var Remote = ripple.Remote;
+var remote = new Remote({
+    // see the API Reference for available options
+    servers: [ 'ws://localhost:6006' ]
+});
 
 function create_wallet() {
-  var walletGenerator = new WalletGenerator();
-  var wallet = walletGenerator.generate();
+  var wallet = ripple.Wallet.generate();
+
   return wallet;
+}
+
+function fund_wallet(wallet, amount) {
+  var amount = amount || 60;
+
+  remote.setSecret(wallet.address, wallet.secret);
+
+  var options = { account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+                  destination: wallet.address,
+                  amount = amount * 1000000
+                };
+  var transaction = remote.createTransaction('Payment', options);
+  transaction.submit(function (err, res) {
+      if (err) {
+          console.log('Failed to make initial XRP transfer because: ' + err.message);
+      }
+      if (res) {
+        console.log('Successfully funded wallet ' + wallet.addres + ' with 60 XRP');
+      }
+  });
 }
 
 exports.create_wallet = create_wallet;
