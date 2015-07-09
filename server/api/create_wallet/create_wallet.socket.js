@@ -13,6 +13,12 @@ var remote = new Remote({
     servers: [ 'ws://localhost:6006' ]
 });
 
+// TODO Move this
+var ROOT_RIPPLE_ACCOUNT = {
+  address = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+  secret = 'masterpassphrase'
+};
+
 function create_wallet() {
   var wallet = ripple.Wallet.generate();
 
@@ -22,9 +28,9 @@ function create_wallet() {
 function fund_wallet(wallet, amount) {
   var amount = amount || 60;
 
-  remote.setSecret(wallet.address, wallet.secret);
+  remote.setSecret(ROOT_RIPPLE_ACCOUNT.address , ROOT_RIPPLE_ACCOUNT.secret);
 
-  var options = { account: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+  var options = { account: ROOT_RIPPLE_ACCOUNT.address,
                   destination: wallet.address,
                   amount = amount * 1000000
                 };
@@ -34,12 +40,13 @@ function fund_wallet(wallet, amount) {
           console.log('Failed to make initial XRP transfer because: ' + err.message);
       }
       if (res) {
-        console.log('Successfully funded wallet ' + wallet.addres + ' with 60 XRP');
+        console.log('Successfully funded wallet ' + wallet.address + ' with 60 XRP');
       }
   });
 }
 
 exports.create_wallet = create_wallet;
+exports.fund_wallet = fund_wallet;
 
 exports.register = function(socket) {
   socket.on('create_wallet', function(data) {
