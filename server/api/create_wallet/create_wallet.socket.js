@@ -8,11 +8,6 @@ var Wallet = require('./../wallet/wallet.model');
 var ripple = require('ripple-lib');
 
 var Remote = ripple.Remote;
-var remote = new Remote({
-    // see the API Reference for available options
-    servers: [ 'ws://localhost:6006' ]
-});
-
 // TODO Move this
 var ROOT_RIPPLE_ACCOUNT = {
   address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
@@ -40,8 +35,13 @@ function create_wallet(callback) {
   //    });
 }
 
-function fund_wallet(ripple_address, amount) {
+function fund_wallet(ripple_address, callback, amount) {
   var amount = amount || 60;
+
+  var remote = new Remote({
+      // see the API Reference for available options
+      servers: [ 'ws://localhost:6006' ]
+  });
 
   remote.setSecret(ROOT_RIPPLE_ACCOUNT.address , ROOT_RIPPLE_ACCOUNT.secret);
 
