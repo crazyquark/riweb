@@ -25,9 +25,9 @@ exports.register = function(socket) {
     };
     Wallet.create(wallet, function(err, wallet) {
       if(!err) {
-        socket.emit('post:create_wallet', wallet.publicKey);
+        socket.emit('post:create_wallet', null, wallet.publicKey);
       } else {
-        socket.emit('post:create_wallet', 'error');
+        socket.emit('post:create_wallet', 'error', null);
         console.error(err);
       }
     });
