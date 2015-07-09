@@ -24,8 +24,8 @@ angular.module('riwebApp')
                                 accountInfo.balance = String(info.account_balance._value).replace(/"/g, '');
                                 accountInfo.account = walletPublicKey; //info.account_data.Account;
                             } else {
-                                accountInfo.balance = undefined;
-                                accountInfo.account = undefined;
+                                accountInfo.balance = '0'; // Your ass is broke, dude
+                                accountInfo.account = walletPublicKey;
                                 console.error(err);
                             }
                             if(callback){
