@@ -13,10 +13,6 @@ var remote = new Remote({
     servers: [ 'ws://localhost:6006' ]
 });
 
-remote.connect(function(err, res) {
-     console.log('Remote connected');
-    });
-
 // TODO Move this
 var ROOT_RIPPLE_ACCOUNT = {
   address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
@@ -27,34 +23,49 @@ function create_wallet(callback) {
   // Wait for randomness to have been added.
   // The entropy of the random generator is increased
   // by random data received from a rippled
-  remote.once('random', function(err, info) {
-    var wallet = ripple.Wallet.generate();
-    callback(wallet);
-  });
+  // TODO: This is event is never received?
+  // See: https://github.com/ripple/ripple-lib/blob/develop/docs/GUIDES.md
+  //remote.connect(function(err, res) {
+  //     if (!err) {
+  //       console.log('Remote connected');
+  //       remote.once('random', function(err, info) {
+           var wallet = ripple.Wallet.generate();
+           callback(wallet);
+  //       });
+  //     } else {
+  //       console.warn('Creating Ripple Address in offline mode');
+  //       var wallet = ripple.Wallet.generate();
+  //       callback(wallet);
+  //     }
+  //    });
 }
 
 function fund_wallet(ripple_address, amount) {
   var amount = amount || 60;
 
-  // CS Funny story: if rippleD is not running the remote will have
-  // status == "offline" and will return an error after a long timeout.
-  // Also, it does not automatically connect
   remote.setSecret(ROOT_RIPPLE_ACCOUNT.address , ROOT_RIPPLE_ACCOUNT.secret);
 
   var options = { account: ROOT_RIPPLE_ACCOUNT.address,
                   destination: ripple_address,
                   amount : amount * 1000000
                 };
-  var transaction = remote.createTransaction('Payment', options);
-  transaction.submit(function (err, res) {
-      if (err) {
-          console.log('Failed to make initial XRP transfer because: ' +
-                        err.message);
-      }
-      if (res) {
-        console.log('Successfully funded wallet ' + wallet.address +
-                    ' with 60 XRP');
-      }
+  remote.connect(function(err, res) {
+    if (!err) {
+        console.log('Remote connected');
+        var transaction = remote.createTransaction('Payment', options);
+        transaction.submit(function (err, res) {
+            if (err) {
+                console.log('Failed to make initial XRP transfer because: ' +
+                              err);
+            }
+            if (res) {
+              console.log('Successfully funded wallet ' + ripple_address +
+                          ' with 60 XRP');
+            }
+          });
+    } else {
+      console.error('Remote not connected');
+    }
   });
 }
 
