@@ -18,6 +18,7 @@ function onConnect(socket) {
   });
 
   // Insert sockets below
+  require('../api/comment/comment.socket').register(socket);
   require('../api/ServerWalletService/ServerWalletService.socket').register(socket);
   require('../api/bankaccount/bankaccount.socket').register(socket);
   require('../api/wallet/wallet.socket').register(socket);
@@ -54,6 +55,7 @@ module.exports = function (socketio) {
 
     // Call onConnect.
     onConnect(socket);
-    console.info('[%s] CONNECTED', socket.address);
+    console.info('[%s] CONNECTED', socket);
+    console.info(socket);
   });
 };
