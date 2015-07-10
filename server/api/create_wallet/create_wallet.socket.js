@@ -39,7 +39,7 @@ function create_wallet(callback) {
   //    });
 }
 
-function fund_wallet(ripple_address, callback, amount) {
+function fund_wallet(wallet, socket, callback, amount) {
   var amount = amount || 60;
 
   var remote = new Remote({
@@ -49,6 +49,7 @@ function fund_wallet(ripple_address, callback, amount) {
 
   remote.setSecret(ROOT_RIPPLE_ACCOUNT.address , ROOT_RIPPLE_ACCOUNT.secret);
 
+  var ripple_address = wallet.publicKey;
   var options = { account: ROOT_RIPPLE_ACCOUNT.address,
                   destination: ripple_address,
                   amount : amount * 1000000
@@ -65,10 +66,24 @@ function fund_wallet(ripple_address, callback, amount) {
             if (res) {
               console.log('Successfully funded wallet ' + ripple_address +
                           ' with 60 XRP');
+              if (callback && socket) {
+                callback(wallet, socket);
+              }
             }
           });
     } else {
       console.error('Remote not connected');
+    }
+  });
+}
+
+function save_wallet_to_db(wallet, socket) {
+  Wallet.create(wallet, function(err, wallet) {
+    if(!err) {
+      socket.emit('post:create_wallet', null, wallet.publicKey);
+    } else {
+      socket.emit('post:create_wallet', 'error', null);
+      console.error(err);
     }
   });
 }
@@ -85,16 +100,7 @@ exports.register = function(socket) {
         passphrase: ripple_wallet.secret,
       };
 
-      Wallet.create(wallet, function(err, wallet) {
-        if(!err) {
-          socket.emit('post:create_wallet', null, wallet.publicKey);
-        } else {
-          socket.emit('post:create_wallet', 'error', null);
-          console.error(err);
-        }
-      });
-
-      fund_wallet(ripple_wallet.address);
+      fund_wallet(wallet, socket, save_wallet_to_db);
     });
   });
 }
