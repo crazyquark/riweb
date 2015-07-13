@@ -85,37 +85,6 @@ angular.module('riwebApp')
             }
         }
 
-        /*function buildNewInitialXRPTransaction(destinationAddress) {
-            return theRemote.createTransaction('Payment', {
-                account: RIPPLE_ROOT_ACCOUNT.address,
-                destination: destinationAddress,
-                amount: 300000000
-            });
-        }*/
-
-        /*function makeInitialXRPTransfer(destinationAddress) {
-            //do not send money to self
-            if (destinationAddress !== RIPPLE_ROOT_ACCOUNT.address) {
-                RippleRemoteService.onRemotePresent(function (remote) {
-                    theRemote = remote;
-                    theRemote.setSecret(RIPPLE_ROOT_ACCOUNT.address, RIPPLE_ROOT_ACCOUNT.secret);
-
-                    var transaction = buildNewInitialXRPTransaction(destinationAddress);
-
-                    transaction.submit(function (err) {
-                        if (!err) {
-                            var makeInitialTrustLines = TrustLineService.buildMakeInitialTrustLines(walletInfo, remote);
-                            makeInitialTrustLines(destinationAddress);
-                        } else {
-                            swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
-                        }
-                    });
-                });
-            } else {
-                loadCurrentUserBalance();
-            }
-        }*/
-
         function generateNewWallet() {
             socket.socket.on('post:create_wallet', function(err, ripple_address){
               socket.socket.removeAllListeners('post:create_wallet');
