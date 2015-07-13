@@ -4,25 +4,17 @@
 
 'use strict';
 
-var Wallet = require('./../wallet/wallet.model');
 var ripple = require('ripple-lib');
 var Q = require('q');
+var Wallet = require('./../wallet/wallet.model');
+var Utils = require('./../../core/utils');
 
 var socket;
 
-var Remote = ripple.Remote;
-
-// TODO Move this to config
-var ROOT_RIPPLE_ACCOUNT = {
-  address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
-  secret  : 'masterpassphrase'
-};
-
-// TODO Move this to config
-var RIPPLED_WS_SERVER = 'ws://localhost:6006'
+var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
 
 function create_wallet(callback) {
-  // TODO: This is event is never received?
+  // TODO: This is event is never received?`
   var wallet = ripple.Wallet.generate();
   callback(wallet);
 }
@@ -30,10 +22,7 @@ function create_wallet(callback) {
 function fund_wallet(wallet, socket, callback, amount) {
   amount = amount || 60;
 
-  var remote = new Remote({
-      // see the API Reference for available options
-      servers: [ RIPPLED_WS_SERVER ]
-  });
+  var remote = Utils.getNewRemote();
 
   remote.setSecret(ROOT_RIPPLE_ACCOUNT.address , ROOT_RIPPLE_ACCOUNT.secret);
 
@@ -105,7 +94,6 @@ exports.create_wallet = create_wallet;
 exports.fund_wallet = fund_wallet;
 
 exports.register = function(newSocket) {
-  console.log('myregister');
   socket = newSocket;
   socket.on('create_wallet', function(data) {
       create_wallet_for_email(data.ownerEmail);
