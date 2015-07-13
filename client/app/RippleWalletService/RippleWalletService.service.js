@@ -122,6 +122,13 @@ angular.module('riwebApp')
               if(!err){
                 walletInfo.wallet = ripple_address;
                 loadCurrentUserBalance();
+
+                // TODO move to server
+                RippleRemoteService.onRemotePresent(function (remote) {
+                    var makeInitialTrustLines = TrustLineService.buildMakeInitialTrustLines(walletInfo, remote);
+                    var destinationAddress = RIPPLE_ROOT_ACCOUNT.address;
+                    makeInitialTrustLines(destinationAddress);
+                });
               } else {
                 walletInfo.wallet = {};
                 swal('Error', 'Sorry there was a problem processing your request!', 'error');
