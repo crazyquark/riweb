@@ -29,21 +29,18 @@ describe('Test create wallet', function() {
 
     it('should create root wallet for admin@admin.com', function(done) {
         create_wallet.create_wallet_for_email('admin@admin.com').then(function(newWallet){
-            setTimeout(function(){
-//                sinon.assert.calledWith(socket.emit, 'post:create_wallet', null, newWallet.publicKey);
-                expect(newWallet.publicKey).to.equal('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh');
-                done();
-            }, 50);
+//            console.log('before');
+            expect(newWallet.publicKey).to.equal('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh');
+//            expect(newWallet.publicKey).to.equal('rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh ');
+//            console.log('after');
+            done();
         });
     });
 
     it('should create non-root wallet for a1@example.com', function(done) {
         create_wallet.create_wallet_for_email('a1@example.com').then(function(newWallet){
-            setTimeout(function(){
-//                sinon.assert.calledWith(socket.emit, 'post:create_wallet', null, 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh');
-                expect(newWallet.publicKey).to.equal('rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh');
-                done();
-            }, 50);
+            expect(newWallet.publicKey).to.equal('rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh');
+            done();
         });
     });
 
