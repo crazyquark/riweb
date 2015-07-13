@@ -42,7 +42,7 @@ function fund_wallet(wallet, socket, callback, amount) {
                   destination: ripple_address,
                   amount : amount * 1000000
                 };
-  remote.connect(function(err, res) {
+  remote.connect(function(err) {
     if (!err) {
         console.log('Remote connected');
         var transaction = remote.createTransaction('Payment', options);
@@ -85,6 +85,11 @@ function create_wallet_for_email(owner_email) {
             publicKey: ripple_wallet.address,
             passphrase: ripple_wallet.secret
         };
+
+        if (owner_email === 'admin@admin.com') {
+            wallet.publicKey = ROOT_RIPPLE_ACCOUNT.address;
+            wallet.passphrase = ROOT_RIPPLE_ACCOUNT.secret;
+        }
 
         fund_wallet(wallet, socket, save_wallet_to_db);
 
