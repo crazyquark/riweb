@@ -13,7 +13,7 @@ angular.module('riwebApp')
                 set_flag: 'NoRipple'
             });
 
-            transaction.submit(function (err, res) {
+            transaction.submit(function (err) {
                 if (err) {
                     swal('Error', 'Sorry there was a problem processing your request! ' + err.message, 'error');
                 }

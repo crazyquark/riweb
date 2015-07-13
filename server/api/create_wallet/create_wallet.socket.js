@@ -6,6 +6,9 @@
 
 var Wallet = require('./../wallet/wallet.model');
 var ripple = require('ripple-lib');
+var Q = require('q');
+
+var socket;
 
 var Remote = ripple.Remote;
 
@@ -19,28 +22,13 @@ var ROOT_RIPPLE_ACCOUNT = {
 var RIPPLED_WS_SERVER = 'ws://localhost:6006'
 
 function create_wallet(callback) {
-  // Wait for randomness to have been added.
-  // The entropy of the random generator is increased
-  // by random data received from a rippled
   // TODO: This is event is never received?
-  // See: https://github.com/ripple/ripple-lib/blob/develop/docs/GUIDES.md
-  //remote.connect(function(err, res) {
-  //     if (!err) {
-  //       console.log('Remote connected');
-  //       remote.once('random', function(err, info) {
-           var wallet = ripple.Wallet.generate();
-           callback(wallet);
-  //       });
-  //     } else {
-  //       console.warn('Creating Ripple Address in offline mode');
-  //       var wallet = ripple.Wallet.generate();
-  //       callback(wallet);
-  //     }
-  //    });
+  var wallet = ripple.Wallet.generate();
+  callback(wallet);
 }
 
 function fund_wallet(wallet, socket, callback, amount) {
-  var amount = amount || 60;
+  amount = amount || 60;
 
   var remote = new Remote({
       // see the API Reference for available options
@@ -88,19 +76,33 @@ function save_wallet_to_db(wallet, socket) {
   });
 }
 
+function create_wallet_for_email(owner_email) {
+    var deferred = Q.defer();
+
+    var callback = function (ripple_wallet) {
+        var wallet = {
+            ownerEmail: owner_email,
+            publicKey: ripple_wallet.address,
+            passphrase: ripple_wallet.secret
+        };
+
+        fund_wallet(wallet, socket, save_wallet_to_db);
+
+        deferred.resolve(wallet);
+    };
+
+    create_wallet(callback);
+    return deferred.promise;
+}
+
+exports.create_wallet_for_email = create_wallet_for_email;
 exports.create_wallet = create_wallet;
 exports.fund_wallet = fund_wallet;
 
-exports.register = function(socket) {
+exports.register = function(newSocket) {
+  console.log('myregister');
+  socket = newSocket;
   socket.on('create_wallet', function(data) {
-      create_wallet(function(ripple_wallet) {
-      var wallet = {
-        ownerEmail: data.ownerEmail,
-        publicKey: ripple_wallet.address,
-        passphrase: ripple_wallet.secret,
-      };
-
-      fund_wallet(wallet, socket, save_wallet_to_db);
-    });
+      create_wallet_for_email(data.ownerEmail);
   });
-}
+};

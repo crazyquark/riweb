@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('LoginCtrl', function ($scope, $http, Auth, $location, socket) {
+  .controller('LoginCtrl', function ($scope, $http, Auth, $location) {
     $scope.user = {};
     $scope.errors = {};
 

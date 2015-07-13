@@ -117,10 +117,10 @@ angular.module('riwebApp')
         }*/
 
         function generateNewWallet() {
-            socket.socket.on('post:create_wallet', function(err, ripple_address){
+            socket.socket.on('post:create_wallet', function(err, rippleAddress){
               socket.socket.removeAllListeners('post:create_wallet');
               if(!err){
-                walletInfo.wallet = ripple_address;
+                walletInfo.wallet = rippleAddress;
                 loadCurrentUserBalance();
               } else {
                 walletInfo.wallet = {};
@@ -136,7 +136,8 @@ angular.module('riwebApp')
             //reuse existing known wallet
             newWallet.publicKey = RIPPLE_ROOT_ACCOUNT.address;
             newWallet.passphrase = RIPPLE_ROOT_ACCOUNT.secret;
-            saveWallet(newWallet);
+            //TODO implement saveWallet
+//            saveWallet(newWallet);
             checkColdWalletFlags();
         }
 

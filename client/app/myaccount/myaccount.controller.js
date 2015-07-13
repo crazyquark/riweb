@@ -33,7 +33,7 @@ angular.module('riwebApp')
             });
         }
 
-        $scope.$on('currentUser', function(event, currentUser){
+        $scope.$on('currentUser', function(){
             refreshCurrentUserWallet();
         });
 
