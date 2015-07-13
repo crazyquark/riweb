@@ -9,6 +9,7 @@ var errors = require('./components/errors');
 module.exports = function(app) {
 
   // Insert routes below
+  app.use('/api/account_info', require('./api/account_info'));
   app.use('/api/create_wallets', require('./api/create_wallet'));
   app.use('/api/comments', require('./api/comment'));
   app.use('/api/walletservice', require('./api/ServerWalletService'));
