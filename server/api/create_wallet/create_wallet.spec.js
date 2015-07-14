@@ -56,4 +56,10 @@ describe('Test create wallet', function() {
         });
     });
 
+    it('should not create wallet for null email', function(done) {
+        create_wallet.create_wallet_for_email(null).then(function(newWallet){
+            expect(newWallet).to.equal(null);
+            done();
+        });
+    });
 });

@@ -97,7 +97,14 @@ function create_convert_ripple_to_riweb_wallet(owner_email) {
 
 function create_wallet_for_email(owner_email) {
   var deferred = Q.defer();
+
+  if (!owner_email) {
+    deferred.resolve(null);
+  }
+
   Wallet.find({ownerEmail: owner_email}, function(err, wallets) {
+      console.log('---Wallet.find');
+      console.log(wallets);
       if (wallets || wallets.length === 0) {
       console.log('create_wallet_for_email ' + owner_email);
         var fund_wallet_and_save_to_db = function(riweb_wallet) {
