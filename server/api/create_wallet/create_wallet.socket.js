@@ -16,11 +16,20 @@ var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
 function fund_wallet(wallet, socket, callback, amount) {
   amount = amount || 60;
 
+  var ripple_address = wallet.publicKey;
+
+  if (ripple_address === ROOT_RIPPLE_ACCOUNT.address) {
+      // No need to fund root account
+      if (callback && socket)
+        callback(wallet, socket);
+
+      return;
+  }
+
   var remote = Utils.getNewRemote();
 
   remote.setSecret(ROOT_RIPPLE_ACCOUNT.address , ROOT_RIPPLE_ACCOUNT.secret);
 
-  var ripple_address = wallet.publicKey;
   var options = { account: ROOT_RIPPLE_ACCOUNT.address,
                   destination: ripple_address,
                   amount : amount * 1000000
@@ -75,27 +84,37 @@ function get_create_wallet(owner_email){
     }
 }
 
+function create_convert_ripple_to_riweb_wallet(owner_email) {
+  var convert_ripple_to_riweb_wallet = function(ripple_wallet) {
+      return {
+          ownerEmail: owner_email,
+          publicKey: ripple_wallet.address,
+          passphrase: ripple_wallet.secret
+      };
+  }
+  return convert_ripple_to_riweb_wallet;
+}
+
 function create_wallet_for_email(owner_email) {
-    var deferred = Q.defer();
-    var create_wallet = get_create_wallet(owner_email);
+  var deferred = Q.defer();
+  Wallet.find({ownerEmail: owner_email}, function(err, wallets) {
+      if (wallets || wallets.length === 0) {
+      console.log('create_wallet_for_email ' + owner_email);
+        var fund_wallet_and_save_to_db = function(riweb_wallet) {
+            deferred.resolve(riweb_wallet);
+            fund_wallet(riweb_wallet, socket, save_wallet_to_db);
+        }
 
-    create_wallet()
-        .then(convert_ripple_to_riweb_wallet)
-        .then(fund_wallet_and_save_to_db);
+        var create_wallet = get_create_wallet(owner_email);
 
+        create_wallet()
+            .then(create_convert_ripple_to_riweb_wallet(owner_email))
+            .then(fund_wallet_and_save_to_db);
 
-    function convert_ripple_to_riweb_wallet(ripple_wallet) {
-        return {
-            ownerEmail: owner_email,
-            publicKey: ripple_wallet.address,
-            passphrase: ripple_wallet.secret
-        };
-    }
-
-    function fund_wallet_and_save_to_db(riweb_wallet) {
-        fund_wallet(riweb_wallet, socket, save_wallet_to_db);
-        deferred.resolve(riweb_wallet);
-    }
+      } else {
+        deferred.resolve(wallets[0]);
+      }
+    });
 
     return deferred.promise;
 }
@@ -106,6 +125,7 @@ exports.fund_wallet = fund_wallet;
 exports.register = function(newSocket) {
   socket = newSocket;
   socket.on('create_wallet', function(data) {
+      socket.removeAllListeners('create_wallet');
       create_wallet_for_email(data.ownerEmail);
   });
 };

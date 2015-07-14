@@ -70,27 +70,23 @@ angular.module('riwebApp')
             RippleRemoteService.onRemotePresent(checkColdWalletFlagsWithRemote);
         }
 
-        function loadCurrentUserBalance(callback) {
+        function loadCurrentUserBalance() {
+            console.log('loadCurrentUserBalance');
             RippleAccountService.resetAccount();
-            if (Auth.getCurrentUser().email) {
-
-                getCurrentUserWallet(function (data) {
-                    if (data.length >= 1) {
-                        walletInfo.wallet = data[0];
-                        RippleAccountService.loadBalance(walletInfo.wallet.publicKey, callback);
-                    } else {
-                        createWallet();
-                    }
-                });
-            }
+            socket.socket.on('post:account_info', function(account) {
+              console.log('on.post:account_info');
+              console.log(account);
+            });
+            socket.socket.emit('account_info', Auth.getCurrentUser().email);
         }
 
-        function generateNewWallet() {
+        function generateNewWallet(callback) {
             socket.socket.on('post:create_wallet', function(err, rippleAddress){
               socket.socket.removeAllListeners('post:create_wallet');
               if(!err){
                 walletInfo.wallet = rippleAddress;
-                loadCurrentUserBalance();
+
+                callback();
 
                 // TODO move to server
                 RippleRemoteService.onRemotePresent(function (remote) {

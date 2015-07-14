@@ -1,5 +1,6 @@
 
 var ripple = require('ripple-lib');
+var Q = require('q');
 
 var ROOT_RIPPLE_ACCOUNT = {
     address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
@@ -14,5 +15,26 @@ function getNewRemote(){
     });
 }
 
+function getNewConnectedRemote(){
+  var deferred = Q.defer();
+  var remote = getNewRemote();
+  remote.connect(function(err, res){
+    if(!err){
+      deferred.resolve(remote);
+    } else {
+      deferred.resolve(err);
+    }
+  })
+  return deferred.promise;
+}
+
+function getNewAdminRemote() {
+  var remote = getNewRemote();
+  remote.setSecret(ROOT_RIPPLE_ACCOUNT.address, ROOT_RIPPLE_ACCOUNT.secret);
+  return remote;
+}
+
 module.exports.getNewRemote = getNewRemote;
+module.exports.getNewConnectedRemote = getNewConnectedRemote;
+module.exports.getNewAdminRemote = getNewAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
