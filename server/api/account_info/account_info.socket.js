@@ -76,7 +76,6 @@ exports.register = function(socket) {
   socket.on('account_info', function(owner_email) {
     console.log('on.account_info');
     console.log(owner_email);
-    socket.removeAllListeners('account_info');
     get_account_info(owner_email, socket);
   });
 }

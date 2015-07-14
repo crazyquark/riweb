@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-    .service('RippleWalletService', function (Wallet, RippleRemoteService, RippleAccountService, TrustLineService,
+    .service('RippleWalletService', function (RippleRemoteService, RippleAccountService, TrustLineService,
                                               Auth, RIPPLE_ROOT_ACCOUNT, socket) {
 
         var walletInfo = {
@@ -22,14 +22,20 @@ angular.module('riwebApp')
 
         function getCurrentUserWallet(callback){
             currentUser = Auth.getCurrentUser();
-            Wallet.getByOwnerEmail({ownerEmail: currentUser.email}).$promise.then(function(data){
-                if(data.length >= 1){
-                    walletInfo.wallet = data[0];
-                } else {
-                    walletInfo.wallet = {};
-                }
-                callback(data);
+
+            socket.socket.on('post:create_wallet', function(err, rippleAddress){
+              socket.socket.removeAllListeners('post:create_wallet');
+              if(!err){
+                walletInfo.wallet = rippleAddress;
+
+                callback();
+              } else {
+                walletInfo.wallet = {};
+                callback();
+                swal('Error', 'Sorry there was a problem processing your request!', 'error');
+              }
             });
+            socket.socket.emit('create_wallet', {ownerEmail: currentUser.email})
         }
 
         function setAccountFlagsForAdmin(err, flags) {
@@ -80,7 +86,7 @@ angular.module('riwebApp')
             socket.socket.emit('account_info', Auth.getCurrentUser().email);
         }
 
-        function generateNewWallet(callback) {
+        /*function generateNewWallet(callback) {
             socket.socket.on('post:create_wallet', function(err, rippleAddress){
               socket.socket.removeAllListeners('post:create_wallet');
               if(!err){
@@ -100,9 +106,9 @@ angular.module('riwebApp')
               }
             });
             socket.socket.emit('create_wallet', {ownerEmail: currentUser.email});
-        }
+        }*/
 
-        function reuseAdminWallet() {
+        /*function reuseAdminWallet() {
             var newWallet = {};
             newWallet.ownerEmail = currentUser.email;
             //reuse existing known wallet
@@ -131,11 +137,11 @@ angular.module('riwebApp')
                     getCurrentUserWallet(generateWalletIfMissing);
                 }
             }
-        }
+        }*/
 
         return {
             getCurrentUserWallet: getCurrentUserWallet,
-            createWallet: createWallet,
+            //createWallet: createWallet,
             loadCurrentUserBalance: loadCurrentUserBalance,
             walletInfo: walletInfo
         };

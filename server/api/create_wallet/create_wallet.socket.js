@@ -112,7 +112,7 @@ function create_wallet_for_email(owner_email) {
             .then(fund_wallet_and_save_to_db);
 
       } else {
-        deferred.resolve(wallets[0]);
+        deferred.resolve(null);
       }
     });
 
@@ -125,7 +125,6 @@ exports.fund_wallet = fund_wallet;
 exports.register = function(newSocket) {
   socket = newSocket;
   socket.on('create_wallet', function(data) {
-      socket.removeAllListeners('create_wallet');
       create_wallet_for_email(data.ownerEmail);
   });
 };

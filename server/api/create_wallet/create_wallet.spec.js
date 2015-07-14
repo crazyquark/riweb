@@ -46,4 +46,14 @@ describe('Test create wallet', function() {
         });
     });
 
+    it('should not create wallet multiple times', function(done) {
+        create_wallet.create_wallet_for_email('duplicate@duplicate.com').then(function(newWallet){
+          expect(newWallet.publicKey).to.equal('rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh');
+          create_wallet.create_wallet_for_email('duplicate@duplicate.com').then(function(newWallet){
+              expect(newWallet).to.equal(null);
+              done();
+          });
+        });
+    });
+
 });
