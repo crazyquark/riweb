@@ -5,6 +5,7 @@
 module.exports = {
   // MongoDB connection options
   mongo: {
-    uri: 'mongodb://localhost/riweb-test'
-  }
+    uri: 'mongodb://localhost/riweb-dev'
+  },
+  seedDB: true
 };

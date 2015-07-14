@@ -6,8 +6,11 @@ var create_wallet = require('./create_wallet.socket');
 var chai = require('chai');
 var io = require('socket.io');
 var expect = chai.expect;
+var assert = chai.assert;
 var ripple = require('ripple-lib');
 var Utils = require('./../../core/utils');
+var mongoose = require('mongoose');
+var Wallet = require('./../wallet/wallet.model');
 
 var nonAdminGeneratedWallet = {
     address: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh',
@@ -24,10 +27,12 @@ describe('Test create wallet', function() {
         ripple.Wallet.generate = sinon.stub().returns(nonAdminGeneratedWallet);
 
         remote = {
-            connect: sinon.spy(),
+            connect: sinon.stub(),
             setSecret: sinon.spy()
         };
+
         Utils.getNewRemote = sinon.stub().returns(remote);
+        remote.connect.yields(null);
 
         create_wallet.register(socket);
     });
@@ -46,7 +51,7 @@ describe('Test create wallet', function() {
         });
     });
 
-    it('should not create wallet multiple times', function(done) {
+    it.only('should not create wallet multiple times', function(done) {
         create_wallet.create_wallet_for_email('duplicate@duplicate.com').then(function(newWallet){
           expect(newWallet.publicKey).to.equal('rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh');
           create_wallet.create_wallet_for_email('duplicate@duplicate.com').then(function(newWallet){

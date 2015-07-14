@@ -58,7 +58,9 @@ function fund_wallet(wallet, socket, callback, amount) {
 }
 
 function save_wallet_to_db(wallet, socket) {
+  console.log('+++save_wallet_to_db');
   Wallet.create(wallet, function(err, wallet) {
+    console.log('+++Wallet.create');
     if(!err) {
       socket.emit('post:create_wallet', null, wallet.publicKey);
     } else {
@@ -86,6 +88,8 @@ function get_create_wallet(owner_email){
 
 function create_convert_ripple_to_riweb_wallet(owner_email) {
   var convert_ripple_to_riweb_wallet = function(ripple_wallet) {
+      console.log('convert_ripple_to_riweb_wallet');
+      console.log(ripple_wallet);
       return {
           ownerEmail: owner_email,
           publicKey: ripple_wallet.address,
@@ -100,28 +104,28 @@ function create_wallet_for_email(owner_email) {
 
   if (!owner_email) {
     deferred.resolve(null);
+  } else {
+    Wallet.find({ownerEmail: owner_email}, function(err, wallets) {
+        console.log('---Wallet.find');
+        console.log(wallets);
+        // if (wallets || wallets.length === 0) {
+        console.log('create_wallet_for_email ' + owner_email);
+          var fund_wallet_and_save_to_db = function(riweb_wallet) {
+              fund_wallet(riweb_wallet, socket, save_wallet_to_db);
+              deferred.resolve(riweb_wallet);
+          }
+
+          var create_wallet = get_create_wallet(owner_email);
+
+          create_wallet()
+              .then(create_convert_ripple_to_riweb_wallet(owner_email))
+              .then(fund_wallet_and_save_to_db);
+
+        // } else {
+        //   deferred.resolve(null);
+        // }
+      });
   }
-
-  Wallet.find({ownerEmail: owner_email}, function(err, wallets) {
-      console.log('---Wallet.find');
-      console.log(wallets);
-      if (wallets || wallets.length === 0) {
-      console.log('create_wallet_for_email ' + owner_email);
-        var fund_wallet_and_save_to_db = function(riweb_wallet) {
-            deferred.resolve(riweb_wallet);
-            fund_wallet(riweb_wallet, socket, save_wallet_to_db);
-        }
-
-        var create_wallet = get_create_wallet(owner_email);
-
-        create_wallet()
-            .then(create_convert_ripple_to_riweb_wallet(owner_email))
-            .then(fund_wallet_and_save_to_db);
-
-      } else {
-        deferred.resolve(null);
-      }
-    });
 
     return deferred.promise;
 }
