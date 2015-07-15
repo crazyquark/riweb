@@ -24,7 +24,7 @@ User.find({}).remove(function() {
     password: 'admin',
     bank: 'ing'
   }, function() {
-      console.log('finished populating users');
+      // console.log('finished populating users');
     }
   );
 });
@@ -52,7 +52,7 @@ BankAccount.find({}).remove(function() {
       secret: ''
     }
   }, function() {
-      console.log('finished creating bank account data');
+      // console.log('finished creating bank account data');
     }
   );
 });

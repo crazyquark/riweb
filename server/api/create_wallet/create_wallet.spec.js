@@ -17,16 +17,18 @@ var nonAdminGeneratedWallet = {
     secret: 'NONADMINssphrase'
 };
 
+function non_admin_mongoose_wallet(email_address){
+  return {
+    ownerEmail: email_address,
+    passphrase: nonAdminGeneratedWallet.secret,
+    publicKey: nonAdminGeneratedWallet.address
+  };
+}
+
 var adminMongooseWallet = {
   ownerEmail: "admin@admin.com",
   passphrase: "masterpassphrase",
   publicKey: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"
-};
-
-var nonAdminMongooseWallet = {
-  ownerEmail: "a1@example.com",
-  passphrase: "NONADMINssphrase",
-  publicKey: "rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh"
 };
 
 describe('Test create wallet', function () {
@@ -59,38 +61,31 @@ describe('Test create wallet', function () {
 
     beforeEach(function () {
         sinon.spy(Wallet, "create");
-        // sinon.spy(remote, "connect");
     });
     afterEach(function () {
        Wallet.create.restore();
-      //  remote.connect.restore();
     });
 
     it('should create root wallet for admin@admin.com', function (done) {
         create_wallet.create_wallet_for_email('admin@admin.com').then(function () {
             expect(Wallet.create).to.have.calledWith(adminMongooseWallet);
             expect(Wallet.create).to.have.callCount(1);
-            // expect(Wallet.create).to.have.calledWith(nonAdminGeneratedWallet);
             done();
         }).done(null, function(error){done(error);});
     });
 
     it('should create non-root wallet for a1@example.com', function (done) {
-      try{
         create_wallet.create_wallet_for_email('a1@example.com').then(function () {
-          expect(Wallet.create).to.have.calledWith(nonAdminMongooseWallet);
+          expect(Wallet.create).to.have.calledWith(non_admin_mongoose_wallet('a1@example.com'));
           expect(Wallet.create).to.have.callCount(1);
           done();
         }).done(null, function (error) {done(error);});
-      }catch (e){
-        done(e);
-      }
     });
 
-    xit('should not create duplicate wallet for a1@example.com', function (done) {
-        create_wallet.create_wallet_for_email('a1@example.com').then(function () {
-            create_wallet.create_wallet_for_email('a1@example.com').then(function (newWallet) {
-                expect(Wallet.create).to.have.calledWith(nonAdminMongooseWallet);
+    it('should not create duplicate wallet for a2@example.com', function (done) {
+        create_wallet.create_wallet_for_email('a2@example.com').then(function () {
+            create_wallet.create_wallet_for_email('a2@example.com').then(function (newWallet) {
+                expect(Wallet.create).to.have.calledWith(non_admin_mongoose_wallet('a2@example.com'));
                 expect(Wallet.create).to.have.callCount(1);
                 done();
             }).done(null, function(error){done(error);})

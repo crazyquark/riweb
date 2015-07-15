@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
+var Q = require('q');
 
 var WalletSchema = new Schema({
   ownerEmail: String,
@@ -9,9 +10,17 @@ var WalletSchema = new Schema({
   passphrase: String
 });
 
-WalletSchema.statics.delete_this_function = function(args){
-//    console.log('delete_this_function');
-//    console.log(args);
+WalletSchema.statics.findByOwnerEmail = function(ownerEmail){
+  var deferred = Q.defer();
+
+  this.find({ownerEmail: ownerEmail}, function (err, wallet) {
+    if(err){
+      deferred.reject(err);
+    } else {
+      deferred.resolve(wallet);
+    }
+  });
+  return deferred.promise;
 };
 
 module.exports = mongoose.model('Wallet', WalletSchema);

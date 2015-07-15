@@ -32,17 +32,17 @@ function fund_wallet(wallet, amount) {
                   };
     remote.connect(function(err) {
       if (!err) {
-          console.log('Remote connected');
+          // console.log('Remote connected');
           var transaction = remote.createTransaction('Payment', options);
           transaction.submit(function (err, res) {
               if (err) {
-                  console.log('Failed to make initial XRP transfer because: ' +
-                                err);
+                  // console.log('Failed to make initial XRP transfer because: ' +
+                  //               err);
                   deferred.resolve(err);
               }
               if (res) {
-                console.log('Successfully funded wallet ' + ripple_address +
-                            ' with 60 XRP');
+                // console.log('Successfully funded wallet ' + ripple_address +
+                //             ' with 60 XRP');
                 deferred.resolve(wallet);
               }
             });
@@ -57,12 +57,17 @@ function fund_wallet(wallet, amount) {
 }
 
 function save_wallet_to_db(wallet) {
-  return Wallet.create(wallet, function(err, wallet) {
-    if(!err) {
-      socket.emit('post:create_wallet', null, wallet.publicKey);
+  return Wallet.findByOwnerEmail(wallet.ownerEmail).then(function(wallets){
+    if(!wallets || wallets.length === 0){
+      return Wallet.create(wallet, function(err, wallet) {
+        if(!err) {
+          socket.emit('post:create_wallet', null, wallet.publicKey);
+        } else {
+          socket.emit('post:create_wallet', 'error', null);
+        }
+      });
     } else {
-      socket.emit('post:create_wallet', 'error', null);
-      console.error(err);
+      return Q.resolve(wallets[0]);
     }
   });
 }
