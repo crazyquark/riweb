@@ -18,7 +18,7 @@ var nonAdminGeneratedWallet = {
 };
 
 describe('Test create wallet', function() {
-    var socket, remote;
+    var socket, remote, transaction;
     beforeEach(function() {
         socket = {};
         socket.emit = sinon.spy();
@@ -28,10 +28,21 @@ describe('Test create wallet', function() {
 
         remote = {
             connect: sinon.stub(),
+            createTransaction: sinon.stub(),
             setSecret: sinon.spy()
         };
 
+        transaction = {
+            submit: sinon.stub()
+        };
+
+        // Fake remote functions
         remote.connect.callsArgWith(0, null);
+        remote.createTransaction.returns(transaction);
+
+        // Fake transaction functions
+        transaction.submit.callsArgWith(0, null, null); // err, res are the params
+
         Utils.getNewRemote = sinon.stub().returns(remote);
 
         create_wallet.register(socket);
