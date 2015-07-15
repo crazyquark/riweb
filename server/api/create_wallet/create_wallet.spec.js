@@ -31,8 +31,8 @@ describe('Test create wallet', function() {
             setSecret: sinon.spy()
         };
 
+        remote.connect.callsArgWith(0, null);
         Utils.getNewRemote = sinon.stub().returns(remote);
-        remote.connect.yields(null);
 
         create_wallet.register(socket);
     });
