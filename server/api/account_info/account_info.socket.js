@@ -83,17 +83,19 @@ function get_account_info(owner_email, socket) {
         var wallet = wallets[0];
 
         console.log('get_ripple_account_info');
-        get_ripple_account_info(wallet.publicKey).then(function(account) {
-          console.log('emit.post:account_info');
-          console.log(account);
-          socket.emit('post:account_info', account);
+        get_ripple_account_info(wallet.publicKey).then(function(ripple_account_info) {
+          var account_lines = {
+            balance: ripple_account_info.lines.length > 0 ? ripple_account_info[0].Balance : 0
+          };
+
+          console.log('emit.post:account_info');;
+          socket.emit('post:account_info', account_lines);
         }).catch(function(err){
           console.error(err);
           deferred.reject(err);
         });
       } else {
-        console.log('create_wallet.create_wallet_for_email');
-        create_wallet.create_wallet_for_email(owner_email);
+        console.log('No wallet yet for ' + owner_email);
       }
   });
 }
