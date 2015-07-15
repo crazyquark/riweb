@@ -78,21 +78,20 @@ angular.module('riwebApp')
 
         function loadCurrentUserBalance() {
             console.log('loadCurrentUserBalance');
-            var ownerEmail = Auth.getCurrentUser().email;
+            var user = Auth.getCurrentUser();
             RippleAccountService.resetAccount();
             socket.socket.on('post:account_info', function(account_info) {
               console.log('on.post:account_info');
               console.log(account_info);
 
-              RippleAccountService.accountInfo.account = ownerEmail;
+              RippleAccountService.accountInfo.account = user.name;
               RippleAccountService.accountInfo.balance = account_info.balance;
             });
-            socket.socket.emit('account_info', ownerEmail);
+            socket.socket.emit('account_info', user.email);
         }
 
         return {
             getCurrentUserWallet: getCurrentUserWallet,
-            //createWallet: createWallet,
             loadCurrentUserBalance: loadCurrentUserBalance,
             walletInfo: walletInfo
         };
