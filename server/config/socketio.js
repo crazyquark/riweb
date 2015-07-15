@@ -20,8 +20,6 @@ function onConnect(socket) {
   // Insert sockets below
   require('../api/account_info/account_info.socket').register(socket);
   require('../api/create_wallet/create_wallet.socket').register(socket);
-  require('../api/comment/comment.socket').register(socket);
-  require('../api/ServerWalletService/ServerWalletService.socket').register(socket);
   require('../api/bankaccount/bankaccount.socket').register(socket);
   require('../api/wallet/wallet.socket').register(socket);
 }

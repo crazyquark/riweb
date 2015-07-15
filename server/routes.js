@@ -11,8 +11,6 @@ module.exports = function(app) {
   // Insert routes below
   app.use('/api/account_info', require('./api/account_info'));
   app.use('/api/create_wallets', require('./api/create_wallet'));
-  app.use('/api/comments', require('./api/comment'));
-  app.use('/api/walletservice', require('./api/ServerWalletService'));
   app.use('/api/bankaccounts', require('./api/bankaccount'));
   app.use('/api/wallets', require('./api/wallet'));
   app.use('/api/users', require('./api/user'));
