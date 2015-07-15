@@ -41,7 +41,7 @@ describe('Test create wallet', function() {
         remote.createTransaction.returns(transaction);
 
         // Fake transaction functions
-        transaction.submit.callsArgWith(0, null, null); // err, res are the params
+        transaction.submit.callsArgWith(0, null, {}); // err, res are the params
 
         Utils.getNewRemote = sinon.stub().returns(remote);
 
