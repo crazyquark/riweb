@@ -13,52 +13,51 @@ var socket;
 
 var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
 
-function fund_wallet(wallet, socket, callback, amount) {
+function fund_wallet(wallet, amount) {
+  var deferred = Q.defer();
   amount = amount || 60;
 
   var ripple_address = wallet.publicKey;
 
   if (ripple_address === ROOT_RIPPLE_ACCOUNT.address) {
-      // No need to fund root account
-      if (callback && socket)
-        callback(wallet, socket);
+    deferred.resolve(null);
+  } else {
+    var remote = Utils.getNewRemote();
 
-      return;
+    remote.setSecret(ROOT_RIPPLE_ACCOUNT.address , ROOT_RIPPLE_ACCOUNT.secret);
+
+    var options = { account: ROOT_RIPPLE_ACCOUNT.address,
+                    destination: ripple_address,
+                    amount : amount * 1000000
+                  };
+    remote.connect(function(err) {
+      if (!err) {
+          console.log('Remote connected');
+          var transaction = remote.createTransaction('Payment', options);
+          transaction.submit(function (err, res) {
+              if (err) {
+                  console.log('Failed to make initial XRP transfer because: ' +
+                                err);
+                  deferred.resolve(err);
+              }
+              if (res) {
+                console.log('Successfully funded wallet ' + ripple_address +
+                            ' with 60 XRP');
+                deferred.resolve(wallet);
+              }
+            });
+      } else {
+        console.error('Remote not connected');
+        deferred.resolve(err);
+      }
+    });
   }
 
-  var remote = Utils.getNewRemote();
-
-  remote.setSecret(ROOT_RIPPLE_ACCOUNT.address , ROOT_RIPPLE_ACCOUNT.secret);
-
-  var options = { account: ROOT_RIPPLE_ACCOUNT.address,
-                  destination: ripple_address,
-                  amount : amount * 1000000
-                };
-  remote.connect(function(err) {
-    if (!err) {
-        console.log('Remote connected');
-        var transaction = remote.createTransaction('Payment', options);
-        transaction.submit(function (err, res) {
-            if (err) {
-                console.log('Failed to make initial XRP transfer because: ' +
-                              err);
-            }
-            if (res) {
-              console.log('Successfully funded wallet ' + ripple_address +
-                          ' with 60 XRP');
-              if (callback && socket) {
-                callback(wallet, socket);
-              }
-            }
-          });
-    } else {
-      console.error('Remote not connected');
-    }
-  });
+  return deferred.promise;
 }
 
-function save_wallet_to_db(wallet, socket) {
-  Wallet.create(wallet, function(err, wallet) {
+function save_wallet_to_db(wallet) {
+  return Wallet.create(wallet, function(err, wallet) {
     if(!err) {
       socket.emit('post:create_wallet', null, wallet.publicKey);
     } else {
@@ -84,19 +83,13 @@ function get_create_wallet(owner_email){
     }
 }
 
-function fund_wallet_and_save_to_db(riweb_wallet) {
-    Wallet.delete_this_function(riweb_wallet)
-
-    fund_wallet(riweb_wallet, socket, save_wallet_to_db);
-    return Q.resolve(riweb_wallet);
-}
-
 function create_wallet_for_email(owner_email) {
     var create_wallet = get_create_wallet(owner_email);
 
     var promise = create_wallet()
         .then(convert_ripple_to_riweb_wallet)
-        .then(fund_wallet_and_save_to_db);
+        .then(save_wallet_to_db)
+        .then(fund_wallet);
 
     function convert_ripple_to_riweb_wallet(ripple_wallet) {
         return {
