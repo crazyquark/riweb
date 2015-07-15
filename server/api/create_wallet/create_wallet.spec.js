@@ -31,7 +31,7 @@ var adminMongooseWallet = {
   publicKey: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"
 };
 
-describe('Test create wallet', function () {
+describe('Test create_wallet', function () {
     var socket, remote, transaction;
     beforeEach(function () {
         socket = {};
@@ -43,7 +43,6 @@ describe('Test create wallet', function () {
         transaction = {
           submit: sinon.stub()
         };
-
         transaction.submit.callsArgWith(0, null, {});
 
         remote = {
@@ -84,7 +83,7 @@ describe('Test create wallet', function () {
 
     it('should not create duplicate wallet for a2@example.com', function (done) {
         create_wallet.create_wallet_for_email('a2@example.com').then(function () {
-            create_wallet.create_wallet_for_email('a2@example.com').then(function (newWallet) {
+            create_wallet.create_wallet_for_email('a2@example.com').then(function () {
                 expect(Wallet.create).to.have.calledWith(non_admin_mongoose_wallet('a2@example.com'));
                 expect(Wallet.create).to.have.callCount(1);
                 done();
