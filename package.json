@@ -27,6 +27,7 @@
     "ripple-wallet": "1.0.0",
     "serve-favicon": "~2.0.1",
     "sinon": "^1.15.4",
+    "sinon-chai": "^2.8.0",
     "socket.io": "^1.0.6",
     "socket.io-client": "^1.0.6",
     "socketio-jwt": "^2.0.2"

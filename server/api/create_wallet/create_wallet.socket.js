@@ -75,14 +75,19 @@ function get_create_wallet(owner_email){
     }
 }
 
+function fund_wallet_and_save_to_db(riweb_wallet) {
+    Wallet.delete_this_function(riweb_wallet)
+
+    fund_wallet(riweb_wallet, socket, save_wallet_to_db);
+    return Q.resolve(riweb_wallet);
+}
+
 function create_wallet_for_email(owner_email) {
-    var deferred = Q.defer();
     var create_wallet = get_create_wallet(owner_email);
 
-    create_wallet()
+    var promise = create_wallet()
         .then(convert_ripple_to_riweb_wallet)
         .then(fund_wallet_and_save_to_db);
-
 
     function convert_ripple_to_riweb_wallet(ripple_wallet) {
         return {
@@ -92,12 +97,7 @@ function create_wallet_for_email(owner_email) {
         };
     }
 
-    function fund_wallet_and_save_to_db(riweb_wallet) {
-        fund_wallet(riweb_wallet, socket, save_wallet_to_db);
-        deferred.resolve(riweb_wallet);
-    }
-
-    return deferred.promise;
+    return promise;
 }
 
 exports.create_wallet_for_email = create_wallet_for_email;

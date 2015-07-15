@@ -9,4 +9,9 @@ var WalletSchema = new Schema({
   passphrase: String
 });
 
+WalletSchema.statics.delete_this_function = function(args){
+//    console.log('delete_this_function');
+//    console.log(args);
+};
+
 module.exports = mongoose.model('Wallet', WalletSchema);
