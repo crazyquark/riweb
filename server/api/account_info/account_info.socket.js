@@ -44,36 +44,36 @@ function get_ripple_account_info(ripple_address) {
 
 function get_account_info(owner_email, socket) {
   return Wallet.findByOwnerEmail(owner_email).then(function(wallets) {
-      console.log('get_account_info');
-      console.log(wallets);
-      console.log(wallets && wallets.length === 1);
+      var deferred = Q.defer();
+
       if (wallets && wallets.length === 1) { // There should be only one
         var wallet = wallets[0];
 
-        console.log('get_ripple_account_info');
         get_ripple_account_info(wallet.publicKey).then(function(ripple_account_info) {
           var account_lines = {
             balance: ripple_account_info.lines.length > 0 ? ripple_account_info[0].Balance : 0
           };
 
-          console.log('emit.post:account_info');;
           socket.emit('post:account_info', account_lines);
+          deferred.resolve(account_lines);
         }).catch(function(err){
           console.error(err);
           deferred.reject(err);
         });
       } else {
-        console.log('No wallet yet for ' + owner_email);
+        socket.emit('post:account_info', {info: 'User does not exist!'});
+        deferred.resolve({info: 'User does not exist!'});
       }
+      return deferred.promise;
   });
 }
 
 
-exports.get_ripple_account_info = get_ripple_account_info;
 exports.get_account_info = get_account_info;
 
 exports.register = function(socket) {
   socket.on('account_info', function(owner_email) {
+    console.log('account_info ' + owner_email);
     get_account_info(owner_email, socket);
   });
 };

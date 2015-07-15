@@ -34,9 +34,10 @@ var adminMongooseWallet = {
 describe('Test create_wallet', function () {
     var socket, remote, transaction;
     beforeEach(function () {
-        socket = {};
-        socket.emit = sinon.spy();
-        socket.on = sinon.spy();
+        socket = {
+            emit: sinon.spy(),
+            on: sinon.spy()
+        };
 
         ripple.Wallet.generate = sinon.stub().returns(nonAdminGeneratedWallet);
 
