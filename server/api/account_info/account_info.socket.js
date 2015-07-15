@@ -10,62 +10,92 @@ var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
 var create_wallet = require('./../create_wallet/create_wallet.socket');
 
-function get_ripple_info(ripple_address, info_function){
+// function get_ripple_info(ripple_address, info_function){
+//   var deferred = Q.defer();
+//   var options = {
+//     account: ripple_address,
+//     ledger: 'validated'
+//   };
+//   info_function(options, function(err, info) {
+//     if(!err){
+//       deferred.reject(info);
+//     } else {
+//       deferred.resolve(err);
+//     }
+//   });
+//   return deferred.promise;
+// }
+//
+// function remote_request_account_lines_old(ripple_address, remote){
+//   Q.fcall(get_ripple_info(ripple_address, remote.requestAccountLines))
+//     .then(function(ripple_info){
+//     console.log('---------ripple_info');
+//     console.log(ripple_info);
+//     var account_info = ripple_info[0];
+//     var account_lines = ripple_info[1];
+//
+//     var account = {
+//       balance: account_info.account_data.Balance,
+//       currencies: account_lines.lines
+//     }
+//     return account;
+//   });
+// }
+
+function remote_request_account_lines(ripple_address, remote){
   var deferred = Q.defer();
   var options = {
     account: ripple_address,
     ledger: 'validated'
   };
-  info_function(options, function(err, info) {
+  remote.requestAccountLines(options, function(err, info) {
     if(!err){
       deferred.resolve(info);
     } else {
-      deferred.resolve(err);
+      deferred.reject(err);
     }
   });
   return deferred.promise;
 }
 
-function get_ripple_account_info(ripple_address, callback) {
+
+function get_ripple_account_info(ripple_address) {
   var deferred = Q.defer();
 
   Utils.getNewConnectedRemote()
     .then(function(remote){
-      Q.all([
-        get_ripple_info(ripple_address, remote.requestAccountInfo),
-        get_ripple_info(ripple_address, remote.requestAccountLines)
-      ]).then(function(ripple_info){
-        var account_info = ripple_info[0];
-        var account_lines = ripple_info[1];
-
-        var account = {
-          balance: account_info.account_data.Balance,
-          currencies: account_lines.lines
-        }
-        deferred.resolve(account);
-      })
-    })
+      remote_request_account_lines(ripple_address, remote).then(function(info){
+        deferred.resolve(info);
+      });
+    }).catch(function(err){
+      console.error(err);
+      deferred.reject(err);
+    });
   return deferred.promise;
 }
 
 function get_account_info(owner_email, socket) {
-  Wallet.find({ownerEmail: owner_email}, function(err, wallets) {
-      console.log('Wallet.find ' + owner_email);
+  return Wallet.findByOwnerEmail(owner_email).then(function(wallets) {
+      console.log('get_account_info');
       console.log(wallets);
-      if(err){ console.error(err);}
+      console.log(wallets && wallets.length === 1);
       if (wallets && wallets.length === 1) { // There should be only one
         var wallet = wallets[0];
 
+        console.log('get_ripple_account_info');
         get_ripple_account_info(wallet.publicKey).then(function(account) {
           console.log('emit.post:account_info');
           console.log(account);
           socket.emit('post:account_info', account);
+        }).catch(function(err){
+          console.error(err);
+          deferred.reject(err);
         });
       } else {
+        console.log('create_wallet.create_wallet_for_email');
         create_wallet.create_wallet_for_email(owner_email);
       }
   });
-
 }
 
 
@@ -74,8 +104,6 @@ exports.get_account_info = get_account_info;
 
 exports.register = function(socket) {
   socket.on('account_info', function(owner_email) {
-    console.log('on.account_info');
-    console.log(owner_email);
     get_account_info(owner_email, socket);
   });
 }

@@ -82,6 +82,7 @@ angular.module('riwebApp')
             socket.socket.on('post:account_info', function(account) {
               console.log('on.post:account_info');
               console.log(account);
+              // walletInfo.wallet.balance = account.balance;
             });
             socket.socket.emit('account_info', Auth.getCurrentUser().email);
         }

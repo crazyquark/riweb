@@ -22,7 +22,8 @@ function getNewConnectedRemote(){
     if(!err){
       deferred.resolve(remote);
     } else {
-      deferred.resolve(err);
+      console.error(err);
+      deferred.reject(err);
     }
   })
   return deferred.promise;
