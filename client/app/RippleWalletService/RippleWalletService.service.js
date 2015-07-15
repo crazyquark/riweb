@@ -78,67 +78,17 @@ angular.module('riwebApp')
 
         function loadCurrentUserBalance() {
             console.log('loadCurrentUserBalance');
+            var ownerEmail = Auth.getCurrentUser().email;
             RippleAccountService.resetAccount();
-            socket.socket.on('post:account_info', function(account) {
+            socket.socket.on('post:account_info', function(account_info) {
               console.log('on.post:account_info');
-              console.log(account);
-              // walletInfo.wallet.balance = account.balance;
+              console.log(account_info);
+
+              RippleAccountService.accountInfo.account = ownerEmail;
+              RippleAccountService.accountInfo.balance = account_info.balance;
             });
-            socket.socket.emit('account_info', Auth.getCurrentUser().email);
+            socket.socket.emit('account_info', ownerEmail);
         }
-
-        /*function generateNewWallet(callback) {
-            socket.socket.on('post:create_wallet', function(err, rippleAddress){
-              socket.socket.removeAllListeners('post:create_wallet');
-              if(!err){
-                walletInfo.wallet = rippleAddress;
-
-                callback();
-
-                // TODO move to server
-                RippleRemoteService.onRemotePresent(function (remote) {
-                    var makeInitialTrustLines = TrustLineService.buildMakeInitialTrustLines(walletInfo, remote);
-                    var destinationAddress = RIPPLE_ROOT_ACCOUNT.address;
-                    makeInitialTrustLines(destinationAddress);
-                });
-              } else {
-                walletInfo.wallet = {};
-                swal('Error', 'Sorry there was a problem processing your request!', 'error');
-              }
-            });
-            socket.socket.emit('create_wallet', {ownerEmail: currentUser.email});
-        }*/
-
-        /*function reuseAdminWallet() {
-            var newWallet = {};
-            newWallet.ownerEmail = currentUser.email;
-            //reuse existing known wallet
-            newWallet.publicKey = RIPPLE_ROOT_ACCOUNT.address;
-            newWallet.passphrase = RIPPLE_ROOT_ACCOUNT.secret;
-            //TODO implement saveWallet
-//            saveWallet(newWallet);
-            checkColdWalletFlags();
-        }
-
-        function generateWalletIfMissing(existingWalletFound) {
-            if (existingWalletFound.length < 1) {
-                if (currentUser.role === 'admin') {
-                    reuseAdminWallet();
-                } else {
-                    generateNewWallet();
-                }
-            }
-        }
-
-        function createWallet() {
-            console.log('Creating wallet');
-            if (currentUser) {
-                if (currentUser.email !== walletInfo.makingWalletForEmail) {
-                    walletInfo.makingWalletForEmail = currentUser.email;
-                    getCurrentUserWallet(generateWalletIfMissing);
-                }
-            }
-        }*/
 
         return {
             getCurrentUserWallet: getCurrentUserWallet,
