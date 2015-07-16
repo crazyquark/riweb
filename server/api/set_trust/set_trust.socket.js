@@ -45,7 +45,13 @@ function set_trust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, 
   return deferred.promise;
 }
 
+// TODO: this a bit more complicated - and do we need it?
+function set_trust_by_email(userEmail, bankAdminEmail) {
+
+}
+
 exports.set_trust = set_trust;
+exports.set_trust_by_email = set_trust_by_email;
 
 exports.register = function(socket) {
 
