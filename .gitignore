@@ -1,6 +1,7 @@
 public
 .tmp
 .idea
+.project
 client/bower_components
 /server/config/local.env.js
 node_modules
