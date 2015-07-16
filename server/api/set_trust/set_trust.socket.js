@@ -16,7 +16,7 @@ var Utils = require('./../../utils/utils');
 * @param limit the limit of the thrustline (defaults to 1000)
 * @param currency the currency of the thrustline (defaults to 'EUR')
 */
-function set_trust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, limit, currency) {
+function setTrust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, limit, currency) {
   limit = limit || 1000;
   currency = currency || 'EUR';
 
@@ -24,21 +24,16 @@ function set_trust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, 
 
   var remote = Utils.getNewConnectedRemote(rippleSourceAddr, rippleSourceSecret);
 
-    var transaction_limit = limit + '/' + currency +'/' + rippleDestinationAddr;
-    var transaction = remote.createTransaction('TrustSet', {
+  var transaction = remote.createTransaction('TrustSet', {
     account: rippleSourceAddr,
-    limit: transaction_limit
-  });
-
-  transaction.on('reusbmitted', function() {
-    // mkay...
+    limit: limit + '/' + currency + '/' + rippleDestinationAddr
   });
 
   transaction.submit(function(err, res) {
     if(!err) {
-      deferred.resolve(null); // See no evil
+      deferred.resolve({status: 'success'}); // See no evil
     } else {
-      deferred.reject(err);
+      deferred.reject({status: 'error', error: err});
     }
   });
 
@@ -50,9 +45,9 @@ function set_trust_by_email(userEmail, bankAdminEmail) {
 
 }
 
-exports.set_trust = set_trust;
+exports.setTrust = setTrust;
 exports.set_trust_by_email = set_trust_by_email;
 
-exports.register = function(socket) {
-
-};
+Utils.eventEmitter.on('set_trust', function(data) {
+  setTrust(data.rippleDestinationAddr, data.rippleSourceAddr, data.rippleSourceSecret);
+});

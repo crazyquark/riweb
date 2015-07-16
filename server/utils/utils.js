@@ -1,6 +1,8 @@
 
 var ripple = require('ripple-lib');
 var Q = require('q');
+var events = require('events');
+var eventEmitter = new events.EventEmitter();
 
 var ROOT_RIPPLE_ACCOUNT = {
     address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
@@ -30,7 +32,7 @@ function getNewConnectedRemote(rippleAddress, rippleSecret){
       console.error(err);
       deferred.reject(err);
     }
-  })
+  });
   return deferred.promise;
 }
 
@@ -44,3 +46,4 @@ module.exports.getNewRemote = getNewRemote;
 module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewAdminRemote = getNewAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
+module.exports.eventEmitter = eventEmitter;

@@ -2,7 +2,6 @@
 
 var sinon = require('sinon');
 var app = require('../../app');
-var create_wallet = require('./create_wallet.socket');
 var chai = require('chai');
 var io = require('socket.io');
 var expect = chai.expect;
@@ -10,6 +9,7 @@ var ripple = require('ripple-lib');
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
+var create_wallet = require('./create_wallet.socket');
 var TestingUtils = require('./../../../test/utils/testing_utils');
 var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');

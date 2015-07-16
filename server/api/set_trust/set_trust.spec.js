@@ -1,12 +1,50 @@
 'use strict';
 
-var should = require('should');
+var sinon = require('sinon');
 var app = require('../../app');
-var request = require('supertest');
+var chai = require('chai');
+var expect = chai.expect;
+var ripple = require('ripple-lib');
+var sinonChai = require("sinon-chai");
+chai.use(sinonChai);
 
-describe('GET /api/set_trust', function() {
+var Utils = require('./../../utils/utils');
+var SetTrust = require('./set_trust.socket');
 
-  xit('should respond with JSON array', function(done) {
+var TestingUtils = require('./../../../test/utils/testing_utils');
 
-  });
+describe('Test set_trust', function () {
+
+    var remote;
+    beforeEach(function () {
+        remote = TestingUtils.buildRemoteStub();
+
+        remote = TestingUtils.buildRemoteStub();
+        Utils.getNewConnectedRemote = sinon.stub().returns(remote);
+    });
+
+    it('should respond with success on proper trust set', function (done) {
+        var adminWallet = TestingUtils.getAdminMongooseWallet();
+        var nonAdminWallet = TestingUtils.getNonAdminMongooseWallet();
+        var data = {
+            rippleDestinationAddr: adminWallet.publicKey,
+            rippleSourceAddr: nonAdminWallet.publicKey,
+            rippleSourceSecret: nonAdminWallet.passphrase
+        };
+        sinon.mock(remote, 'createTransaction');
+
+        SetTrust.setTrust(data.rippleDestinationAddr, data.rippleSourceAddr, data.rippleSourceSecret).then(function (result) {
+            expect(result.status).to.eql('success');
+            expect(remote.createTransaction).to.have.calledWith(
+                'TrustSet', {
+                    account: nonAdminWallet.publicKey,
+                    limit: '1000/EUR/' + adminWallet.publicKey
+                });
+            done();
+        }).done(null, function (error) {
+            done(error);
+        });
+
+
+    });
 });

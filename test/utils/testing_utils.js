@@ -26,8 +26,12 @@ function buildRemoteStub() {
 }
 
 function buildEmptyTransactionStub() {
-    var transaction = {submit: sinon.stub()};
+    var transaction = {
+        submit: sinon.stub(),
+        setTrust: sinon.stub()
+    };
     transaction.submit.yields(null, {});
+    transaction.setTrust.yields(null, {});
     return transaction;
 }
 
@@ -39,6 +43,7 @@ function getNonAdminRippleGeneratedWallet() {
 }
 
 function getNonAdminMongooseWallet(email_address) {
+    email_address = email_address || 'joe@danger.io';
     return {
         ownerEmail: email_address,
         passphrase: 'NONADMINssphrase',
