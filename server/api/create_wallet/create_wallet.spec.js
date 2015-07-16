@@ -15,19 +15,15 @@ var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
 
 describe('Test create_wallet', function () {
-    var socket, remote, transaction;
+
+    var socket, remote;
+
     beforeEach(function () {
         socket = TestingUtils.buildSocketSpy();
 
         ripple.Wallet.generate = sinon.stub().returns(TestingUtils.getNonAdminRippleGeneratedWallet());
 
-        transaction = {submit: sinon.stub()};
-        transaction.submit.callsArgWith(0, null, {});
-
         remote = TestingUtils.buildRemoteStub();
-        remote.connect.callsArgWith(0, null);
-        remote.createTransaction.returns(transaction);
-
         Utils.getNewRemote = sinon.stub().returns(remote);
 
         create_wallet.register(socket);
