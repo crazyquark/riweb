@@ -13,45 +13,21 @@ chai.use(sinonChai);
 var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
 var account_info = require('./account_info.socket');
-
-function findByOwnerEmailForAdmin(Wallet){
-    sinon.stub(Wallet, "findByOwnerEmail").returns(Q.resolve([{
-        ownerEmail: "admin@admin.com",
-        passphrase: "masterpassphrase",
-        publicKey: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"
-    }]));
-}
-
-function findByOwnerEmailForUnexisting(Wallet){
-    sinon.stub(Wallet, "findByOwnerEmail").returns(Q.resolve([]));
-}
-
+var TestingUtils = require('./../../../test/utils/testing_utils');
 
 describe('Test account_info', function () {
-    var socket, remote, transaction;
+    var socket, remote;
     beforeEach(function () {
-        socket = {};
-        socket.emit = sinon.spy();
-        socket.on = sinon.spy();
+        socket = TestingUtils.buildSocketSpy();
 
-        transaction = {
-          submit: sinon.stub()
-        };
-        transaction.submit.callsArgWith(0, null, {});
+        ripple.Wallet.generate = sinon.stub().returns(TestingUtils.getNonAdminRippleGeneratedWallet());
 
-        remote = {
-            connect: sinon.stub(),
-            setSecret: sinon.stub(),
-            createTransaction: sinon.stub(),
-            requestAccountLines: sinon.stub()
-        };
-        remote.connect.callsArgWith(0, null);
-        remote.createTransaction.returns(transaction);
-        remote.requestAccountLines.callsArgWith(1, null, {lines:[]});
-
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
+        remote = TestingUtils.buildRemoteStub();
+        Utils.getNewRemote = sinon.stub().returns(remote);
 
         account_info.register(socket);
+
+        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
     });
 
     beforeEach(function () {
@@ -63,7 +39,7 @@ describe('Test account_info', function () {
     });
 
     it('should get account_info for unexisting email', function (done) {
-        findByOwnerEmailForUnexisting(Wallet);
+        TestingUtils.buildFindByOwnerEmailForUnexisting(Wallet);
 
         account_info.get_account_info('not_exist@example.com', socket).then(function () {
             expect(socket.emit).to.have.calledWith('post:account_info', {info: 'User does not exist!'});
@@ -73,7 +49,8 @@ describe('Test account_info', function () {
     });
 
     it('should get account_info for admin email', function (done) {
-        findByOwnerEmailForAdmin(Wallet);
+        TestingUtils.buildFindByOwnerEmailForAdmin(Wallet);
+
         account_info.get_account_info('admin@admin.com', socket).then(function () {
             expect(socket.emit).to.have.callCount(1);
             expect(socket.emit).to.have.calledWith('post:account_info', {balance: 0});
