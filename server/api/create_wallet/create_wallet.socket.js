@@ -7,7 +7,7 @@
 var ripple = require('ripple-lib');
 var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
-var Utils = require('./../../core/utils');
+var Utils = require('./../../utils/utils');
 
 var socket;
 

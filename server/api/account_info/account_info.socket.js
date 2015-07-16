@@ -5,7 +5,7 @@
 'use strict';
 
 var ripple = require('ripple-lib');
-var Utils = require('./../../core/utils');
+var Utils = require('./../../utils/utils');
 var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
 var create_wallet = require('./../create_wallet/create_wallet.socket');

@@ -10,7 +10,7 @@ var Q = require('q');
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
-var Utils = require('./../../core/utils');
+var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
 var account_info = require('./account_info.socket');
 

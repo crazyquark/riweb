@@ -7,7 +7,7 @@ var chai = require('chai');
 var io = require('socket.io');
 var expect = chai.expect;
 var ripple = require('ripple-lib');
-var Utils = require('./../../core/utils');
+var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
