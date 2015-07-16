@@ -7,50 +7,24 @@ var chai = require('chai');
 var io = require('socket.io');
 var expect = chai.expect;
 var ripple = require('ripple-lib');
-var Utils = require('./../../utils/utils');
-var Wallet = require('./../wallet/wallet.model');
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
-var nonAdminGeneratedWallet = {
-    address: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh',
-    secret: 'NONADMINssphrase'
-};
-
-function non_admin_mongoose_wallet(email_address){
-  return {
-    ownerEmail: email_address,
-    passphrase: nonAdminGeneratedWallet.secret,
-    publicKey: nonAdminGeneratedWallet.address
-  };
-}
-
-var adminMongooseWallet = {
-  ownerEmail: "admin@admin.com",
-  passphrase: "masterpassphrase",
-  publicKey: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"
-};
+var TestingUtils = require('./../../../test/utils/testing_utils');
+var Utils = require('./../../utils/utils');
+var Wallet = require('./../wallet/wallet.model');
 
 describe('Test create_wallet', function () {
     var socket, remote, transaction;
     beforeEach(function () {
-        socket = {
-            emit: sinon.spy(),
-            on: sinon.spy()
-        };
+        socket = TestingUtils.buildSocketSpy();
 
-        ripple.Wallet.generate = sinon.stub().returns(nonAdminGeneratedWallet);
+        ripple.Wallet.generate = sinon.stub().returns(TestingUtils.getNonAdminRippleGeneratedWallet());
 
-        transaction = {
-          submit: sinon.stub()
-        };
+        transaction = {submit: sinon.stub()};
         transaction.submit.callsArgWith(0, null, {});
 
-        remote = {
-            connect: sinon.stub(),
-            setSecret: sinon.stub(),
-            createTransaction: sinon.stub()
-        };
+        remote = TestingUtils.buildRemoteStub();
         remote.connect.callsArgWith(0, null);
         remote.createTransaction.returns(transaction);
 
@@ -68,7 +42,7 @@ describe('Test create_wallet', function () {
 
     it('should create root wallet for admin@admin.com', function (done) {
         create_wallet.create_wallet_for_email('admin@admin.com').then(function () {
-            expect(Wallet.create).to.have.calledWith(adminMongooseWallet);
+            expect(Wallet.create).to.have.calledWith(TestingUtils.getAdminMongooseWallet());
             expect(Wallet.create).to.have.callCount(1);
             done();
         }).done(null, function(error){done(error);});
@@ -76,7 +50,7 @@ describe('Test create_wallet', function () {
 
     it('should create non-root wallet for a1@example.com', function (done) {
         create_wallet.create_wallet_for_email('a1@example.com').then(function () {
-          expect(Wallet.create).to.have.calledWith(non_admin_mongoose_wallet('a1@example.com'));
+          expect(Wallet.create).to.have.calledWith(TestingUtils.getNonAdminMongooseWallet('a1@example.com'));
           expect(Wallet.create).to.have.callCount(1);
           done();
         }).done(null, function (error) {done(error);});
@@ -85,7 +59,7 @@ describe('Test create_wallet', function () {
     it('should not create duplicate wallet for a2@example.com', function (done) {
         create_wallet.create_wallet_for_email('a2@example.com').then(function () {
             create_wallet.create_wallet_for_email('a2@example.com').then(function () {
-                expect(Wallet.create).to.have.calledWith(non_admin_mongoose_wallet('a2@example.com'));
+                expect(Wallet.create).to.have.calledWith(TestingUtils.getNonAdminMongooseWallet('a2@example.com'));
                 expect(Wallet.create).to.have.callCount(1);
                 done();
             }).done(null, function(error){done(error);})
