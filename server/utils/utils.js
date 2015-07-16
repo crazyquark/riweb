@@ -15,9 +15,14 @@ function getNewRemote(){
     });
 }
 
-function getNewConnectedRemote(){
+function getNewConnectedRemote(rippleAddress, rippleSecret){
   var deferred = Q.defer();
   var remote = getNewRemote();
+
+  if (rippleAddress && rippleSecret) {
+    remote.setSecret(rippleAddress, rippleSecret);
+  }
+
   remote.connect(function(err, res){
     if(!err){
       deferred.resolve(remote);
