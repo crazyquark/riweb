@@ -9,11 +9,23 @@ function buildSocketSpy() {
 }
 
 function buildRemoteStub() {
-    return {
+    var remoteStub = {
         connect: sinon.stub(),
         setSecret: sinon.stub(),
         createTransaction: sinon.stub()
     };
+
+    var transaction = buildEmptyTransactionStub();
+    remoteStub.connect.yields(null);
+    remoteStub.createTransaction.returns(transaction);
+
+    return  remoteStub;
+}
+
+function buildEmptyTransactionStub() {
+    var transaction = {submit: sinon.stub()};
+    transaction.submit.yields(null, {});
+    return transaction;
 }
 
 function getNonAdminRippleGeneratedWallet() {
@@ -41,6 +53,7 @@ function getAdminMongooseWallet() {
 
 exports.buildSocketSpy = buildSocketSpy;
 exports.buildRemoteStub = buildRemoteStub;
+exports.buildEmptyTransactionStub = buildEmptyTransactionStub;
 exports.getNonAdminRippleGeneratedWallet = getNonAdminRippleGeneratedWallet;
 exports.getNonAdminMongooseWallet = getNonAdminMongooseWallet;
 exports.getAdminMongooseWallet = getAdminMongooseWallet;
