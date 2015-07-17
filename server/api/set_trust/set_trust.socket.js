@@ -22,19 +22,19 @@ function setTrust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, l
 
   var deferred = Q.defer();
 
-  var remote = Utils.getNewConnectedRemote(rippleSourceAddr, rippleSourceSecret);
-
-  var transaction = remote.createTransaction('TrustSet', {
-    account: rippleSourceAddr,
-    limit: limit + '/' + currency + '/' + rippleDestinationAddr
-  });
-
-  transaction.submit(function(err, res) {
-    if(!err) {
-      deferred.resolve({status: 'success'}); // See no evil
-    } else {
-      deferred.reject({status: 'error', error: err});
-    }
+  Utils.getNewConnectedRemote(rippleSourceAddr, rippleSourceSecret).then(function(remote) {
+    var transaction = remote.createTransaction('TrustSet', {
+      account: rippleSourceAddr,
+      limit: limit + '/' + currency + '/' + rippleDestinationAddr
+    });
+  
+    transaction.submit(function(err, res) {
+      if(!err) {
+        deferred.resolve({status: 'success'}); // See no evil
+      } else {
+        deferred.reject({status: 'error', error: err});
+      }
+    });    
   });
 
   return deferred.promise;

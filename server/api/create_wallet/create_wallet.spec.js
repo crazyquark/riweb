@@ -4,6 +4,7 @@ var sinon = require('sinon');
 var app = require('../../app');
 var chai = require('chai');
 var io = require('socket.io');
+var Q = require('q');
 var expect = chai.expect;
 var ripple = require('ripple-lib');
 var sinonChai = require("sinon-chai");
@@ -26,7 +27,7 @@ describe('Test create_wallet', function () {
         ripple.Wallet.generate = sinon.stub().returns(nonAdminRippleGeneratedWallet);
 
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedRemote = sinon.stub().returns(remote);
+        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
 
         create_wallet.register(socket);
     });

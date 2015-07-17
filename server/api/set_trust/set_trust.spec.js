@@ -4,6 +4,7 @@ var sinon = require('sinon');
 var app = require('../../app');
 var chai = require('chai');
 var expect = chai.expect;
+var Q = require('q');
 var ripple = require('ripple-lib');
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
@@ -18,7 +19,7 @@ describe('Test set_trust', function () {
     var remote;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedRemote = sinon.stub().returns(remote);
+        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
     });
 
     it('should respond with success on proper trust set', function (done) {
