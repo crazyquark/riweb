@@ -51,7 +51,7 @@ function get_account_info(owner_email, socket) {
 
         get_ripple_account_info(wallet.publicKey).then(function(ripple_account_info) {
           var account_lines = {
-            balance: ripple_account_info.lines.length > 0 ? ripple_account_info[0].Balance : 0
+            balance: ripple_account_info.lines.length > 0 ? ripple_account_info.lines[0].balance : 0
           };
 
           socket.emit('post:account_info', account_lines);
