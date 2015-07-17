@@ -10,6 +10,7 @@ var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
 var Utils = require('./../../utils/utils');
+var Wallet = require('./../wallet/wallet.model');
 
 var TestingUtils = require('./../../../test/utils/testing_utils');
 
@@ -31,6 +32,15 @@ describe('Test make_transfer', function() {
     xit('should send 50 EURO from Alice to Bob', function (done) {
         var alliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         var bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
+
+        sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
+            if (email === 'alice@example.com') {
+                return Q.resolve(alliceWallet);
+            } else {
+                return Q.resolve(bobWallet);
+            }
+        });
+
         var amount = 50;
 
         sinon.mock(remote, 'createTransaction');
