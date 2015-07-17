@@ -36,8 +36,6 @@ describe('Test make_transfer', function() {
         sinon.mock(remote, 'createTransaction');
         sinon.mock(remote, 'setSecret');
 
-        var transaction = remote.createTransaction();
-
         MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).then(function () {
             expect(remote.createTransaction).to.have.calledWith('Payment', {
                 account: alliceWallet.publicKey,
