@@ -87,7 +87,7 @@ angular.module('riwebApp')
               RippleAccountService.accountInfo.account = user.name;
               RippleAccountService.accountInfo.balance = account_info.balance;
             });
-            socket.socket.emit('.emit(account_info', user.email);
+            socket.socket.emit('account_info', user.email);
         }
 
         return {
