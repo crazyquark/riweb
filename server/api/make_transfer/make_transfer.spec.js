@@ -17,15 +17,18 @@ var MakeTransfer = require('./make_transfer.socket');
 
 describe('Test make_transfer', function() {
 
-    var remote;
+    var remote, emitSpy;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
         Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
-        Utils.getEventEmitter = sinon.spy();
+        emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
+    });
+
+    afterEach(function () {
+        emitSpy.restore();
     });
 
     xit('should send 50 EURO from Alice to Bob', function (done) {
-        var emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
         var alliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         var bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
         var amount = 50;
