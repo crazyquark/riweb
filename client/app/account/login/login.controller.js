@@ -18,6 +18,7 @@ angular.module('riwebApp')
           $location.path('/myaccount');
         })
         .catch( function(err) {
+          console.error(err);
           $scope.errors.other = err.message;
         });
       }

@@ -20,7 +20,7 @@ function fund_wallet(wallet, amount) {
   var ripple_address = wallet.publicKey;
 
   if (ripple_address === ROOT_RIPPLE_ACCOUNT.address) {
-    deferred.resolve(null);
+    deferred.resolve(wallet);
   } else {
     var remote = Utils.getNewRemote();
 
