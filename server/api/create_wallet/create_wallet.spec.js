@@ -16,15 +16,17 @@ var Wallet = require('./../wallet/wallet.model');
 
 describe('Test create_wallet', function () {
 
-    var socket, remote;
+    var socket, remote, nonAdminRippleGeneratedWallet, adminMongooseWallet;
 
     beforeEach(function () {
         socket = TestingUtils.buildSocketSpy();
 
-        ripple.Wallet.generate = sinon.stub().returns(TestingUtils.getNonAdminRippleGeneratedWallet());
+        nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
+        adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
+        ripple.Wallet.generate = sinon.stub().returns(nonAdminRippleGeneratedWallet);
 
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewRemote = sinon.stub().returns(remote);
+        Utils.getNewConnectedRemote = sinon.stub().returns(remote);
 
         create_wallet.register(socket);
     });
@@ -33,7 +35,7 @@ describe('Test create_wallet', function () {
         sinon.spy(Wallet, "create");
     });
     afterEach(function () {
-       Wallet.create.restore();
+        Wallet.create.restore();
     });
 
     it('should create root wallet for admin@admin.com', function (done) {
@@ -59,6 +61,20 @@ describe('Test create_wallet', function () {
                 expect(Wallet.create).to.have.callCount(1);
                 done();
             }).done(null, function(error){done(error);})
+        }).done(null, function(error){done(error);});
+    });
+
+    it('should set_trust when create new wallet', function (done) {
+        var emitSpy = sinon.spy(Utils.eventEmitter, 'emit');
+
+        create_wallet.create_wallet_for_email('a3@example.com').then(function () {
+            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.calledWith('set_trust', {
+                rippleDestinationAddr: adminMongooseWallet.publicKey,
+                rippleSourceAddr: nonAdminRippleGeneratedWallet.address,
+                rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
+            });
+            done();
         }).done(null, function(error){done(error);});
     });
 });

@@ -67,6 +67,10 @@ function buildFindByOwnerEmailForAdmin(wallet){
     }]));
 }
 
+function buildCreateForEmailStub(wallet, email){
+    sinon.stub(wallet, "create").returns(Q.resolve([getNonAdminMongooseWallet(email)]));
+}
+
 function buildFindByOwnerEmailForUnexisting(wallet){
     sinon.stub(wallet, "findByOwnerEmail").returns(Q.resolve([]));
 }
@@ -74,6 +78,7 @@ function buildFindByOwnerEmailForUnexisting(wallet){
 
 exports.buildSocketSpy = buildSocketSpy;
 exports.buildRemoteStub = buildRemoteStub;
+exports.buildCreateForEmailStub = buildCreateForEmailStub;
 exports.buildEmptyTransactionStub = buildEmptyTransactionStub;
 exports.getNonAdminRippleGeneratedWallet = getNonAdminRippleGeneratedWallet;
 exports.getNonAdminMongooseWallet = getNonAdminMongooseWallet;

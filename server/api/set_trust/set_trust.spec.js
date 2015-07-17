@@ -18,8 +18,6 @@ describe('Test set_trust', function () {
     var remote;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
-
-        remote = TestingUtils.buildRemoteStub();
         Utils.getNewConnectedRemote = sinon.stub().returns(remote);
     });
 
@@ -44,7 +42,5 @@ describe('Test set_trust', function () {
         }).done(null, function (error) {
             done(error);
         });
-
-
     });
 });
