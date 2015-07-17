@@ -4,7 +4,19 @@
 
 'use strict';
 
-var MakeTransfer = require('./make_transfer.model');
+var Q = require('q');
 
-exports.register = function() {
+var Utils = require('./../../utils/utils');
+
+function makeTransfer(fromEmail, toEmail, amout){
+  var deferred = Q.defer();
+  deferred.resolve("foobar");
+  return deferred.promise;
 }
+
+exports.makeTransfer = makeTransfer;
+exports.register = function() {
+    Utils.getEventEmitter().on('make_transfer', function(data) {
+        makeTransfer(data.fromEmail, data.toEmail, data.amout);
+    });
+};

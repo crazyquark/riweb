@@ -66,7 +66,7 @@ describe('Test create_wallet', function () {
     });
 
     it('should set_trust when create new wallet', function (done) {
-        var emitSpy = sinon.spy(Utils.eventEmitter, 'emit');
+        var emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
 
         create_wallet.create_wallet_for_email('a3@example.com').then(function () {
             expect(emitSpy).to.have.callCount(1);
