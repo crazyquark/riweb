@@ -9,7 +9,7 @@ var Q = require('q');
 var Utils = require('./../../utils/utils');
 
 /**
-* Creates a trst line between 2 ripple accounts
+* Creates a trust line between 2 ripple accounts
 * @param rippleDestinationAddr target trustline endpoint
 * @param rippleSourceAddr source trustline endpoint
 * @param rippleSourceSecret source address secret (used to create the trustline)
