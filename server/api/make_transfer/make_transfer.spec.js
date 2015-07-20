@@ -6,6 +6,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var Q = require('q');
 var ripple = require('ripple-lib');
+var Amount = require('ripple-lib').Amount;
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
@@ -49,7 +50,7 @@ describe('Test make_transfer', function() {
             expect(remote.createTransaction).to.have.calledWith('Payment', {
                 account: alliceWallet.publicKey,
                 destination: bobWallet.publicKey,
-                amount: amount + '/EUR/' + alliceWallet.publicKey
+                amount: Amount.from_human(amount + 'EUR')
             });
             expect(Utils.getNewConnectedRemote).to.have.calledWith(alliceWallet.publicKey, alliceWallet.passphrase);
 

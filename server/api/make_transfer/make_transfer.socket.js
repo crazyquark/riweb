@@ -7,6 +7,7 @@
 var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
 var Utils = require('./../../utils/utils');
+var Amount = require('ripple-lib').Amount;
 
 function makeTransfer(fromEmail, toEmail, amount){
   var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
@@ -23,7 +24,7 @@ function makeTransfer(fromEmail, toEmail, amount){
         var transaction = remote.createTransaction('Payment', {
             account: senderWallet.publicKey,
             destination: recvWallet.publicKey,
-            amount: amount + '/EUR/' + senderWallet.publicKey
+            amount: Amount.from_human(amount + 'EUR')
         });
     
         transaction.submit(function (err, res) {
