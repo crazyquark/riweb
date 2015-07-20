@@ -79,7 +79,7 @@ angular.module('riwebApp')
         function loadCurrentUserBalance() {
             console.log('loadCurrentUserBalance');
             var user = Auth.getCurrentUser();
-            RippleAccountService.resetAccount();
+            // RippleAccountService.resetAccount();
             socket.socket.on('post:account_info', function(account_info) {
               console.log('on.post:account_info');
               console.log(account_info);

@@ -6,7 +6,6 @@ var chai = require('chai');
 var expect = chai.expect;
 var Q = require('q');
 var ripple = require('ripple-lib');
-var Amount = require('ripple-lib').Amount;
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
@@ -36,9 +35,9 @@ describe('Test make_transfer', function() {
 
         sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
             if (email === 'alice@example.com') {
-                return Q.resolve(alliceWallet);
+                return Q.resolve([alliceWallet]);
             } else {
-                return Q.resolve(bobWallet);
+                return Q.resolve([bobWallet]);
             }
         });
 
@@ -50,11 +49,12 @@ describe('Test make_transfer', function() {
             expect(remote.createTransaction).to.have.calledWith('Payment', {
                 account: alliceWallet.publicKey,
                 destination: bobWallet.publicKey,
-                amount: Amount.from_human(amount + 'EUR')
+                amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
             });
+    
             expect(Utils.getNewConnectedRemote).to.have.calledWith(alliceWallet.publicKey, alliceWallet.passphrase);
 
-            expect(emitSpy).to.have.calledWith('make_transfer:success', {
+            expect(emitSpy).to.have.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
                 amount: amount,
@@ -62,9 +62,9 @@ describe('Test make_transfer', function() {
             });
 
             done();
-        }).done(null, function (error) {
+        }).done(null, function(error){
             done(error);
         });
-    });
+   });
 
 });
