@@ -36,15 +36,26 @@ function getNewConnectedRemote(rippleAddress, rippleSecret){
   return deferred.promise;
 }
 
-function getNewAdminRemote() {
+function getNewConnectedAdminRemote() {
+  var deferred = Q.defer();
   var remote = getNewRemote();
+
   remote.setSecret(ROOT_RIPPLE_ACCOUNT.address, ROOT_RIPPLE_ACCOUNT.secret);
-  return remote;
+
+  remote.connect(function(err, res){
+    if(!err){
+      deferred.resolve(remote);
+    } else {
+      console.error(err);
+      deferred.reject(err);
+    }
+  });
+  return deferred.promise;
 }
 
 module.exports.getNewRemote = getNewRemote;
 module.exports.getNewConnectedRemote = getNewConnectedRemote;
-module.exports.getNewAdminRemote = getNewAdminRemote;
+module.exports.getNewConnectedAdminRemote = getNewConnectedAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
 module.exports.getEventEmitter = function(){
     return eventEmitter;

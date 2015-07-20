@@ -1,20 +1,41 @@
 'use strict';
 
-var should = require('should');
+var sinon = require('sinon');
 var app = require('../../app');
-var request = require('supertest');
+var chai = require('chai');
+var expect = chai.expect;
+var Q = require('q');
+var ripple = require('ripple-lib');
+var sinonChai = require("sinon-chai");
+chai.use(sinonChai);
 
-describe('GET /api/set_root_flagss', function() {
+var Utils = require('./../../utils/utils');
+var SetRootFlags = require('./set_root_flags.socket');
 
-  xit('should respond with JSON array', function(done) {
-    request(app)
-      .get('/api/set_root_flagss')
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .end(function(err, res) {
-        if (err) return done(err);
-        res.body.should.be.instanceof(Array);
-        done();
-      });
-  });
+var TestingUtils = require('./../../../test/utils/testing_utils');
+
+describe('Test set_root_flags', function () {
+
+    var remote;
+    beforeEach(function () {
+        remote = TestingUtils.buildRemoteStub();
+        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q.resolve(remote));
+        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
+    });
+
+    it('should respond with success on proper trust set', function (done) {
+        sinon.mock(remote, 'createTransaction');
+
+        SetRootFlags.setRootFlags().then(function (result) {
+            expect(result.status).to.eql('success');
+            expect(remote.createTransaction).to.have.calledWith(
+                'AccountSet', {
+                    account: Utils.ROOT_RIPPLE_ACCOUNT.address,
+                    set: 'DefaultRipple'
+                });
+            done();
+        }).done(null, function (error) {
+            done(error);
+        });
+    });
 });
