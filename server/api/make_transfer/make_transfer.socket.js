@@ -4,7 +4,5 @@
 
 'use strict';
 
-var MakeTransfer = require('./make_transfer.model');
-
 exports.register = function() {
 }
