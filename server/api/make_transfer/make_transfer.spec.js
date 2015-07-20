@@ -29,7 +29,7 @@ describe('Test make_transfer', function() {
         emitSpy.restore();
     });
 
-    xit('should send 50 EURO from Alice to Bob', function (done) {
+    it('should send 50 EURO from Alice to Bob', function (done) {
         var alliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         var bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
 
@@ -44,20 +44,19 @@ describe('Test make_transfer', function() {
         var amount = 50;
 
         sinon.mock(remote, 'createTransaction');
-        sinon.mock(remote, 'setSecret');
 
         MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).then(function () {
             expect(remote.createTransaction).to.have.calledWith('Payment', {
                 account: alliceWallet.publicKey,
                 destination: bobWallet.publicKey,
-                amount: amount + '/EUR/' + TestingUtils.rootAccountAddress
+                amount: amount + '/EUR/' + alliceWallet.publicKey
             });
-            expect(remote.setSecret).to.have.calledWith(alliceWallet.publicKey, alliceWallet.passphrase);
+            expect(Utils.getNewConnectedRemote).to.have.calledWith(alliceWallet.publicKey, alliceWallet.passphrase);
 
-            expect(emitSpy).to.have.calledWith('make_transfer', {
+            expect(emitSpy).to.have.calledWith('make_transfer:success', {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
-                amout: amount,
+                amount: amount,
                 status: 'success'
             });
 
