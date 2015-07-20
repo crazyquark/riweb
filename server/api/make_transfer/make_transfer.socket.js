@@ -20,8 +20,11 @@ function makeTransfer(fromEmail, toEmail, amount){
      
      if (!(senderWallets.length === 1 && recvWallets.length === 1)) {
          var result = {
+             fromEmail: fromEmail,
+             toEmail: toEmail,
+             amount: amount,
              status: 'error',
-             error: 'missing account'
+             message: 'missing account'
          };
          Utils.getEventEmitter().emit('post:make_transfer', result);
          deferred.resolve(result);
