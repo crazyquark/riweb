@@ -14,14 +14,17 @@ function buildRemoteStub() {
         connect: sinon.stub(),
         setSecret: sinon.stub(),
         createTransaction: sinon.stub(),
-        requestAccountLines: sinon.stub()
+        requestAccountLines: sinon.stub(),
+        _stub_transaction: {}
     };
 
     var transaction = buildEmptyTransactionStub();
     remoteStub.connect.yields(null);
     remoteStub.createTransaction.returns(transaction);
     remoteStub.requestAccountLines.yields(null, {lines:[]});
-
+    
+    remoteStub._stub_transaction = transaction;
+    
     return  remoteStub;
 }
 

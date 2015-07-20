@@ -45,7 +45,18 @@ function makeTransfer(fromEmail, toEmail, amount){
         transaction.submit(function (err, res) {
             if (err) {
                 console.log(err);
-                deferred.reject(err);
+                Utils.getEventEmitter().emit('post:make_transfer', {
+                    fromEmail:  fromEmail,
+                    toEmail:    toEmail,
+                    amount:     amount,
+                    status:     'ripple error'
+                });
+                var stupidJavascriptError;
+                try{
+                  stupidJavascriptError = new Error('ripple error')
+                } catch(e){
+                  deferred.reject(e);
+                }
             }
             if (res) {
                 Utils.getEventEmitter().emit('post:make_transfer', {

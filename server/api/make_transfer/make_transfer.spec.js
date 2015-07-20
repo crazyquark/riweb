@@ -89,5 +89,29 @@ describe('Test make_transfer', function() {
             done(error);
         });
    });
+    
+   it('should send to upstream ripple error', function (done) {
+        var amount = 50;
 
+        sinon.mock(remote, 'createTransaction');
+        
+        var rippleError = 'ripple error';
+        
+        remote._stub_transaction.submit.yields(rippleError, {});
+        
+        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).done(function (error) {
+            expect(remote.createTransaction).to.have.callCount(1);
+            expect(Utils.getNewConnectedRemote).to.have.callCount(1);;
+    
+            expect(emitSpy).to.have.calledWith('post:make_transfer', {
+                fromEmail: 'alice@example.com',
+                toEmail: 'bob@example.com',
+                amount: amount,
+                status: 'ripple error'
+            });
+    
+            done();
+        });
+   });
+   
 });
