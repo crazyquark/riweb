@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-    .service('RippleAccountService', function (RippleRemoteService, RIPPLE_ROOT_ACCOUNT) {
+    .service('RippleAccountService', function () {
         var accountInfo = {};
 
         function resetAccount() {
@@ -14,7 +14,6 @@ angular.module('riwebApp')
 
         return {
             accountInfo: accountInfo,
-            resetAccount: resetAccount,
-            loadBalance: function (walletPublicKey, callback) { }
-    };
+            resetAccount: resetAccount
+        };
 });

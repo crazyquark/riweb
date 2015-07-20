@@ -74,7 +74,7 @@ describe('Test make_transfer', function() {
 
         MakeTransfer.makeTransfer('alice@example.com', 'charlie@example.com', amount).then(function () {
             expect(remote.createTransaction).to.have.callCount(0);
-            expect(Utils.getNewConnectedRemote).to.have.callCount(0);;
+            expect(Utils.getNewConnectedRemote).to.have.callCount(0);
     
             expect(emitSpy).to.have.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
@@ -101,12 +101,13 @@ describe('Test make_transfer', function() {
         
         MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).done(function (error) {
             expect(remote.createTransaction).to.have.callCount(1);
-            expect(Utils.getNewConnectedRemote).to.have.callCount(1);;
+            expect(Utils.getNewConnectedRemote).to.have.callCount(1);
     
             expect(emitSpy).to.have.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
                 amount: amount,
+                message: 'Ripple error',
                 status: 'ripple error'
             });
     

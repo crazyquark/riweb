@@ -8,17 +8,7 @@ angular.module('riwebApp')
             wallet: {}
         };
 
-        var theRemote;
         var currentUser = Auth.getCurrentUser();
-
-        function showTransactionResultMessage(err) {
-            if (err) {
-                swal('Error', 'Failed to set the DefaultRipple flag on the cold wallet account: ' + err.message, 'error');
-            }
-            else {
-                swal('Info', 'Set the DefaultRipple flag on the cold wallet account', 'info');
-            }
-        }
 
         function getCurrentUserWallet(callback){
             currentUser = Auth.getCurrentUser();
@@ -35,57 +25,19 @@ angular.module('riwebApp')
                 swal('Error', 'Sorry there was a problem processing your request!', 'error');
               }
             });
-            socket.socket.emit('create_wallet', {ownerEmail: currentUser.email})
-        }
-
-        function setAccountFlagsForAdmin(err, flags) {
-            if (err) {
-                swal('Error', 'There was an error communicating with the server: ' + err.message, 'error');
-            }
-            else {
-                /*jshint bitwise: false*/
-                if (!(flags & 0x00800000)) {
-                    // OK, let's set the DefaultRipple flag if it's not there
-                    theRemote.setSecret(RIPPLE_ROOT_ACCOUNT.address, RIPPLE_ROOT_ACCOUNT.secret);
-
-                    var transaction = theRemote.createTransaction('AccountSet', {
-                        account: RIPPLE_ROOT_ACCOUNT.address,
-                        set: 'DefaultRipple'
-                    });
-
-                    transaction.submit(showTransactionResultMessage);
-
-                } else {
-                    console.log('The admin account wallet has the DefaultRipple flag active, flags are: ' + flags);
-                }
-            }
-        }
-
-        function checkColdWalletFlagsWithRemote(remote) {
-            theRemote = remote;
-
-            var reqOptions = {
-                account: RIPPLE_ROOT_ACCOUNT.address,
-                ledger: 'validated'
-            };
-
-            theRemote.requestAccountFlags(reqOptions, setAccountFlagsForAdmin);
-        }
-
-        function checkColdWalletFlags() {
-            RippleRemoteService.onRemotePresent(checkColdWalletFlagsWithRemote);
+            socket.socket.emit('create_wallet', {ownerEmail: currentUser.email});
         }
 
         function loadCurrentUserBalance() {
             console.log('loadCurrentUserBalance');
             var user = Auth.getCurrentUser();
             // RippleAccountService.resetAccount();
-            socket.socket.on('post:account_info', function(account_info) {
+            socket.socket.on('post:account_info', function(accountInfo) {
               console.log('on.post:account_info');
-              console.log(account_info);
+             console.log(accountInfo);
 
               RippleAccountService.accountInfo.account = user.name;
-              RippleAccountService.accountInfo.balance = account_info.balance;
+              RippleAccountService.accountInfo.balance = accountInfo.balance;
             });
             socket.socket.emit('account_info', user.email);
         }

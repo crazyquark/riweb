@@ -49,6 +49,7 @@ function makeTransfer(fromEmail, toEmail, amount){
                     fromEmail:  fromEmail,
                     toEmail:    toEmail,
                     amount:     amount,
+                    message:     'Ripple error',
                     status:     'ripple error'
                 });
                 var stupidJavascriptError;
