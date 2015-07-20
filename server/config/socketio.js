@@ -18,6 +18,7 @@ function onConnect(socket) {
   });
 
   // Insert sockets below
+  require('../api/set_root_flags/set_root_flags.socket').register(socket);
   require('../api/make_transfer/make_transfer.socket').register(socket);
   require('../api/set_trust/set_trust.socket').register(socket);
   require('../api/account_info/account_info.socket').register(socket);

@@ -78,4 +78,12 @@ describe('Test create_wallet', function () {
             done();
         }).done(null, function(error){done(error);});
     });
+
+    it('should set root flag when create new wallet', function (done) {
+        create_wallet.create_wallet_for_email('admin@admin.com').then(function () {
+            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.calledWith('set_root_flags');
+            done();
+        }).done(null, function(error){done(error);});
+    });
 });
