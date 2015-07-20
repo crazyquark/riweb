@@ -16,7 +16,7 @@ var TestingUtils = require('./../../../test/utils/testing_utils');
 
 var MakeTransfer = require('./make_transfer.socket');
 
-describe('Test make_transfer', function() {
+describe('Test make_transfer', function () {
 
     var remote, emitSpy, alliceWallet, bobWallet;
     beforeEach(function () {
@@ -50,7 +50,7 @@ describe('Test make_transfer', function() {
                 destination: bobWallet.publicKey,
                 amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
             });
-    
+
             expect(Utils.getNewConnectedRemote).to.have.calledWith(alliceWallet.publicKey, alliceWallet.passphrase);
 
             expect(emitSpy).to.have.calledWith('post:make_transfer', {
@@ -61,10 +61,10 @@ describe('Test make_transfer', function() {
             });
 
             done();
-        }).done(null, function(error){
+        }).done(null, function (error) {
             done(error);
         });
-   });
+    });
 
 
     it('should not send to unexisting address', function (done) {
@@ -75,7 +75,7 @@ describe('Test make_transfer', function() {
         MakeTransfer.makeTransfer('alice@example.com', 'charlie@example.com', amount).then(function () {
             expect(remote.createTransaction).to.have.callCount(0);
             expect(Utils.getNewConnectedRemote).to.have.callCount(0);
-    
+
             expect(emitSpy).to.have.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
                 toEmail: 'charlie@example.com',
@@ -85,24 +85,24 @@ describe('Test make_transfer', function() {
             });
 
             done();
-        }).done(null, function(error){
+        }).done(null, function (error) {
             done(error);
         });
-   });
-    
-   it('should send to upstream ripple error', function (done) {
+    });
+
+    it('should send to upstream ripple error', function (done) {
         var amount = 50;
 
         sinon.mock(remote, 'createTransaction');
-        
+
         var rippleError = 'ripple error';
-        
+
         remote._stub_transaction.submit.yields(rippleError, {});
-        
+
         MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).done(function (error) {
             expect(remote.createTransaction).to.have.callCount(1);
             expect(Utils.getNewConnectedRemote).to.have.callCount(1);
-    
+
             expect(emitSpy).to.have.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
@@ -110,9 +110,9 @@ describe('Test make_transfer', function() {
                 message: 'Ripple error',
                 status: 'ripple error'
             });
-    
+
             done();
         });
-   });
-   
+    });
+
 });

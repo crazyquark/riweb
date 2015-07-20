@@ -16,4 +16,4 @@ angular.module('riwebApp')
             accountInfo: accountInfo,
             resetAccount: resetAccount
         };
-});
+    });
