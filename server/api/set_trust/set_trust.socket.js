@@ -48,7 +48,7 @@ function set_trust_by_email(userEmail, bankAdminEmail) {
 exports.setTrust = setTrust;
 exports.set_trust_by_email = set_trust_by_email;
 exports.register = function() {
-  Utils.eventEmitter.on('set_trust', function(data) {
+  Utils.getEventEmitter().on('set_trust', function(data) {
     setTrust(data.rippleDestinationAddr, data.rippleSourceAddr, data.rippleSourceSecret);
   });
 };

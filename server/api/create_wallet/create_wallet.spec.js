@@ -17,7 +17,7 @@ var Wallet = require('./../wallet/wallet.model');
 
 describe('Test create_wallet', function () {
 
-    var socket, remote, nonAdminRippleGeneratedWallet, adminMongooseWallet;
+    var socket, remote, nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy;
 
     beforeEach(function () {
         socket = TestingUtils.buildSocketSpy();
@@ -30,6 +30,7 @@ describe('Test create_wallet', function () {
         Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
 
         create_wallet.register(socket);
+        emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
     });
 
     beforeEach(function () {
@@ -37,6 +38,7 @@ describe('Test create_wallet', function () {
     });
     afterEach(function () {
         Wallet.create.restore();
+        emitSpy.restore();
     });
 
     it('should create root wallet for admin@admin.com', function (done) {
@@ -66,8 +68,6 @@ describe('Test create_wallet', function () {
     });
 
     it('should set_trust when create new wallet', function (done) {
-        var emitSpy = sinon.spy(Utils.eventEmitter, 'emit');
-
         create_wallet.create_wallet_for_email('a3@example.com').then(function () {
             expect(emitSpy).to.have.callCount(1);
             expect(emitSpy).to.have.calledWith('set_trust', {

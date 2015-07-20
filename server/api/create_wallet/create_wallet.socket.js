@@ -43,7 +43,7 @@ function fund_wallet(wallet, amount) {
                   // console.log('Successfully funded wallet ' + ripple_address +
                   //             ' with 60 XRP');
                   deferred.resolve(wallet);
-                  Utils.eventEmitter.emit('set_trust', {
+                  Utils.getEventEmitter().emit('set_trust', {
                       rippleDestinationAddr: ROOT_RIPPLE_ACCOUNT.address,
                       rippleSourceAddr: wallet.publicKey,
                       rippleSourceSecret: wallet.passphrase

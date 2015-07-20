@@ -46,4 +46,6 @@ module.exports.getNewRemote = getNewRemote;
 module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewAdminRemote = getNewAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
-module.exports.eventEmitter = eventEmitter;
+module.exports.getEventEmitter = function(){
+    return eventEmitter;
+};
