@@ -13,7 +13,7 @@ var socket;
 
 var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
 
-function fund_wallet(wallet, amount) {
+function fundWallet(wallet, amount) {
   var deferred = Q.defer();
   amount = amount || 60;
 
@@ -52,7 +52,7 @@ function fund_wallet(wallet, amount) {
   return deferred.promise;
 }
 
-function save_wallet_to_db(wallet) {
+function saveWalletToDb(wallet) {
   return Wallet.findByOwnerEmail(wallet.ownerEmail).then(function(foundWallet){
     if(!foundWallet){
       var deferred = Q.defer();
@@ -72,35 +72,35 @@ function save_wallet_to_db(wallet) {
   });
 }
 
-function create_admin_wallet(){
+function createAdminWallet(){
     return Q(Utils.ROOT_RIPPLE_ACCOUNT);
 }
 
-function create_new_wallet(){
+function createNewWallet(){
     return Q.fcall(ripple.Wallet.generate);
 }
 
-function get_create_wallet(owner_email){
-    if (owner_email === 'admin@admin.com') {
-        return create_admin_wallet;
+function getCreateWallet(ownerEmail){
+    if (ownerEmail === 'admin@admin.com') {
+        return createAdminWallet;
     } else {
-        return create_new_wallet;
+        return createNewWallet;
     }
 }
 
-function createWalletForEmail(owner_email) {
-    var create_wallet = get_create_wallet(owner_email);
+function createWalletForEmail(ownerEmail) {
+    var create_wallet = getCreateWallet(ownerEmail);
 
     var promise = create_wallet()
-        .then(convert_ripple_to_riweb_wallet)
-        .then(save_wallet_to_db)
-        .then(fund_wallet);
+        .then(convertRippleToRiwebWallet)
+        .then(saveWalletToDb)
+        .then(fundWallet);
 
-    function convert_ripple_to_riweb_wallet(ripple_wallet) {
+    function convertRippleToRiwebWallet(rippleWallet) {
         return {
-            ownerEmail: owner_email,
-            address: ripple_wallet.address,
-            secret: ripple_wallet.secret
+            ownerEmail: ownerEmail,
+            address: rippleWallet.address,
+            secret: rippleWallet.secret
         };
     }
 
@@ -108,7 +108,7 @@ function createWalletForEmail(owner_email) {
 }
 
 exports.createWalletForEmail = createWalletForEmail;
-exports.fund_wallet = fund_wallet;
+exports.fundWallet = fundWallet;
 
 exports.register = function(newSocket) {
   socket = newSocket;
