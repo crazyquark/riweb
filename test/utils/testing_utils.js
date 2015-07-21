@@ -22,9 +22,9 @@ function buildRemoteStub() {
     remoteStub.connect.yields(null);
     remoteStub.createTransaction.returns(transaction);
     remoteStub.requestAccountLines.yields(null, {lines:[]});
-    
+
     remoteStub._stub_transaction = transaction;
-    
+
     return  remoteStub;
 }
 
@@ -64,11 +64,11 @@ function getAdminMongooseWallet() {
 }
 
 function buildFindByOwnerEmailForAdmin(wallet){
-    sinon.stub(wallet, 'findByOwnerEmail').returns(Q.resolve([{
+    sinon.stub(wallet, 'findByOwnerEmail').returns(Q.resolve({
         ownerEmail: 'admin@admin.com',
         passphrase: 'masterpassphrase',
         publicKey: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
-    }]));
+    }));
 }
 
 function buildCreateForEmailStub(wallet, email){
@@ -76,7 +76,7 @@ function buildCreateForEmailStub(wallet, email){
 }
 
 function buildFindByOwnerEmailForUnexisting(wallet){
-    sinon.stub(wallet, 'findByOwnerEmail').returns(Q.resolve([]));
+    sinon.stub(wallet, 'findByOwnerEmail').returns(Q.resolve({}));
 }
 
 

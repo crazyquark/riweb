@@ -37,6 +37,7 @@ function getNewConnectedRemote(rippleAddress, rippleSecret){
 }
 
 function getNewConnectedAdminRemote() {
+  //return getNewConnectedRemote(ROOT_RIPPLE_ACCOUNT.address, ROOT_RIPPLE_ACCOUNT.secret);
   var deferred = Q.defer();
   var remote = getNewRemote();
 

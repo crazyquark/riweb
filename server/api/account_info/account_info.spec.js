@@ -23,10 +23,9 @@ describe('Test account_info', function () {
         ripple.Wallet.generate = sinon.stub().returns(TestingUtils.getNonAdminRippleGeneratedWallet());
 
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewRemote = sinon.stub().returns(remote);
-
         account_info.register(socket);
 
+        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q.resolve(remote));
         Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
     });
 

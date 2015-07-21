@@ -28,6 +28,7 @@ describe('Test create_wallet', function () {
 
         remote = TestingUtils.buildRemoteStub();
         Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
+        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q.resolve(remote));
 
         create_wallet.register(socket);
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');

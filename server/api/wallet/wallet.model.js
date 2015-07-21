@@ -10,21 +10,21 @@ var WalletSchema = new Schema({
   passphrase: String
 });
 
-WalletSchema.statics.findByOwnerEmail = function(ownerEmail){
-    var deferred = Q.defer();
-
-    this.find({ownerEmail: ownerEmail}, function (err, wallet) {
-        if(err){
-            deferred.reject(err);
-        } else {
-            deferred.resolve(wallet);
-        }
-    });
-    return deferred.promise;
-};
-
 //WalletSchema.statics.findByOwnerEmail = function(ownerEmail){
-//  return this.findOneQ({ownerEmail: ownerEmail});
+//    var deferred = Q.defer();
+//
+//    this.find({ownerEmail: ownerEmail}, function (err, wallet) {
+//        if(err){
+//            deferred.reject(err);
+//        } else {
+//            deferred.resolve(wallet);
+//        }
+//    });
+//    return deferred.promise;
 //};
+
+WalletSchema.statics.findByOwnerEmail = function(ownerEmail){
+  return this.findOneQ({ownerEmail: ownerEmail});
+};
 
 module.exports = mongoose.model('Wallet', WalletSchema);
