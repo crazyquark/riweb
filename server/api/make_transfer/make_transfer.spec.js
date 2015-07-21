@@ -18,16 +18,16 @@ var MakeTransfer = require('./make_transfer.socket');
 
 describe('Test make_transfer', function () {
 
-    var remote, emitSpy, alliceWallet, bobWallet;
+    var remote, emitSpy, aliceWallet, bobWallet;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
         Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
-        alliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
+        aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
         sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
             if (email === 'alice@example.com') {
-                return Q([alliceWallet]);
+                return Q([aliceWallet]);
             } else if (email === 'bob@example.com') {
                 return Q([bobWallet]);
             }
@@ -46,12 +46,12 @@ describe('Test make_transfer', function () {
 
         MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).then(function () {
             expect(remote.createTransaction).to.have.been.calledWith('Payment', {
-                account: alliceWallet.address,
+                account: aliceWallet.address,
                 destination: bobWallet.address,
-                amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
+                amount: amount + '/EUR/' + aliceWallet.address
             });
 
-            expect(Utils.getNewConnectedRemote).to.have.been.calledWith(alliceWallet.address, alliceWallet.secret);
+            expect(Utils.getNewConnectedRemote).to.have.been.calledWith(aliceWallet.address, aliceWallet.secret);
 
             expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',

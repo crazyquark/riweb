@@ -18,7 +18,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
         var senderWallets = senderWalletPromise.value;
         var recvWallets = recvWalletPromise.value;
 
-        if (!(senderWallets.length === 1 && recvWallets.length === 1)) {
+        function buildMissingError() {
             var result = {
                 fromEmail: fromEmail,
                 toEmail: toEmail,
@@ -26,20 +26,38 @@ function makeTransfer(fromEmail, toEmail, amount) {
                 status: 'error',
                 message: 'missing account'
             };
+
             Utils.getEventEmitter().emit('post:make_transfer', result);
             deferred.resolve(result);
-
-            return deferred.promise;
         }
+        
+        var senderWallet, recvWallet;
+        
+        if (senderWallets.constructor === Array) {
+            if (!(senderWallets.length === 1 && recvWallets.length === 1)) {
+                buildMissingError();
 
-        var senderWallet = senderWallets[0];
-        var recvWallet = recvWallets[0];
+                return deferred.promise;
+            }
+
+            senderWallet = senderWallets[0];
+            recvWallet = recvWallets[0];
+        } else {
+            if (!senderWallets || !recvWallets) {
+                buildMissingError();
+
+                return deferred.promise;
+            }
+
+            senderWallet = senderWallets;
+            recvWallet = recvWallets;
+        }
 
         Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
             var transaction = remote.createTransaction('Payment', {
                 account: senderWallet.address,
                 destination: recvWallet.address,
-                amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
+                amount: amount + '/EUR/' + senderWallet.address
             });
 
             transaction.submit(function (err, res) {
