@@ -17,28 +17,23 @@ var Wallet = require('./../wallet/wallet.model');
 
 describe('Test create_wallet', function () {
 
-    var socket, remote, nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy;
+    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy;
 
     beforeEach(function () {
-        socket = TestingUtils.buildSocketSpy();
-
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         ripple.Wallet.generate = sinon.stub().returns(nonAdminRippleGeneratedWallet);
 
-        remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
-        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(remote));
-
-        CreateWallet.register(socket);
+        CreateWallet.register(TestingUtils.buildSocketSpy());
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
     });
 
     beforeEach(function () {
-        sinon.spy(Wallet, "create");
+        TestingUtils.buildWalletSpy();
+        TestingUtils.buildNewConnectedRemoteStub();
     });
     afterEach(function () {
-        Wallet.create.restore();
+        TestingUtils.restoreWalletSpy();
         emitSpy.restore();
     });
 

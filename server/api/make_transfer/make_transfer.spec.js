@@ -38,7 +38,7 @@ describe('Test make_transfer', function () {
 
     afterEach(function () {
         emitSpy.restore();
-        Wallet.findByOwnerEmail.restore();
+        TestingUtils.restoreWalletSpy();
     });
 
     it('should send 50 EURO from Alice to Bob', function (done) {

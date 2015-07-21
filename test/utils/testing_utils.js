@@ -1,5 +1,7 @@
 var sinon = require('sinon');
 var Q = require('q');
+var Wallet = require('./../../server/api/wallet/wallet.model');
+var Utils = require('./../../server/utils/utils');
 
 function buildSocketSpy() {
     return {
@@ -79,10 +81,39 @@ function buildFindByOwnerEmailForUnexisting(wallet){
     sinon.stub(wallet, 'findByOwnerEmail').returns(Q({}));
 }
 
+function buildGenericSpy(objectToSpyOn, methods){
+  methods.forEach(function(methodName){
+    sinon.spy(objectToSpyOn, methodName);
+  });
+}
+
+function restoreGenericSpy(objectToRestoreSpy, methods){
+  methods.forEach(function(methodName){
+    if(objectToRestoreSpy[methodName].restore){
+      objectToRestoreSpy[methodName].restore();
+    }
+  });
+}
+
+function buildWalletSpy(){
+  buildGenericSpy(Wallet, ["create"]);
+}
+
+function restoreWalletSpy(){
+  restoreGenericSpy(Wallet, ["create", "findByOwnerEmail"]);
+}
+
+function buildNewConnectedRemoteStub(){
+  Utils.getNewConnectedRemote = sinon.stub().returns(Q(buildRemoteStub()));
+  Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(buildRemoteStub()));
+}
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
 exports.buildSocketSpy = buildSocketSpy;
 exports.buildRemoteStub = buildRemoteStub;
+exports.buildWalletSpy = buildWalletSpy;
+exports.restoreWalletSpy = restoreWalletSpy;
+exports.buildNewConnectedRemoteStub = buildNewConnectedRemoteStub;
 exports.buildCreateForEmailStub = buildCreateForEmailStub;
 exports.buildEmptyTransactionStub = buildEmptyTransactionStub;
 exports.getNonAdminRippleGeneratedWallet = getNonAdminRippleGeneratedWallet;
