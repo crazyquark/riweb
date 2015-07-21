@@ -1,6 +1,7 @@
 {
   "extends": ".jshintrc",
-  "globals": {
+    "newcap":false,
+    "globals": {
     "describe": true,
     "it": true,
     "before": true,
