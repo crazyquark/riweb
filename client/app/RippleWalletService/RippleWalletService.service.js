@@ -31,6 +31,11 @@ angular.module('riwebApp')
         function loadCurrentUserBalance() {
             console.log('loadCurrentUserBalance');
             var user = Auth.getCurrentUser();
+            
+            if (!user.email) {
+                return; // No user is logged in, please go away
+            }
+            
             // RippleAccountService.resetAccount();
             socket.socket.on('post:account_info', function (accountInfo) {
                 console.log('on.post:account_info');
