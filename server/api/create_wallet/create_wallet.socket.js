@@ -55,17 +55,10 @@ function fundWallet(wallet, amount) {
 function saveWalletToDb(wallet) {
   return Wallet.findByOwnerEmail(wallet.ownerEmail).then(function(foundWallet){
     if(!foundWallet){
-      var deferred = Q.defer();
-      Wallet.create(wallet, function (err, savedWallet) {
-        if (!err) {
+      return Wallet.createQ(wallet).then(function(savedWallet) {
           socket.emit('post:create_wallet', null, savedWallet.address);
-          deferred.resolve(savedWallet);
-        } else {
-          socket.emit('post:create_wallet', 'error', null);
-          deferred.reject(err);
-        }
+          return savedWallet;
       });
-      return deferred.promise;
     } else {
       return Q(foundWallet);
     }
