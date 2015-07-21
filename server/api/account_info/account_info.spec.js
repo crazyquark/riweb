@@ -41,7 +41,7 @@ describe('Test account_info', function () {
         TestingUtils.buildFindByOwnerEmailForUnexisting(Wallet);
 
         AccountInfo.getAccountInfo('not_exist@example.com', socket).then(function () {
-            expect(socket.emit).to.have.calledWith('post:account_info', {info: 'User does not exist!'});
+            expect(socket.emit).to.have.been.calledWith('post:account_info', {info: 'User does not exist!'});
             expect(socket.emit).to.have.callCount(1);
             done();
         }).done(null, function(error){done(error);});
@@ -52,7 +52,7 @@ describe('Test account_info', function () {
 
         AccountInfo.getAccountInfo('admin@admin.com', socket).then(function () {
             expect(socket.emit).to.have.callCount(1);
-            expect(socket.emit).to.have.calledWith('post:account_info', {balance: 0});
+            expect(socket.emit).to.have.been.calledWith('post:account_info', {balance: 0});
             done();
         }).done(null, function(error){done(error);});
     });

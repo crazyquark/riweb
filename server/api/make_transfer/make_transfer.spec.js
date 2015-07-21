@@ -45,15 +45,15 @@ describe('Test make_transfer', function () {
         var amount = 50;
 
         MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).then(function () {
-            expect(remote.createTransaction).to.have.calledWith('Payment', {
+            expect(remote.createTransaction).to.have.been.calledWith('Payment', {
                 account: alliceWallet.address,
                 destination: bobWallet.address,
                 amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
             });
 
-            expect(Utils.getNewConnectedRemote).to.have.calledWith(alliceWallet.address, alliceWallet.secret);
+            expect(Utils.getNewConnectedRemote).to.have.been.calledWith(alliceWallet.address, alliceWallet.secret);
 
-            expect(emitSpy).to.have.calledWith('post:make_transfer', {
+            expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
                 amount: amount,
@@ -76,7 +76,7 @@ describe('Test make_transfer', function () {
             expect(remote.createTransaction).to.have.callCount(0);
             expect(Utils.getNewConnectedRemote).to.have.callCount(0);
 
-            expect(emitSpy).to.have.calledWith('post:make_transfer', {
+            expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
                 toEmail: 'charlie@example.com',
                 amount: amount,
@@ -103,7 +103,7 @@ describe('Test make_transfer', function () {
             expect(remote.createTransaction).to.have.callCount(1);
             expect(Utils.getNewConnectedRemote).to.have.callCount(1);
 
-            expect(emitSpy).to.have.calledWith('post:make_transfer', {
+            expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
                 amount: amount,

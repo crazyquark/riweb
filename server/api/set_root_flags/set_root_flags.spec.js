@@ -28,7 +28,7 @@ describe('Test set_root_flags', function () {
 
         SetRootFlags.setRootFlags().then(function (result) {
             expect(result.status).to.eql('success');
-            expect(remote.createTransaction).to.have.calledWith(
+            expect(remote.createTransaction).to.have.been.calledWith(
                 'AccountSet', {
                     account: Utils.ROOT_RIPPLE_ACCOUNT.address,
                     set: 'DefaultRipple'

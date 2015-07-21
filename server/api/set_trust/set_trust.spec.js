@@ -34,7 +34,7 @@ describe('Test set_trust', function () {
 
         SetTrust.setTrust(data.rippleDestinationAddr, data.rippleSourceAddr, data.rippleSourceSecret).then(function (result) {
             expect(result.status).to.eql('success');
-            expect(remote.createTransaction).to.have.calledWith(
+            expect(remote.createTransaction).to.have.been.calledWith(
                 'TrustSet', {
                     account: nonAdminWallet.address,
                     limit: '1000/EUR/' + adminWallet.address
