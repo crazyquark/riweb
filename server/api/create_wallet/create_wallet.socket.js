@@ -88,7 +88,7 @@ function get_create_wallet(owner_email){
     }
 }
 
-function create_wallet_for_email(owner_email) {
+function createWalletForEmail(owner_email) {
     var create_wallet = get_create_wallet(owner_email);
 
     var promise = create_wallet()
@@ -107,12 +107,12 @@ function create_wallet_for_email(owner_email) {
     return promise;
 }
 
-exports.create_wallet_for_email = create_wallet_for_email;
+exports.createWalletForEmail = createWalletForEmail;
 exports.fund_wallet = fund_wallet;
 
 exports.register = function(newSocket) {
   socket = newSocket;
   socket.on('create_wallet', function(data) {
-      create_wallet_for_email(data.ownerEmail);
+      createWalletForEmail(data.ownerEmail);
   });
 };

@@ -43,7 +43,7 @@ describe('Test create_wallet', function () {
     });
 
     it('should create root wallet for admin@admin.com', function (done) {
-        create_wallet.create_wallet_for_email('admin@admin.com').then(function () {
+        create_wallet.createWalletForEmail('admin@admin.com').then(function () {
             expect(Wallet.create).to.have.calledWith(TestingUtils.getAdminMongooseWallet());
             expect(Wallet.create).to.have.callCount(1);
             done();
@@ -51,7 +51,7 @@ describe('Test create_wallet', function () {
     });
 
     it('should create non-root wallet for a1@example.com', function (done) {
-        create_wallet.create_wallet_for_email('a1@example.com').then(function () {
+        create_wallet.createWalletForEmail('a1@example.com').then(function () {
           expect(Wallet.create).to.have.calledWith(TestingUtils.getNonAdminMongooseWallet('a1@example.com'));
           expect(Wallet.create).to.have.callCount(1);
           done();
@@ -59,8 +59,8 @@ describe('Test create_wallet', function () {
     });
 
     it('should not create duplicate wallet for a2@example.com', function (done) {
-        create_wallet.create_wallet_for_email('a2@example.com').then(function () {
-            create_wallet.create_wallet_for_email('a2@example.com').then(function () {
+        create_wallet.createWalletForEmail('a2@example.com').then(function () {
+            create_wallet.createWalletForEmail('a2@example.com').then(function () {
                 expect(Wallet.create).to.have.calledWith(TestingUtils.getNonAdminMongooseWallet('a2@example.com'));
                 expect(Wallet.create).to.have.callCount(1);
                 done();
@@ -69,7 +69,7 @@ describe('Test create_wallet', function () {
     });
 
     it('should set_trust when create new wallet', function (done) {
-        create_wallet.create_wallet_for_email('a3@example.com').then(function () {
+        create_wallet.createWalletForEmail('a3@example.com').then(function () {
             expect(emitSpy).to.have.callCount(1);
             expect(emitSpy).to.have.calledWith('set_trust', {
                 rippleDestinationAddr: adminMongooseWallet.address,
@@ -81,7 +81,7 @@ describe('Test create_wallet', function () {
     });
 
     it('should set root flag when create new wallet', function (done) {
-        create_wallet.create_wallet_for_email('admin@admin.com').then(function () {
+        create_wallet.createWalletForEmail('admin@admin.com').then(function () {
             expect(emitSpy).to.have.callCount(1);
             expect(emitSpy).to.have.calledWith('set_root_flags');
             done();
