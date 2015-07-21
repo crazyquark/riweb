@@ -17,7 +17,7 @@ function fund_wallet(wallet, amount) {
   var deferred = Q.defer();
   amount = amount || 60;
 
-  var ripple_address = wallet.publicKey;
+  var ripple_address = wallet.address;
 
   if (ripple_address === ROOT_RIPPLE_ACCOUNT.address) {
     Utils.getEventEmitter().emit('set_root_flags');
@@ -41,8 +41,8 @@ function fund_wallet(wallet, amount) {
               deferred.resolve(wallet);
               Utils.getEventEmitter().emit('set_trust', {
                   rippleDestinationAddr: ROOT_RIPPLE_ACCOUNT.address,
-                  rippleSourceAddr: wallet.publicKey,
-                  rippleSourceSecret: wallet.passphrase
+                  rippleSourceAddr: wallet.address,
+                  rippleSourceSecret: wallet.secret
               });
           }
         });
@@ -58,7 +58,7 @@ function save_wallet_to_db(wallet) {
       var deferred = Q.defer();
       Wallet.create(wallet, function (err, savedWallet) {
         if (!err) {
-          socket.emit('post:create_wallet', null, savedWallet.publicKey);
+          socket.emit('post:create_wallet', null, savedWallet.address);
           deferred.resolve(savedWallet);
         } else {
           socket.emit('post:create_wallet', 'error', null);
@@ -99,8 +99,8 @@ function create_wallet_for_email(owner_email) {
     function convert_ripple_to_riweb_wallet(ripple_wallet) {
         return {
             ownerEmail: owner_email,
-            publicKey: ripple_wallet.address,
-            passphrase: ripple_wallet.secret
+            address: ripple_wallet.address,
+            secret: ripple_wallet.secret
         };
     }
 

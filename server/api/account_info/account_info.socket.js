@@ -46,8 +46,8 @@ function get_account_info(owner_email, socket) {
   return Wallet.findByOwnerEmail(owner_email).then(function(foundWallet) {
       var deferred = Q.defer();
 
-     if (foundWallet && foundWallet.publicKey) { // There should be only one
-        get_ripple_account_info(foundWallet.publicKey).then(function(ripple_account_info) {
+     if (foundWallet && foundWallet.address) { // There should be only one
+        get_ripple_account_info(foundWallet.address).then(function(ripple_account_info) {
           var account_lines = {
             balance: ripple_account_info.lines.length > 0 ? ripple_account_info.lines[0].balance : 0
           };

@@ -50,24 +50,24 @@ function getNonAdminMongooseWallet(email_address, sufix) {
     sufix = sufix || '';
     return {
         ownerEmail: email_address,
-        passphrase: 'NONADMINssphrase' + sufix,
-        publicKey: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh' + sufix
+        secret: 'NONADMINssphrase' + sufix,
+        address: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh' + sufix
     };
 }
 
 function getAdminMongooseWallet() {
     return {
         ownerEmail: 'admin@admin.com',
-        passphrase: 'masterpassphrase',
-        publicKey: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
+        secret: 'masterpassphrase',
+        address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
     };
 }
 
 function buildFindByOwnerEmailForAdmin(wallet){
     sinon.stub(wallet, 'findByOwnerEmail').returns(Q({
         ownerEmail: 'admin@admin.com',
-        passphrase: 'masterpassphrase',
-        publicKey: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
+        secret: 'masterpassphrase',
+        address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
     }));
 }
 

@@ -6,8 +6,8 @@ var Q = require('q');
 
 var WalletSchema = new Schema({
   ownerEmail: String,
-  publicKey: String,
-  passphrase: String
+  address: String,
+  secret: String
 });
 
 //WalletSchema.statics.findByOwnerEmail = function(ownerEmail){

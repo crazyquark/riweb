@@ -35,10 +35,10 @@ function makeTransfer(fromEmail, toEmail, amount) {
         var senderWallet = senderWallets[0];
         var recvWallet = recvWallets[0];
 
-        Utils.getNewConnectedRemote(senderWallet.publicKey, senderWallet.passphrase).then(function (remote) {
+        Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
             var transaction = remote.createTransaction('Payment', {
-                account: senderWallet.publicKey,
-                destination: recvWallet.publicKey,
+                account: senderWallet.address,
+                destination: recvWallet.address,
                 amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
             });
 

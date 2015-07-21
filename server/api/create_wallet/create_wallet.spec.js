@@ -72,7 +72,7 @@ describe('Test create_wallet', function () {
         create_wallet.create_wallet_for_email('a3@example.com').then(function () {
             expect(emitSpy).to.have.callCount(1);
             expect(emitSpy).to.have.calledWith('set_trust', {
-                rippleDestinationAddr: adminMongooseWallet.publicKey,
+                rippleDestinationAddr: adminMongooseWallet.address,
                 rippleSourceAddr: nonAdminRippleGeneratedWallet.address,
                 rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
             });

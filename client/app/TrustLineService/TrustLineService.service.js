@@ -4,7 +4,7 @@ angular.module('riwebApp')
   .service('TrustLineService', function (Auth, RIPPLE_ROOT_ACCOUNT) {
 
         function makeInitialTrustLines(walletInfo, remote, rippleAddress) {
-            remote.setSecret(walletInfo.wallet.publicKey, walletInfo.wallet.passphrase);
+            remote.setSecret(walletInfo.wallet.address, walletInfo.wallet.secret);
 
             /*jshint camelcase: false */
             var transaction = remote.createTransaction('TrustSet', {

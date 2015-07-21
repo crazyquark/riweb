@@ -26,9 +26,9 @@ describe('Test set_trust', function () {
         var adminWallet = TestingUtils.getAdminMongooseWallet();
         var nonAdminWallet = TestingUtils.getNonAdminMongooseWallet();
         var data = {
-            rippleDestinationAddr: adminWallet.publicKey,
-            rippleSourceAddr: nonAdminWallet.publicKey,
-            rippleSourceSecret: nonAdminWallet.passphrase
+            rippleDestinationAddr: adminWallet.address,
+            rippleSourceAddr: nonAdminWallet.address,
+            rippleSourceSecret: nonAdminWallet.secret
         };
         sinon.mock(remote, 'createTransaction');
 
@@ -36,8 +36,8 @@ describe('Test set_trust', function () {
             expect(result.status).to.eql('success');
             expect(remote.createTransaction).to.have.calledWith(
                 'TrustSet', {
-                    account: nonAdminWallet.publicKey,
-                    limit: '1000/EUR/' + adminWallet.publicKey
+                    account: nonAdminWallet.address,
+                    limit: '1000/EUR/' + adminWallet.address
                 });
             done();
         }).done(null, function (error) {

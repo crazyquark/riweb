@@ -46,12 +46,12 @@ describe('Test make_transfer', function () {
 
         MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).then(function () {
             expect(remote.createTransaction).to.have.calledWith('Payment', {
-                account: alliceWallet.publicKey,
-                destination: bobWallet.publicKey,
+                account: alliceWallet.address,
+                destination: bobWallet.address,
                 amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
             });
 
-            expect(Utils.getNewConnectedRemote).to.have.calledWith(alliceWallet.publicKey, alliceWallet.passphrase);
+            expect(Utils.getNewConnectedRemote).to.have.calledWith(alliceWallet.address, alliceWallet.secret);
 
             expect(emitSpy).to.have.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
