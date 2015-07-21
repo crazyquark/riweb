@@ -12,7 +12,7 @@ chai.use(sinonChai);
 
 var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
-var account_info = require('./account_info.socket');
+var AccountInfo = require('./account_info.socket');
 var TestingUtils = require('./../../../test/utils/testing_utils');
 
 describe('Test account_info', function () {
@@ -23,7 +23,7 @@ describe('Test account_info', function () {
         ripple.Wallet.generate = sinon.stub().returns(TestingUtils.getNonAdminRippleGeneratedWallet());
 
         remote = TestingUtils.buildRemoteStub();
-        account_info.register(socket);
+        AccountInfo.register(socket);
 
         Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(remote));
         Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
@@ -40,7 +40,7 @@ describe('Test account_info', function () {
     it('should get account_info for unexisting email', function (done) {
         TestingUtils.buildFindByOwnerEmailForUnexisting(Wallet);
 
-        account_info.get_account_info('not_exist@example.com', socket).then(function () {
+        AccountInfo.getAccountInfo('not_exist@example.com', socket).then(function () {
             expect(socket.emit).to.have.calledWith('post:account_info', {info: 'User does not exist!'});
             expect(socket.emit).to.have.callCount(1);
             done();
@@ -50,7 +50,7 @@ describe('Test account_info', function () {
     it('should get account_info for admin email', function (done) {
         TestingUtils.buildFindByOwnerEmailForAdmin(Wallet);
 
-        account_info.get_account_info('admin@admin.com', socket).then(function () {
+        AccountInfo.getAccountInfo('admin@admin.com', socket).then(function () {
             expect(socket.emit).to.have.callCount(1);
             expect(socket.emit).to.have.calledWith('post:account_info', {balance: 0});
             done();

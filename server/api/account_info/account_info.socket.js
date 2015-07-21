@@ -10,10 +10,10 @@ var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
 var create_wallet = require('./../create_wallet/create_wallet.socket');
 
-function remote_request_account_lines(ripple_address, remote){
+function remoteRequestAccountLines(rippleAddress, remote){
   var deferred = Q.defer();
   var options = {
-    account: ripple_address,
+    account: rippleAddress,
     ledger: 'validated'
   };
   remote.requestAccountLines(options, function(err, info) {
@@ -27,12 +27,12 @@ function remote_request_account_lines(ripple_address, remote){
 }
 
 
-function get_ripple_account_info(ripple_address) {
+function getRippleAccountInfo(rippleAddress) {
   var deferred = Q.defer();
 
   Utils.getNewConnectedRemote()
     .then(function(remote){
-      remote_request_account_lines(ripple_address, remote).then(function(info){
+      remoteRequestAccountLines(rippleAddress, remote).then(function(info){
         deferred.resolve(info);
       });
     }).catch(function(err){
@@ -42,18 +42,18 @@ function get_ripple_account_info(ripple_address) {
   return deferred.promise;
 }
 
-function get_account_info(owner_email, socket) {
-  return Wallet.findByOwnerEmail(owner_email).then(function(foundWallet) {
+function getAccountInfo(ownerEmail, socket) {
+  return Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet) {
       var deferred = Q.defer();
 
      if (foundWallet && foundWallet.address) { // There should be only one
-        get_ripple_account_info(foundWallet.address).then(function(ripple_account_info) {
-          var account_lines = {
-            balance: ripple_account_info.lines.length > 0 ? ripple_account_info.lines[0].balance : 0
+        getRippleAccountInfo(foundWallet.address).then(function(rippleAccountInfo) {
+          var accountLines = {
+            balance: rippleAccountInfo.lines.length > 0 ? rippleAccountInfo.lines[0].balance : 0
           };
 
-          socket.emit('post:account_info', account_lines);
-          deferred.resolve(account_lines);
+          socket.emit('post:account_info', accountLines);
+          deferred.resolve(accountLines);
         }).catch(function(err){
           console.error(err);
           deferred.reject(err);
@@ -67,11 +67,11 @@ function get_account_info(owner_email, socket) {
 }
 
 
-exports.get_account_info = get_account_info;
+exports.getAccountInfo = getAccountInfo;
 
 exports.register = function(socket) {
-  socket.on('account_info', function(owner_email) {
-    console.log('account_info ' + owner_email);
-    get_account_info(owner_email, socket);
+  socket.on('account_info', function(ownerEmail) {
+    console.log('account_info ' + ownerEmail);
+    getAccountInfo(ownerEmail, socket);
   });
 };
