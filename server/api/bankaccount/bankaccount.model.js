@@ -1,7 +1,7 @@
 'use strict';
 
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
+var mongoose = require('mongoose-q')(require('mongoose'));
+var Schema = mongoose.Schema;
 
 var BankaccountSchema = new Schema({
   name: String,
