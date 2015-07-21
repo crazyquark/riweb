@@ -22,7 +22,6 @@
     "morgan": "^1.6.1",
     "passport": "~0.2.0",
     "passport-local": "~0.1.6",
-    "promisify-node": "^0.1.5",
     "q": "^1.4.1",
     "rewire": "^2.3.4",
     "ripple-lib": "^0.12.4",
