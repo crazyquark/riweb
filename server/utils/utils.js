@@ -40,7 +40,6 @@ function getNewConnectedAdminRemote() {
   return getNewConnectedRemote(ROOT_RIPPLE_ACCOUNT.address, ROOT_RIPPLE_ACCOUNT.secret);
 }
 
-module.exports.getNewRemote = getNewRemote;
 module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewConnectedAdminRemote = getNewConnectedAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
