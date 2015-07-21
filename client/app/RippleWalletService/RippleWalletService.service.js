@@ -40,7 +40,6 @@ angular.module('riwebApp')
                 return; // No user is logged in, please go away
             }
             
-            // RippleAccountService.resetAccount();
             socket.socket.on('post:account_info', function (accountInfo) {
                 console.log('on.post:account_info');
                 console.log(accountInfo);
