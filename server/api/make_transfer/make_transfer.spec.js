@@ -21,17 +21,17 @@ describe('Test make_transfer', function () {
     var remote, emitSpy, alliceWallet, bobWallet;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
+        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
         alliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
         sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
             if (email === 'alice@example.com') {
-                return Q.resolve([alliceWallet]);
+                return Q([alliceWallet]);
             } else if (email === 'bob@example.com') {
-                return Q.resolve([bobWallet]);
+                return Q([bobWallet]);
             }
-            return Q.resolve([]);
+            return Q([]);
         });
         sinon.mock(remote, 'createTransaction');
     });

@@ -27,8 +27,8 @@ describe('Test create_wallet', function () {
         ripple.Wallet.generate = sinon.stub().returns(nonAdminRippleGeneratedWallet);
 
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
-        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q.resolve(remote));
+        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
+        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(remote));
 
         create_wallet.register(socket);
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');

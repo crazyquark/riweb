@@ -19,8 +19,8 @@ describe('Test set_root_flags', function () {
     var remote;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q.resolve(remote));
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
+        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(remote));
+        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
     });
 
     it('should respond with success on proper trust set', function (done) {

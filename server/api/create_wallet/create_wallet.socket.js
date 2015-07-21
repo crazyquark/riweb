@@ -67,13 +67,13 @@ function save_wallet_to_db(wallet) {
       });
       return deferred.promise;
     } else {
-      return Q.resolve(foundWallet);
+      return Q(foundWallet);
     }
   });
 }
 
 function create_admin_wallet(){
-    return Q.resolve(Utils.ROOT_RIPPLE_ACCOUNT);
+    return Q(Utils.ROOT_RIPPLE_ACCOUNT);
 }
 
 function create_new_wallet(){

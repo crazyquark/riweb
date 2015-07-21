@@ -19,7 +19,7 @@ describe('Test set_trust', function () {
     var remote;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
+        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
     });
 
     it('should respond with success on proper trust set', function (done) {

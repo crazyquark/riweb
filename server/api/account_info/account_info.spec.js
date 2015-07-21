@@ -25,8 +25,8 @@ describe('Test account_info', function () {
         remote = TestingUtils.buildRemoteStub();
         account_info.register(socket);
 
-        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q.resolve(remote));
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q.resolve(remote));
+        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(remote));
+        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
     });
 
     beforeEach(function () {

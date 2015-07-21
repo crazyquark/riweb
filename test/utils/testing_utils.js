@@ -64,7 +64,7 @@ function getAdminMongooseWallet() {
 }
 
 function buildFindByOwnerEmailForAdmin(wallet){
-    sinon.stub(wallet, 'findByOwnerEmail').returns(Q.resolve({
+    sinon.stub(wallet, 'findByOwnerEmail').returns(Q({
         ownerEmail: 'admin@admin.com',
         passphrase: 'masterpassphrase',
         publicKey: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
@@ -72,11 +72,11 @@ function buildFindByOwnerEmailForAdmin(wallet){
 }
 
 function buildCreateForEmailStub(wallet, email){
-    sinon.stub(wallet, 'create').returns(Q.resolve([getNonAdminMongooseWallet(email)]));
+    sinon.stub(wallet, 'create').returns(Q([getNonAdminMongooseWallet(email)]));
 }
 
 function buildFindByOwnerEmailForUnexisting(wallet){
-    sinon.stub(wallet, 'findByOwnerEmail').returns(Q.resolve({}));
+    sinon.stub(wallet, 'findByOwnerEmail').returns(Q({}));
 }
 
 
