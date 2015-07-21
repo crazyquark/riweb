@@ -48,7 +48,7 @@ describe('Test make_transfer', function () {
             expect(remote.createTransaction).to.have.been.calledWith('Payment', {
                 account: aliceWallet.address,
                 destination: bobWallet.address,
-                amount: amount + '/EUR/' + aliceWallet.address
+                amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
             });
 
             expect(Utils.getNewConnectedRemote).to.have.been.calledWith(aliceWallet.address, aliceWallet.secret);

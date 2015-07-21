@@ -57,7 +57,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
             var transaction = remote.createTransaction('Payment', {
                 account: senderWallet.address,
                 destination: recvWallet.address,
-                amount: amount + '/EUR/' + senderWallet.address
+                amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
             });
 
             transaction.submit(function (err, res) {
