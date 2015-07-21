@@ -16,25 +16,22 @@ var AccountInfo = require('./account_info.socket');
 var TestingUtils = require('./../../../test/utils/testing_utils');
 
 describe('Test account_info', function () {
-    var socket, remote;
+    var socket;
     beforeEach(function () {
         socket = TestingUtils.buildSocketSpy();
 
         ripple.Wallet.generate = sinon.stub().returns(TestingUtils.getNonAdminRippleGeneratedWallet());
 
-        remote = TestingUtils.buildRemoteStub();
         AccountInfo.register(socket);
 
-        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(remote));
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
+        TestingUtils.buildNewConnectedRemoteStub();
     });
 
     beforeEach(function () {
-        sinon.spy(Wallet, "create");
+        TestingUtils.buildWalletSpy();
     });
     afterEach(function () {
-       Wallet.create.restore();
-       Wallet.findByOwnerEmail.restore();
+        TestingUtils.restoreWalletSpy();
     });
 
     it('should get account_info for unexisting email', function (done) {
