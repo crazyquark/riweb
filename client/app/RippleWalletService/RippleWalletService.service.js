@@ -12,7 +12,11 @@ angular.module('riwebApp')
 
         function getCurrentUserWallet(callback) {
             currentUser = Auth.getCurrentUser();
-
+            
+            if (!currentUser.email) {
+                return; // not logged in
+            }
+            
             socket.socket.on('post:create_wallet', function (err, rippleAddress) {
                 socket.socket.removeAllListeners('post:create_wallet');
                 if (!err) {
