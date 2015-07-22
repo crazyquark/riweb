@@ -10,7 +10,7 @@ var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
 
 function listTransactions(ownerEmail, socket) {
-	var deferred = Q.deffer();
+	var deferred = Q.defer();
 
 	function buildMissingError() {
 		var result = {
@@ -68,7 +68,7 @@ function listTransactions(ownerEmail, socket) {
 }
 
 exports.register = function (socket) {
-	socket.on('list_transactions', function (data) {
-		listTransactions(data.ownerEmail, socket);
+	socket.on('list_transactions', function (ownerEmail) {
+		listTransactions(ownerEmail, socket);
 	});
 }
