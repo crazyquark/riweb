@@ -17,17 +17,10 @@ angular.module('riwebApp')
                 return; // not logged in
             }
 
-            socket.socket.on('post:create_wallet', function (err, rippleAddress) {
+            socket.socket.on('post:create_wallet', function (rippleAddress) {
                 socket.socket.removeAllListeners('post:create_wallet');
-                if (!err) {
-                    walletInfo.wallet = rippleAddress;
-
-                    callback();
-                } else {
-                    walletInfo.wallet = {};
-                    callback();
-                    swal('Error', 'Sorry there was a problem processing your request!', 'error');
-                }
+                walletInfo.wallet = rippleAddress;
+                callback();
             });
             socket.socket.emit('create_wallet', { ownerEmail: currentUser.email });
         }
