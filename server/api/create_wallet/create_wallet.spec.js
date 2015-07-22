@@ -37,10 +37,12 @@ describe('Test create_wallet', function () {
         emitSpy.restore();
     });
 
-    it('should create root wallet for admin@admin.com', function (done) {
+    it('should create root wallet for admin@admin.com and call set_root_flags', function (done) {
         CreateWallet.createWalletForEmail('admin@admin.com').then(function () {
             expect(Wallet.create).to.have.been.calledWith(TestingUtils.getAdminMongooseWallet());
             expect(Wallet.create).to.have.callCount(1);
+            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.been.calledWith('set_root_flags');
             done();
         }).done(null, function(error){done(error);});
     });
@@ -75,11 +77,4 @@ describe('Test create_wallet', function () {
         }).done(null, function (error) { done(error); });
     });
 
-    it('should set root flag when create new wallet', function (done) {
-        CreateWallet.createWalletForEmail('admin@admin.com').then(function () {
-            expect(emitSpy).to.have.callCount(1);
-            expect(emitSpy).to.have.been.calledWith('set_root_flags');
-            done();
-        }).done(null, function(error){done(error);});
-    });
 });
