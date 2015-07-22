@@ -17,6 +17,12 @@ function fundWallet(wallet, amount) {
   var deferred = Q.defer();
   amount = amount || 60;
 
+  if (!wallet) {
+    deferred.resolve(null);
+    
+    return deferred.promise;
+  }
+  
   var ripple_address = wallet.address;
 
   if (ripple_address === ROOT_RIPPLE_ACCOUNT.address) {
@@ -28,16 +34,16 @@ function fundWallet(wallet, amount) {
                       destination: ripple_address,
                       amount : amount * 1000000
                     };
-      // console.log('Remote connected');
+
       var transaction = remote.createTransaction('Payment', options);
       transaction.submit(function (err, res) {
           if (err) {
-              // console.log('Failed to make initial XRP transfer because: ' +
-              //               err);
+              console.log('Failed to make initial XRP transfer because: ' +
+                            err);
               deferred.reject(err);
           } else {
-              // console.log('Successfully funded wallet ' + ripple_address +
-              //             ' with 60 XRP');
+              console.log('Successfully funded wallet ' + ripple_address +
+                          ' with 60 XRP');
               deferred.resolve(wallet);
               Utils.getEventEmitter().emit('set_trust', {
                   rippleDestinationAddr: ROOT_RIPPLE_ACCOUNT.address,
@@ -53,9 +59,10 @@ function fundWallet(wallet, amount) {
 }
 
 function saveWalletToDb(wallet) {
-  return Wallet.findByOwnerEmail(wallet.ownerEmail).then(function(foundWallet){
+  var deferred = Q.defer();
+  
+  Wallet.findByOwnerEmail(wallet.ownerEmail).then(function(foundWallet){
     if(!foundWallet){
-      var deferred = Q.defer();
       Wallet.create(wallet, function(err, savedWallet) {
         if(err){
           deferred.reject(err);
@@ -63,12 +70,15 @@ function saveWalletToDb(wallet) {
           socket.emit('post:create_wallet', wallet.address);
           deferred.resolve(wallet);
         }
+        
+        return deferred.promise;
       });
-      return deferred.promise;
     } else {
-      return Q(foundWallet);
+      deferred.resolve(null); // No new wallet created, skip the next promise in the chain   
     }
   });
+  
+  return deferred.promise;
 }
 
 function createAdminWallet(){
@@ -87,8 +97,6 @@ function getCreateWallet(ownerEmail){
     }
 }
 
-var walletsBeingCreated = [];
-
 function convertRippleToRiwebWallet(ownerEmail){
   var walletConverterFunction = function(rippleWallet) {
         return {
@@ -100,23 +108,15 @@ function convertRippleToRiwebWallet(ownerEmail){
     return walletConverterFunction;
 }
 
-function createWalletForEmail(ownerEmail) {
-   if (walletsBeingCreated[ownerEmail] === undefined) {
-    walletsBeingCreated[ownerEmail] = true;
+function createWalletForEmail(ownerEmail) {;
     var createWallet = getCreateWallet(ownerEmail);
 
     var promise = createWallet()
         .then(convertRippleToRiwebWallet(ownerEmail))
         .then(saveWalletToDb)
         .then(fundWallet)
-        .then(function(){
-          delete walletsBeingCreated[ownerEmail];
-        });
 
     return promise;
-   } else {
-     return Q({message: 'Creating wallet for '});
-   }
 }
 
 exports.createWalletForEmail = createWalletForEmail;
