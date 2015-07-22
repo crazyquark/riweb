@@ -41,9 +41,13 @@ angular.module('riwebApp')
                 RippleAccountService.accountInfo.balance = accountInfo.balance;
             });
 
-            socket.socket.on('post:list_transactions', function(result) {
+            socket.socket.on('post:list_transactions', function (result) {
                 if (result.status === 'success') {
                     RippleAccountService.accountInfo.transactions = result.transactions;
+                    if (console.table) {
+                        console.log('post:list_transactions');
+                        console.table(result.transactions);
+                    }
                 }
             });
 
