@@ -50,10 +50,15 @@ function listTransactions(ownerEmail, socket) {
 				ledger_index_max: -1,
 				binary: false
 			}, function (err, res) {
+				var result;
 				if (err) {
-					deferred.resolve({ status: 'error', message: err.message });
+					result = { status: 'error', message: err.message };
+					socket.emit('post:list_transactions', result);
+					deferred.resolve(result);
 				} else {
-					deferred.resolve({ status: 'success', transactions: res.transactions);
+					result = { status: 'success', transactions: res.transactions };
+					socket.emit('post:list_transactions', result);
+					deferred.resolve(result);
 				}
 			});
 		});
