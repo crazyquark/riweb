@@ -54,13 +54,16 @@ describe('Test create_wallet', function () {
     });
 
     it('should not create duplicate wallet for a2@example.com', function (done) {
-        CreateWallet.createWalletForEmail('a2@example.com').then(function () {
+        CreateWallet.createWalletForEmail('a2@example.com');
+        CreateWallet.createWalletForEmail('a2@example.com');
+        CreateWallet.createWalletForEmail('a2@example.com');
+        setTimeout(function () {
             CreateWallet.createWalletForEmail('a2@example.com').then(function () {
                 expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('a2@example.com'));
                 expect(Wallet.create).to.have.callCount(1);
                 done();
-            }).done(null, function(error){done(error);})
-        }).done(null, function(error){done(error);});
+            }).done(null, function (error) { done(error); })
+        }, 50);    
     });
 
     it('should set_trust when create new wallet', function (done) {
@@ -72,7 +75,7 @@ describe('Test create_wallet', function () {
                 rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
             });
             done();
-        }).done(null, function(error){done(error);});
+        }).done(null, function (error) { done(error); });
     });
 
     it('should set root flag when create new wallet', function (done) {
