@@ -23,6 +23,10 @@ describe('Test set_root_flags', function () {
         Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
     });
 
+    afterEach(function () {
+        TestingUtils.dropMongodbDatabase();
+    });
+
     it('should respond with success on proper trust set', function (done) {
         sinon.mock(remote, 'createTransaction');
 

@@ -40,6 +40,9 @@ describe('Test make_transfer', function () {
         emitSpy.restore();
         TestingUtils.restoreWalletSpy();
     });
+    afterEach(function () {
+        TestingUtils.dropMongodbDatabase();
+    });
 
     it('should send 50 EURO from Alice to Bob', function (done) {
         var amount = 50;
