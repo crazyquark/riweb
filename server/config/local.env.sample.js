@@ -10,5 +10,5 @@ module.exports = {
   SESSION_SECRET:   'riweb-secret',
 
   // Control debug level for modules using visionmedia/debug
-  DEBUG: ''
+  DEBUG: 'http*,socket.io*'
 };
