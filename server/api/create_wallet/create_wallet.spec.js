@@ -17,14 +17,15 @@ var Wallet = require('./../wallet/wallet.model');
 
 describe('Test create_wallet', function () {
 
-    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy;
+    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy;
 
     beforeEach(function () {
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         ripple.Wallet.generate = sinon.stub().returns(nonAdminRippleGeneratedWallet);
 
-        CreateWallet.register(TestingUtils.buildSocketSpy());
+        socketSpy = TestingUtils.buildSocketSpy();
+        CreateWallet.register(socketSpy);
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
     });
 
@@ -83,6 +84,14 @@ describe('Test create_wallet', function () {
         CreateWallet.createWalletForEmail('admin@admin.com').then(function () {
             expect(emitSpy).to.have.callCount(1);
             expect(emitSpy).to.have.been.calledWith('set_root_flags');
+            done();
+        }).done(null, function (error) { done(error); });
+    });
+
+    it('should emit post:create_wallet flag when create new wallet', function (done) {
+        CreateWallet.createWalletForEmail('a5@admin.com').then(function () {
+            expect(socketSpy.emit).to.have.callCount(1);
+            expect(socketSpy.emit).to.have.been.calledWith('post:create_wallet', sinon.match.string);
             done();
         }).done(null, function (error) { done(error); });
     });

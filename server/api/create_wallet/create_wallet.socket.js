@@ -17,11 +17,6 @@ function fundWallet(wallet, amount) {
   var deferred = Q.defer();
   amount = amount || 60;
 
-  if (!wallet) {
-    deferred.resolve(null);
-    
-    return deferred.promise;
-  }
   
   var ripple_address = wallet.address;
 
@@ -59,26 +54,7 @@ function fundWallet(wallet, amount) {
 }
 
 function saveWalletToDb(wallet) {
-  var deferred = Q.defer();
-  
-  Wallet.findByOwnerEmail(wallet.ownerEmail).then(function(foundWallet){
-    if(!foundWallet){
-      Wallet.create(wallet, function(err, savedWallet) {
-        if(err){
-          deferred.reject(err);
-        } else {
-          socket.emit('post:create_wallet', wallet.address);
-          deferred.resolve(wallet);
-        }
-        
-        return deferred.promise;
-      });
-    } else {
-      deferred.resolve(null); // No new wallet created, skip the next promise in the chain   
-    }
-  });
-  
-  return deferred.promise;
+  return Wallet.createQ(wallet);
 }
 
 function createAdminWallet(){
@@ -108,15 +84,24 @@ function convertRippleToRiwebWallet(ownerEmail){
     return walletConverterFunction;
 }
 
-function createWalletForEmail(ownerEmail) {;
-    var createWallet = getCreateWallet(ownerEmail);
-
-    var promise = createWallet()
-        .then(convertRippleToRiwebWallet(ownerEmail))
-        .then(saveWalletToDb)
-        .then(fundWallet)
-
-    return promise;
+function createWalletForEmail(ownerEmail) {
+  
+  return Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet){
+    if(!foundWallet){
+      var createWallet = getCreateWallet(ownerEmail);
+  
+      var promise = createWallet()
+          .then(convertRippleToRiwebWallet(ownerEmail))
+          .then(saveWalletToDb)
+          .then(fundWallet)
+  
+      return promise;
+    } else {
+      return Q(foundWallet);
+    }
+  }).then(function(foundWallet){
+    socket.emit('post:create_wallet', foundWallet.address);
+  });
 }
 
 exports.createWalletForEmail = createWalletForEmail;
