@@ -16,7 +16,7 @@ function translateTransactionsToHuman(transactionsList) {
 	var transactionsListHuman = [];
 	var walletsPromises = [];
 	var result = [];
-	
+
 	transactionsList.forEach(function (transaction) {
 
 		var transactionHuman = {
@@ -53,8 +53,8 @@ function translateTransactionsToHuman(transactionsList) {
 							amount: transactionsListHuman[wallet.address].amount,
 							fee: transactionsListHuman[wallet.address].fee
 						});
+						delete transactionsListHuman[wallet.address]
 					}
-					delete transactionsListHuman[wallet.address]
 				}
 			});
 
