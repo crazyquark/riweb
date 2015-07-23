@@ -4,6 +4,24 @@ var Q = require('q');
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
+var debug = require('debug')('EventEmitter');
+var error = debug('app:error');
+
+var loggedEmitter = {
+  emit: function loggedEmit(args){
+    debug(' ===> emit(', args, ')');
+    return eventEmitter.emit(args);
+  },
+  on: function loggedOn(eventName, listenerFunction){
+    return eventEmitter.on(eventName, loggedListenerFunction);
+
+    function loggedListenerFunction(args){
+      debug(' <=== on(', eventName, args, ')');
+      listenerFunction.call(args);
+    }
+  }
+};
+
 var ROOT_RIPPLE_ACCOUNT = {
     address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
     secret  : 'masterpassphrase'
@@ -29,7 +47,7 @@ function getNewConnectedRemote(rippleAddress, rippleSecret){
     if(!err){
       deferred.resolve(remote);
     } else {
-      console.error(err);
+      error(err);
       deferred.reject(err);
     }
   });
@@ -44,5 +62,5 @@ module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewConnectedAdminRemote = getNewConnectedAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
 module.exports.getEventEmitter = function(){
-    return eventEmitter;
+    return loggedEmitter;
 };
