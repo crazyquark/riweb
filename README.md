@@ -25,7 +25,7 @@ Install packages with bower from cache:
 *bower install --offline*  
 
 Start server:  
-*npm install -g grunt-cli*  
+*sudo npm install -g grunt-cli*  
 *grunt serve*  
 
 
