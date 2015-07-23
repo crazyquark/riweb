@@ -33,6 +33,9 @@ describe('Test account_info', function () {
     afterEach(function () {
         TestingUtils.restoreWalletSpy();
     });
+    afterEach(function () {
+        TestingUtils.dropMongodbDatabase();
+    });
 
     it('should get account_info for unexisting email', function (done) {
         TestingUtils.buildFindByOwnerEmailForUnexisting(Wallet);

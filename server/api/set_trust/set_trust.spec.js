@@ -21,6 +21,10 @@ describe('Test set_trust', function () {
         remote = TestingUtils.buildRemoteStub();
         Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
     });
+    
+    afterEach(function () {
+        TestingUtils.dropMongodbDatabase();
+    });
 
     it('should respond with success on proper trust set', function (done) {
         var adminWallet = TestingUtils.getAdminMongooseWallet();

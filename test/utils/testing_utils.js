@@ -2,6 +2,7 @@ var sinon = require('sinon');
 var Q = require('q');
 var Wallet = require('./../../server/api/wallet/wallet.model');
 var Utils = require('./../../server/utils/utils');
+var mongoose = require('mongoose-q')(require('mongoose'));
 
 function buildSocketSpy() {
     return {
@@ -23,11 +24,11 @@ function buildRemoteStub() {
     var transaction = buildEmptyTransactionStub();
     remoteStub.connect.yields(null);
     remoteStub.createTransaction.returns(transaction);
-    remoteStub.requestAccountLines.yields(null, {lines:[]});
+    remoteStub.requestAccountLines.yields(null, { lines: [] });
 
     remoteStub._stub_transaction = transaction;
 
-    return  remoteStub;
+    return remoteStub;
 }
 
 function buildEmptyTransactionStub() {
@@ -65,7 +66,7 @@ function getAdminMongooseWallet() {
     };
 }
 
-function buildFindByOwnerEmailForAdmin(wallet){
+function buildFindByOwnerEmailForAdmin(wallet) {
     sinon.stub(wallet, 'findByOwnerEmail').returns(Q({
         ownerEmail: 'admin@admin.com',
         secret: 'masterpassphrase',
@@ -73,42 +74,47 @@ function buildFindByOwnerEmailForAdmin(wallet){
     }));
 }
 
-function buildCreateForEmailStub(wallet, email){
+function buildCreateForEmailStub(wallet, email) {
     sinon.stub(wallet, 'create').returns(Q([getNonAdminMongooseWallet(email)]));
 }
 
-function buildFindByOwnerEmailForUnexisting(wallet){
+function buildFindByOwnerEmailForUnexisting(wallet) {
     sinon.stub(wallet, 'findByOwnerEmail').returns(Q({}));
 }
 
-function buildGenericSpy(objectToSpyOn, methods){
-  methods.forEach(function(methodName){
-    sinon.spy(objectToSpyOn, methodName);
-  });
+function buildGenericSpy(objectToSpyOn, methods) {
+    methods.forEach(function (methodName) {
+        sinon.spy(objectToSpyOn, methodName);
+    });
 }
 
-function restoreGenericSpy(objectToRestoreSpy, methods){
-  methods.forEach(function(methodName){
-    if(objectToRestoreSpy[methodName].restore){
-      objectToRestoreSpy[methodName].restore();
-    }
-  });
+function restoreGenericSpy(objectToRestoreSpy, methods) {
+    methods.forEach(function (methodName) {
+        if (objectToRestoreSpy[methodName].restore) {
+            objectToRestoreSpy[methodName].restore();
+        }
+    });
 }
 
-function buildWalletSpy(){
-  buildGenericSpy(Wallet, ["create"]);
+function buildWalletSpy() {
+    buildGenericSpy(Wallet, ["create"]);
 }
 
-function restoreWalletSpy(){
-  restoreGenericSpy(Wallet, ["create", "findByOwnerEmail"]);
+function restoreWalletSpy() {
+    restoreGenericSpy(Wallet, ["create", "findByOwnerEmail"]);
 }
 
-function buildNewConnectedRemoteStub(){
-  Utils.getNewConnectedRemote = sinon.stub().returns(Q(buildRemoteStub()));
-  Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(buildRemoteStub()));
+function buildNewConnectedRemoteStub() {
+    Utils.getNewConnectedRemote = sinon.stub().returns(Q(buildRemoteStub()));
+    Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(buildRemoteStub()));
+}
+
+function dropMongodbDatabase() {
+    mongoose.connection.db.dropDatabase();
 }
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
+exports.dropMongodbDatabase = dropMongodbDatabase;
 exports.buildSocketSpy = buildSocketSpy;
 exports.buildRemoteStub = buildRemoteStub;
 exports.buildWalletSpy = buildWalletSpy;

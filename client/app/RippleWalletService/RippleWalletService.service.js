@@ -12,22 +12,15 @@ angular.module('riwebApp')
 
         function getCurrentUserWallet(callback) {
             currentUser = Auth.getCurrentUser();
-            
+
             if (!currentUser.email) {
                 return; // not logged in
             }
-            
-            socket.socket.on('post:create_wallet', function (err, rippleAddress) {
-                socket.socket.removeAllListeners('post:create_wallet');
-                if (!err) {
-                    walletInfo.wallet = rippleAddress;
 
-                    callback();
-                } else {
-                    walletInfo.wallet = {};
-                    callback();
-                    swal('Error', 'Sorry there was a problem processing your request!', 'error');
-                }
+            socket.socket.on('post:create_wallet', function (rippleAddress) {
+                socket.socket.removeAllListeners('post:create_wallet');
+                walletInfo.wallet = rippleAddress;
+                callback();
             });
             socket.socket.emit('create_wallet', { ownerEmail: currentUser.email });
         }
@@ -35,11 +28,11 @@ angular.module('riwebApp')
         function loadCurrentUserBalance() {
             console.log('loadCurrentUserBalance');
             var user = Auth.getCurrentUser();
-            
+
             if (!user.email) {
                 return; // No user is logged in, please go away
             }
-            
+
             socket.socket.on('post:account_info', function (accountInfo) {
                 console.log('on.post:account_info');
                 console.log(accountInfo);
@@ -47,7 +40,19 @@ angular.module('riwebApp')
                 RippleAccountService.accountInfo.account = user.name;
                 RippleAccountService.accountInfo.balance = accountInfo.balance;
             });
+
+            socket.socket.on('post:list_transactions', function (result) {
+                if (result.status === 'success') {
+                    RippleAccountService.accountInfo.transactions = result.transactions;
+                    if (console.table) {
+                        console.log('post:list_transactions');
+                        console.table(result.transactions);
+                    }
+                }
+            });
+
             socket.socket.emit('account_info', user.email);
+            socket.socket.emit('list_transactions', user.email);
         }
 
         return {
