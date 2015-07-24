@@ -19,13 +19,13 @@ Start mongoDB server:
 *cd docker && ./start_mongo.sh*  
 
 Install bower:  
-*sudo npm install -g bower*  
+*npm install -g bower*  
 
 Install packages with bower from cache:  
 *bower install --offline*  
 
 Start server:  
-*sudo npm install -g grunt-cli*  
+*npm install -g grunt-cli*  
 *grunt serve*  
 
 
