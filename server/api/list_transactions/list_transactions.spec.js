@@ -103,10 +103,12 @@ describe('Test list_transactions', function() {
 					amount: 99 + '€',
 					fee: 12}];
 
-        ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
+            ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
 
-        expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
-
+            expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
+            expect(socketSpy.emit).to.have.callCount(1);
+            expect(socketSpy.emit).to.have.been.calledWith('post:list_transactions', 
+                { status: 'success', transactions: expectedHumanTransactions });
           done();
         }).done(null, function (error) {
             done(error);
