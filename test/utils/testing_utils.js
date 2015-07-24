@@ -18,6 +18,7 @@ function buildRemoteStub() {
         setSecret: sinon.stub(),
         createTransaction: sinon.stub(),
         requestAccountLines: sinon.stub(),
+        requestAccountTransactions: sinon.stub(),
         _stub_transaction: {}
     };
 
