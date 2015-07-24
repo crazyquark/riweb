@@ -10,7 +10,7 @@ var Q = require('q');
 var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
 
-function translateTransactionsToHuman(transactionsList) {
+function translateTransactionsToHuman(ownerEmail, transactionsList) {
 	var deferred = Q.defer();
 
 	var transactionsListHuman = [];
@@ -20,7 +20,8 @@ function translateTransactionsToHuman(transactionsList) {
 	transactionsList.forEach(function (transaction) {
 
 		var transactionHuman = {
-			account: transaction.tx.Destination,
+			source: ownerEmail,
+			destination: transaction.tx.Destination,
 			fee: transaction.tx.Fee,
 			txType: transaction.tx.TransactionType,
 			date: transaction.tx.date,
@@ -30,10 +31,10 @@ function translateTransactionsToHuman(transactionsList) {
 		if (transactionHuman.txType == 'Payment') {
 			if (typeof transactionHuman.amount === 'object') {
 				transactionHuman.amount = transactionHuman.amount.value; // Extract only EUR value	
-				transactionsListHuman[transactionHuman.account] = transactionHuman;
+				transactionsListHuman[transactionHuman.destination] = transactionHuman;
 				
 				// Wait for the owner email from the DB
-				walletsPromises.push(Wallet.findByRippleAddress(transactionHuman.account));
+				walletsPromises.push(Wallet.findByRippleAddress(transactionHuman.destination));
 			}
 		}
 
@@ -49,13 +50,11 @@ function translateTransactionsToHuman(transactionsList) {
 					var wallet = walletPromiseResult.value;
 	
 					result.push({
+						source: transactionHuman.source,
 						destination: wallet ? wallet.ownerEmail : '<<< deleted account >>>',
 						amount: transactionHuman.amount + '€',
 						fee: transactionHuman.fee
 					});
-					
-					// Free up some memory, because why not
-					delete transactionsListHuman[walletsPromises[idx].rippleAddress];
 				}
 			});
 
@@ -112,7 +111,7 @@ function listTransactions(ownerEmail, socket) {
 					socket.emit('post:list_transactions', result);
 					deferred.resolve(result);
 				} else {
-					translateTransactionsToHuman(res.transactions)
+					translateTransactionsToHuman(wallet.ownerEmail, res.transactions)
 						.then(function (transactionsHuman) {
 							result = { status: 'success', transactions: transactionsHuman };
 							socket.emit('post:list_transactions', result);
