@@ -10,7 +10,98 @@ var Q = require('q');
 var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
 
-function translateTransactionsToHuman(ownerEmail, transactionsList) {
+function findEmailFromAddress(rippleAddress){
+	return Wallet.findByRippleAddress(rippleAddress).then(function(foundWallet){
+		if(!foundWallet){
+			return '<<< deleted account >>>';
+		} else {
+			return foundWallet.ownerEmail;
+		}
+	})
+}
+
+function convertRippleTxToHuman(transaction){
+	
+  var sourceEmailPromise = findEmailFromAddress(transaction.tx.Account);
+  var destinationEmailPromise = findEmailFromAddress(transaction.tx.Destination);
+  return Q.all([sourceEmailPromise, destinationEmailPromise]).spread(function(sourceEmail, destinationEmail){
+		var transactionHuman = {
+					source: sourceEmail,
+					destination: destinationEmail,
+					amount: transaction.tx.Amount.value + '€',
+					fee: transaction.tx.Fee};
+					
+		return transactionHuman;
+  });
+}
+
+function listTransactions(ownerEmail, socket) {
+		var deferred = Q.defer();
+
+	function buildMissingError() {
+		var result = {
+			ownerEmail: ownerEmail,
+			status: 'error',
+			message: 'missing account'
+		}
+
+		socket.emit('post:list_transactions', result);
+		deferred.resolve(result);
+	}
+
+	var wallet;
+	Wallet.findByOwnerEmail(ownerEmail).then(function (wallets) {
+		if (wallets.constructor == Array) {
+			if (wallets.length != 1) {
+				buildMissingError();
+
+				return deferred.promise;
+			} else {
+				wallet = wallets[0];
+			}
+		} else {
+			if (!wallets) {
+				buildMissingError();
+
+				return deferred.promise;
+			} else {
+				wallet = wallets;
+			}
+		}
+
+		Utils.getNewConnectedRemote(wallet.address, wallet.secret).then(function (remote) {
+			remote.requestAccountTransactions({
+				account: wallet.address,
+				ledger_index_min: -1,
+				ledger_index_max: -1,
+				binary: false
+			}, function (err, res) {
+				var result;
+				if (err) {
+					result = { status: 'error', message: err.message };
+					socket.emit('post:list_transactions', result);
+					deferred.resolve(result);
+				} else {
+     				var transactionPromises = [];
+
+					res.transactions.forEach(function(rippleTx){
+						transactionPromises.push(convertRippleTxToHuman(rippleTx));
+					});
+					Q.all(transactionPromises).then(function(transactionsHuman){
+							result = { status: 'success', transactions: transactionsHuman };
+							socket.emit('post:list_transactions', transactionsHuman);
+							deferred.resolve(result);
+					});
+					
+				}
+			});
+		});
+	});
+
+	return deferred.promise;
+}
+
+function translateTransactionsToHuman(ownerEmail, ownerRippleAddress, transactionsList) {
 	var deferred = Q.defer();
 
 	var transactionsListHuman = [];
@@ -20,7 +111,7 @@ function translateTransactionsToHuman(ownerEmail, transactionsList) {
 	transactionsList.forEach(function (transaction) {
 
 		var transactionHuman = {
-			source: ownerEmail,
+			source: transaction.tx.Account,
 			destination: transaction.tx.Destination,
 			fee: transaction.tx.Fee,
 			txType: transaction.tx.TransactionType,
@@ -34,7 +125,8 @@ function translateTransactionsToHuman(ownerEmail, transactionsList) {
 				transactionsListHuman[transactionHuman.destination] = transactionHuman;
 				
 				// Wait for the owner email from the DB
-				walletsPromises.push(Wallet.findByRippleAddress(transactionHuman.destination));
+				var addressToResolve = ownerRippleAddress === transactionHuman.destination ? transactionHuman.source : transactionHuman.destination;
+				walletsPromises.push(Wallet.findByRippleAddress(addressToResolve));
 			}
 		}
 
@@ -48,13 +140,17 @@ function translateTransactionsToHuman(ownerEmail, transactionsList) {
 					
 					// If the user no longer exists in the DB the promise value will resolve to null
 					var wallet = walletPromiseResult.value;
-	
-					result.push({
-						source: transactionHuman.source,
-						destination: wallet ? wallet.ownerEmail : '<<< deleted account >>>',
-						amount: transactionHuman.amount + '€',
-						fee: transactionHuman.fee
-					});
+					
+					var resultTx = {
+						source: 		transactionHuman.source === ownerRippleAddress ? 
+											ownerEmail : (wallet ? wallet.ownerEmail : '<<< deleted account >>>'),
+						destination:  	transactionHuman.destination === ownerRippleAddress ? 
+											ownerEmail : (wallet ? wallet.ownerEmail : '<<< deleted account >>>') ,
+						amount: 		transactionHuman.amount + '€',
+						fee: 			transactionHuman.fee
+					};
+					
+					result.push(resultTx);
 				}
 			});
 
@@ -64,7 +160,7 @@ function translateTransactionsToHuman(ownerEmail, transactionsList) {
 	return deferred.promise;
 }
 
-function listTransactions(ownerEmail, socket) {
+function listTransactions_old(ownerEmail, socket) {
 	var deferred = Q.defer();
 
 	function buildMissingError() {
@@ -111,7 +207,7 @@ function listTransactions(ownerEmail, socket) {
 					socket.emit('post:list_transactions', result);
 					deferred.resolve(result);
 				} else {
-					translateTransactionsToHuman(wallet.ownerEmail, res.transactions)
+					translateTransactionsToHuman(wallet.ownerEmail, wallet.address, res.transactions)
 						.then(function (transactionsHuman) {
 							result = { status: 'success', transactions: transactionsHuman };
 							socket.emit('post:list_transactions', result);

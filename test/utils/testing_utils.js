@@ -98,11 +98,11 @@ function restoreGenericSpy(objectToRestoreSpy, methods) {
 }
 
 function buildWalletSpy() {
-    buildGenericSpy(Wallet, ["create"]);
+    buildGenericSpy(Wallet, ['create']);
 }
 
 function restoreWalletSpy() {
-    restoreGenericSpy(Wallet, ["create", "findByOwnerEmail"]);
+    restoreGenericSpy(Wallet, ['create', 'findByOwnerEmail', 'findByRippleAddress']);
 }
 
 function buildNewConnectedRemoteStub() {

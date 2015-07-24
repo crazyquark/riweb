@@ -17,7 +17,7 @@ var TestingUtils = require('./../../../test/utils/testing_utils');
 var ListTransactions = require('./list_transactions.socket');
 
 describe('Test list_transactions', function() {
-    var remote, emitSpy, aliceWallet, bobWallet, socketSpy;
+    var remote, emitSpy, aliceWallet, bobWallet, socketSpy, fromAliceToBobTx, fromBobToAliceTx;
 
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
@@ -48,15 +48,22 @@ describe('Test list_transactions', function() {
         });
         
         
-        remote.requestAccountTransactions.yields(null, { transactions: [
-            { tx: {
+        fromAliceToBobTx = { tx: {
+    			Account: aliceWallet.address,
     			Destination: bobWallet.address,
     			Fee: 12,
+                date: '123456',
                 TransactionType: 'Payment',
-    			date: 'date',
-    			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 100 }
-            }}
-        ] });
+    			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 100 }}};
+        
+        fromBobToAliceTx = { tx: {
+    			Account: bobWallet.address,
+    			Destination: aliceWallet.address,
+    			Fee: 12,
+                date: '123456',
+                TransactionType: 'Payment',
+    			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 99 }}};
+
     });
 
     afterEach(function () {
@@ -69,18 +76,38 @@ describe('Test list_transactions', function() {
     });
 
     it('should list transactions from Alice to Bob', function (done) {
+        remote.requestAccountTransactions.yields(null, { transactions: [fromAliceToBobTx] });
+
         var expectedHumanTransactions = [{
 					source: 'alice@example.com',
 					destination: 'bob@example.com',
 					amount: 100 + '€',
-					fee: 12
-				}];
+					fee: 12}];
 
         ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
 
         expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
 
             done();
+        }).done(null, function (error) {
+            done(error);
+        });
+    });
+
+    it('should list transactions from Bob to Alice', function (done) {
+        remote.requestAccountTransactions.yields(null, { transactions: [fromBobToAliceTx] });
+
+        var expectedHumanTransactions = [{
+					source: 'bob@example.com',
+					destination: 'alice@example.com',
+					amount: 99 + '€',
+					fee: 12}];
+
+        ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
+
+        expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
+
+          done();
         }).done(null, function (error) {
             done(error);
         });
