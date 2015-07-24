@@ -7,19 +7,25 @@ var eventEmitter = new events.EventEmitter();
 var debug = require('debug')('EventEmitter');
 var error = debug('app:error');
 
-var loggedEmitter = {
-  emit: function loggedEmit(args){
-    debug(' ===> emit(', args, ')');
-    return eventEmitter.emit(args);
-  },
-  on: function loggedOn(eventName, listenerFunction){
-    return eventEmitter.on(eventName, loggedListenerFunction);
+function loggedOn(eventName, listenerFunction) {
+  return eventEmitter.on(eventName, loggedListenerFunction);
 
-    function loggedListenerFunction(args){
-      debug(' <=== on(', eventName, args, ')');
-      listenerFunction.call(args);
-    }
+  function loggedListenerFunction(args) {
+    debug(' <=== on(', eventName, args, ')');
+    listenerFunction.apply(eventEmitter, args);
   }
+}
+
+function loggedEmit(eventName, eventObject) {
+  debug(' ===> emit(', eventName, eventObject, ')');
+  return eventEmitter.emit(eventName, eventObject);
+}
+  
+var loggedEmitter = {
+  emit: eventEmitter.emit,
+  on: eventEmitter.on
+  // emit: loggedEmit,
+  // on: loggedOn
 };
 
 var ROOT_RIPPLE_ACCOUNT = {

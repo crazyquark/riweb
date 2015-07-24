@@ -17,8 +17,8 @@ angular.module('riwebApp')
     }
 
     return {
-      on: loggedOn,
-      emit: loggedEmit
+      on: socket.socket.on,
+      emit: socket.socket.emit
     }
 
   });
