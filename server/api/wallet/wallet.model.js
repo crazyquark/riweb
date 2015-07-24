@@ -15,7 +15,10 @@ WalletSchema.statics.findByOwnerEmail = function(ownerEmail){
 };
 
 WalletSchema.statics.findByRippleAddress = function(rippleAddress){
-  return this.findOneQ({address: rippleAddress});
+  var promise = this.findOneQ({address: rippleAddress});
+  promise.rippleAddress = rippleAddress; // let's remember why we're here
+  
+  return promise;
 };
 
 module.exports = mongoose.model('Wallet', WalletSchema);

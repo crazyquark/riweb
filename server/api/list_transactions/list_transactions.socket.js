@@ -41,20 +41,21 @@ function translateTransactionsToHuman(transactionsList) {
 
 	Q.allSettled(walletsPromises)
 		.then(function (walletPromisesResults) {
-			walletPromisesResults.forEach(function (walletPromiseResult) {
+			walletPromisesResults.forEach(function (walletPromiseResult, idx) {
 				if (walletPromiseResult.state === 'fulfilled') {
-					// If the user no longer exists in the DB the promise will resolve to null
-					if (walletPromiseResult) {
-						var wallet = walletPromiseResult.value;
-				
-						// Replace account with ownerEmail
-						result.push({
-							destination: wallet.ownerEmail,
-							amount: transactionsListHuman[wallet.address].amount,
-							fee: transactionsListHuman[wallet.address].fee
-						});
-						delete transactionsListHuman[wallet.address]
-					}
+					var transactionHuman = transactionsListHuman[walletsPromises[idx].rippleAddress];
+					
+					// If the user no longer exists in the DB the promise value will resolve to null
+					var wallet = walletPromiseResult.value;
+	
+					result.push({
+						destination: wallet ? wallet.ownerEmail : '<<< deleted account >>>',
+						amount: transactionHuman.amount + '€',
+						fee: transactionHuman.fee
+					});
+					
+					// Free up some memory, because why not
+					delete transactionsListHuman[walletsPromises[idx].rippleAddress];
 				}
 			});
 
