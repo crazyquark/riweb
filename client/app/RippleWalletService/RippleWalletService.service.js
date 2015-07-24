@@ -2,7 +2,7 @@
 
 angular.module('riwebApp')
     .service('RippleWalletService', function (RippleRemoteService, RippleAccountService,
-        Auth, RIPPLE_ROOT_ACCOUNT, socket) {
+        Auth, RIPPLE_ROOT_ACCOUNT, socket, $log) {
 
         var walletInfo = {
             wallet: {}
@@ -26,7 +26,7 @@ angular.module('riwebApp')
         }
 
         function loadCurrentUserBalance() {
-            console.log('loadCurrentUserBalance');
+            $log.debug('loadCurrentUserBalance');
             var user = Auth.getCurrentUser();
 
             if (!user.email) {
