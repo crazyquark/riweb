@@ -21,7 +21,7 @@ function fundWallet(wallet, amount) {
   var ripple_address = wallet.address;
 
   if (ripple_address === ROOT_RIPPLE_ACCOUNT.address) {
-    Utils.getEventEmitter().emit('set_root_flags');
+    Utils.getEventEmitter().emit('set_root_flags', {});
     deferred.resolve(wallet);
   } else {
     Utils.getNewConnectedAdminRemote().then(function(remote){
@@ -31,7 +31,7 @@ function fundWallet(wallet, amount) {
                     };
 
       var transaction = remote.createTransaction('Payment', options);
-      transaction.submit(function (err, res) {
+      transaction.submit(function (err) {
           if (err) {
               console.log('Failed to make initial XRP transfer because: ' +
                             err);
@@ -93,7 +93,7 @@ function createWalletForEmail(ownerEmail) {
       var promise = createWallet()
           .then(convertRippleToRiwebWallet(ownerEmail))
           .then(saveWalletToDb)
-          .then(fundWallet)
+          .then(fundWallet);
   
       return promise;
     } else {

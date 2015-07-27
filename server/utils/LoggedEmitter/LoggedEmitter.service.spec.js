@@ -15,13 +15,15 @@ var LoggedEmitter = require('../LoggedEmitter/LoggedEmitter.service');
 
 describe('Testing LoggedEmitter', function () {
 
-    var emitSpy, debugSpy;
+    var emitSpy, debugSpy, onSpy;
     beforeEach(function () {
         emitSpy = sinon.spy(LoggedEmitter.eventEmitter, 'emit');
+        onSpy = sinon.spy(LoggedEmitter.eventEmitter, 'on');
         debugSpy = sinon.spy(LoggedEmitter, 'debug');
     });
     afterEach(function () {
         emitSpy.restore();
+        onSpy.restore();
         debugSpy.restore();
     });
 
@@ -38,4 +40,15 @@ describe('Testing LoggedEmitter', function () {
         expect(debugSpy).to.have.been.calledWith(' ===> emit(', 'foo', {foo: 'bar'}, ')');
         expect(debugSpy).to.have.callCount(1);
     });
+
+    it('should call EventEmitter.on when an event has been emitted', function () {
+        var myOnSpy = sinon.spy();
+        var wrappedListenerFunction = LoggedEmitter.on('foo', myOnSpy);
+
+        wrappedListenerFunction('foo', {foo: 'bar'});
+
+        expect(myOnSpy).to.have.been.calledWith({foo: 'bar'});
+        expect(myOnSpy).to.have.callCount(1);
+    });
+
 });

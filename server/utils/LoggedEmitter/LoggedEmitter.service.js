@@ -4,25 +4,25 @@ var eventEmitter = new events.EventEmitter();
 var debug = require('debug')('EventEmitter');
 
 var loggedEmitter = {
-//    emit: eventEmitter.emit,
-    on: eventEmitter.on,
     emit: loggedEmit,
-//    on: loggedOn,
+    on: loggedOn,
     eventEmitter: eventEmitter,
     debug: debug
 };
 
 function loggedOn(eventName, listenerFunction) {
-    return eventEmitter.on(eventName, loggedListenerFunction);
+    eventEmitter.on(eventName, loggedListenerFunction);
 
-    function loggedListenerFunction(args) {
-        loggedEmitter.debug(' <=== on(', eventName, args, ')');
-        listenerFunction.apply(eventEmitter, args);
+    function loggedListenerFunction() {
+        var eventObject = arguments[1];
+        loggedEmitter.debug(' <=== on(', eventName, eventObject, ')');
+        listenerFunction.call(null, eventObject);
     }
+
+    return loggedListenerFunction;
 }
 
 function loggedEmit(eventName, eventObject) {
-    console.log('loggedEmit', eventName, eventObject);
     loggedEmitter.debug(' ===> emit(', eventName, eventObject, ')');
     return eventEmitter.emit(eventName, eventObject);
 }

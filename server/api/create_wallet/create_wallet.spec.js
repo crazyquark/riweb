@@ -83,7 +83,7 @@ describe('Test create_wallet', function () {
     it('should set root flag when create new admin@admin.com wallet', function (done) {
         CreateWallet.createWalletForEmail('admin@admin.com').then(function () {
             expect(emitSpy).to.have.callCount(1);
-            expect(emitSpy).to.have.been.calledWith('set_root_flags');
+            expect(emitSpy).to.have.been.calledWith('set_root_flags', {});
             done();
         }).done(null, function (error) { done(error); });
     });

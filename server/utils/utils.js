@@ -1,41 +1,18 @@
 
 var ripple = require('ripple-lib');
 var Q = require('q');
-var events = require('events');
-var eventEmitter = new events.EventEmitter();
 
 var LoggedEmitterService = require('./LoggedEmitter/LoggedEmitter.service');
 
 var debug = require('debug')('EventEmitter');
 var error = debug('app:error');
 
-function loggedOn(eventName, listenerFunction) {
-  return eventEmitter.on(eventName, loggedListenerFunction);
-
-  function loggedListenerFunction(args) {
-    debug(' <=== on(', eventName, args, ')');
-    listenerFunction.apply(eventEmitter, args);
-  }
-}
-
-function loggedEmit(eventName, eventObject) {
-  debug(' ===> emit(', eventName, eventObject, ')');
-  return eventEmitter.emit(eventName, eventObject);
-}
-  
-var loggedEmitter = {
-  emit: eventEmitter.emit,
-  on: eventEmitter.on
-  // emit: loggedEmit,
-  // on: loggedOn
-};
-
 var ROOT_RIPPLE_ACCOUNT = {
     address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
     secret  : 'masterpassphrase'
 };
 
-var RIPPLED_WS_SERVER = 'ws://localhost:6006'
+var RIPPLED_WS_SERVER = 'ws://localhost:6006';
 
 function getNewRemote(){
     return new ripple.Remote({
@@ -52,7 +29,7 @@ function getNewConnectedRemote(rippleAddress, rippleSecret){
     remote.setSecret(rippleAddress, rippleSecret);
   }
 
-  remote.connect(function(err, res){
+  remote.connect(function(err){
     if(!err){
       deferred.resolve(remote);
     } else {
