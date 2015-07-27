@@ -4,6 +4,8 @@ var Q = require('q');
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 
+var LoggedEmitterService = require('./LoggedEmitter/LoggedEmitter.service');
+
 var debug = require('debug')('EventEmitter');
 var error = debug('app:error');
 
@@ -69,5 +71,5 @@ module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewConnectedAdminRemote = getNewConnectedAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
 module.exports.getEventEmitter = function(){
-    return loggedEmitter;
+    return LoggedEmitterService;
 };
