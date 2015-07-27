@@ -17,7 +17,8 @@ angular.module('riwebApp')
         $scope.serverInfo = RippleRemoteService.serverInfo;
         $scope.peersInfo = RipplePeersService.peersInfo;
         $scope.accountInfo = RippleAccountService.accountInfo;
-
+        $scope.walletInfo = RippleWalletService.walletInfo;
+        
         var loadCurrentUserBalance = RippleWalletService.loadCurrentUserBalance;
         var refreshPeers = RipplePeersService.refreshPeers;
 
