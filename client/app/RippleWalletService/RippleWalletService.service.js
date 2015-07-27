@@ -20,6 +20,9 @@ angular.module('riwebApp')
             socket.socket.on('post:create_wallet', function (rippleAddress) {
                 socket.socket.removeAllListeners('post:create_wallet');
                 walletInfo.wallet = rippleAddress;
+                
+                RippleAccountService.accountInfo.account = currentUser.name;
+                
                 callback();
             });
             socket.socket.emit('create_wallet', { ownerEmail: currentUser.email });
@@ -33,14 +36,6 @@ angular.module('riwebApp')
                 return; // No user is logged in, please go away
             }
 
-            socket.socket.on('post:account_info', function (accountInfo) {
-                console.log('on.post:account_info');
-                console.log(accountInfo);
-
-                RippleAccountService.accountInfo.account = user.name;
-                RippleAccountService.accountInfo.balance = accountInfo.balance;
-            });
-
             socket.socket.on('post:list_transactions', function (result) {
                 if (result.status === 'success') {
                     RippleAccountService.accountInfo.transactions = result.transactions;
@@ -51,7 +46,7 @@ angular.module('riwebApp')
                 }
             });
 
-            socket.socket.emit('account_info', user.email);
+            // socket.socket.emit('account_info', user.email);
             socket.socket.emit('list_transactions', user.email);
         }
 
