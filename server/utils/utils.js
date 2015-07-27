@@ -37,7 +37,8 @@ var RIPPLED_WS_SERVER = 'ws://localhost:6006'
 
 function getNewRemote(){
     return new ripple.Remote({
-        servers: [ RIPPLED_WS_SERVER ]
+        servers: [ RIPPLED_WS_SERVER ],
+        fee_cushion: 0.0
     });
 }
 
