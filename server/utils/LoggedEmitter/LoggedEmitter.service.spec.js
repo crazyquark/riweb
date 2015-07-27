@@ -45,7 +45,7 @@ describe('Testing LoggedEmitter', function () {
         var myOnSpy = sinon.spy();
         var wrappedListenerFunction = LoggedEmitter.on('foo', myOnSpy);
 
-        wrappedListenerFunction('foo', {foo: 'bar'});
+        wrappedListenerFunction({foo: 'bar'});
 
         expect(myOnSpy).to.have.been.calledWith({foo: 'bar'});
         expect(myOnSpy).to.have.callCount(1);

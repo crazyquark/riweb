@@ -14,7 +14,7 @@ function loggedOn(eventName, listenerFunction) {
     eventEmitter.on(eventName, loggedListenerFunction);
 
     function loggedListenerFunction() {
-        var eventObject = arguments[1];
+        var eventObject = arguments[0];
         loggedEmitter.debug(' <=== on(', eventName, eventObject, ')');
         listenerFunction.call(null, eventObject);
     }
