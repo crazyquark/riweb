@@ -14,6 +14,7 @@ var UserSchema = new Schema({
   hashedPassword: String,
   provider: String,
   bank: String,
+  iban: String,
   salt: String
 });
 
@@ -61,6 +62,13 @@ UserSchema
   .validate(function(email) {
     return email.length;
   }, 'Email cannot be blank');
+
+// Validate empty IBAN
+UserSchema
+  .path('iban')
+  .validate(function(iban) {
+    return iban.length;
+  }, 'IBAN cannot be blank');
 
 // Validate empty password
 UserSchema

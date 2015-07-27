@@ -2,8 +2,10 @@ public
 .tmp
 .idea
 .project
+.settings
 client/bower_components
 /server/config/local.env.js
 node_modules
 tags
 dist
+*~

@@ -7,6 +7,7 @@ angular.module('riwebApp')
         function resetAccount() {
             accountInfo.balance = '';
             accountInfo.account = '';
+            accountInfo.iban = '';
             accountInfo.transactions = [];
         }
 

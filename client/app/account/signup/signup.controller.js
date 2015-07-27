@@ -26,6 +26,7 @@ angular.module('riwebApp')
           name: $scope.user.name,
           email: $scope.user.email,
           password: $scope.user.password,
+          iban: $scope.user.iban,
           bank: 'ing'// TODO CS: Hardcode for now, should link to $scope.user.bank
         })
         .then( function() {

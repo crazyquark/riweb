@@ -6,7 +6,8 @@
             <h3 id="panel-title" class="panel-title">My account: <strong>{{getMyAccountUser().email}}</strong></h3>
         </div>
         <div class="panel-body">
-            <h4 id="panel-title" class="panel-title" ng-show="walletInfo.wallet">Account: <strong>{{getMyAccountUser().name}}</strong></h4>
+            <h4 id="panel-title" class="panel-title" ng-show="walletInfo.wallet">Account: <strong>{{getMyAccountUser().name}}</strong></h4>            
+            <h4 ng-show="accountInfo.iban">IBAN: <strong>{{accountInfo.iban}}</strong></h4>            
             <!--<h4 ng-show="accountInfo.balance">Current balance: <strong>{{accountInfo.balance}}</strong> €</h4>-->
 
             <div class="row">

@@ -22,7 +22,8 @@ angular.module('riwebApp')
                 walletInfo.wallet = rippleAddress;
                 
                 RippleAccountService.accountInfo.account = currentUser.name;
-                
+                RippleAccountService.accountInfo.iban = currentUser.iban;
+
                 callback();
             });
             socket.socket.emit('create_wallet', { ownerEmail: currentUser.email });
