@@ -19,7 +19,7 @@ Start mongoDB server:
 *cd docker && ./start_mongo.sh*  
 
 Install bower:  
-*sudo npm install -g bower*  
+*npm install -g bower*  
 
 Install packages with bower from cache:  
 *bower install --offline*  
