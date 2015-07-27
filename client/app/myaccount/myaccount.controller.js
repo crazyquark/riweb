@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-    .controller('MyaccountCtrl', function ($scope, Auth, User, Wallet, RIPPLE_ROOT_ACCOUNT, TrustLineService,
+    .controller('MyaccountCtrl', function ($scope, Auth, User, Wallet, RIPPLE_ROOT_ACCOUNT,
                                            RippleRemoteService, FormattingService, RipplePeersService,
                                            RippleAccountService, RippleWalletService, RippleTransactionService) {
 
@@ -33,7 +33,7 @@ angular.module('riwebApp')
             });
         }
 
-        $scope.$on('currentUser', function(event, currentUser){
+        $scope.$on('currentUser', function(){
             refreshCurrentUserWallet();
         });
 

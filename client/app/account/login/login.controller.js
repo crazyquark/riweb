@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('LoginCtrl', function ($scope, Auth, $location) {
+  .controller('LoginCtrl', function ($scope, $http, Auth, $location) {
     $scope.user = {};
     $scope.errors = {};
 
@@ -18,6 +18,7 @@ angular.module('riwebApp')
           $location.path('/myaccount');
         })
         .catch( function(err) {
+          console.error(err);
           $scope.errors.other = err.message;
         });
       }
