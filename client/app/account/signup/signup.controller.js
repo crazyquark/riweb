@@ -1,19 +1,17 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('SignupCtrl', function ($scope, Auth, $location) {
+  .controller('SignupCtrl', function ($scope, Auth, $location, BankAccountService) {
     $scope.user = {};
     $scope.errors = {};
 
     $scope.availableBanks = [];
 
     $scope.listAvailableBanks = function() {
-      $scope.availableBanks = [
-        {name: 'abnamro', info: 'ABN Amro'},
-        {name: 'ing', info: 'ING Bank N.V.'}
-        ];
-      $scope.user.bank = $scope.availableBanks[0];
-      // TODO CS Extract from DB the list of banks available
+      BankAccountService.query().$promise.then(function(allBanks){
+          $scope.availableBanks = allBanks;
+          $scope.user.bank = $scope.availableBanks[0];
+      });
     };
 
     $scope.listAvailableBanks();
@@ -27,7 +25,7 @@ angular.module('riwebApp')
           email: $scope.user.email,
           password: $scope.user.password,
           iban: $scope.user.iban,
-          bank: 'ing'// TODO CS: Hardcode for now, should link to $scope.user.bank
+          bank: $scope.user.bank._id
         })
         .then( function() {
           // Account created, redirect to home

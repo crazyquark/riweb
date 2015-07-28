@@ -13,7 +13,7 @@ var UserSchema = new Schema({
   },
   hashedPassword: String,
   provider: String,
-  bank: String,
+  bank: Schema.Types.ObjectId,
   iban: String,
   salt: String
 });
