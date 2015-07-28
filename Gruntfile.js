@@ -426,6 +426,13 @@ module.exports = function (grunt) {
       src: ['server/**/*.spec.js']
     },
 
+    mochaTestIntegration: {
+      options: {
+        reporter: 'spec'
+      },
+      src: ['test/integration/**/*.spec.js']
+    },
+
     protractor: {
       options: {
         configFile: 'protractor.conf.js'
@@ -580,10 +587,24 @@ module.exports = function (grunt) {
       ]);
     }
 
+    else if (target === 'integration') {
+      return grunt.task.run([
+        'env:all',
+        'env:test',
+        'mochaTestIntegration'
+      ]);
+    }
+
     else grunt.task.run([
       'test:server',
-      'test:client'
+      'test:client',
+      'test:integration'
     ]);
+  });
+
+  grunt.registerTask('mochaTestIntegration', function () {
+    grunt.config.set('mochaTest.src', 'test/integration/**/*.spec.js');
+    grunt.task.run('mochaTest');
   });
 
   grunt.registerTask('build', [
@@ -609,4 +630,5 @@ module.exports = function (grunt) {
     'test',
     'build'
   ]);
+
 };
