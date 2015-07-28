@@ -9,26 +9,6 @@ var User = require('../api/user/user.model');
 var Wallet = require('../api/wallet/wallet.model');
 var BankAccount = require('../api/bankaccount/bankaccount.model');
 
-User.find({}).remove(function() {
-  User.create({
-    provider: 'local',
-    name: 'Test User',
-    email: 'test@test.com',
-    password: 'test',
-    bank: 'ing'
-  }, {
-    provider: 'local',
-    role: 'admin',
-    name: 'Admin',
-    email: 'admin@admin.com',
-    password: 'admin',
-    bank: 'ing'
-  }, function() {
-      // console.log('finished populating users');
-    }
-  );
-});
-
 BankAccount.find({}).remove(function() {
   BankAccount.create({
     name: 'ing',
@@ -52,9 +32,33 @@ BankAccount.find({}).remove(function() {
       secret: ''
     }
   }, function() {
-      // console.log('finished creating bank account data');
+      BankAccount.findOne(function (err, firstBank) {
+          seedUsers(firstBank);
+      });
     }
   );
 });
+
+function seedUsers(bank){
+    User.find({}).remove(function() {
+        User.create({
+                provider: 'local',
+                name: 'Test User',
+                email: 'test@test.com',
+                password: 'test',
+                bank: bank._id
+            }, {
+                provider: 'local',
+                role: 'admin',
+                name: 'Admin',
+                email: 'admin@admin.com',
+                password: 'admin',
+                bank: bank._id
+            }, function() {
+                // console.log('finished populating users');
+            }
+        );
+    });
+}
 
 Wallet.find({}).remove().exec();
