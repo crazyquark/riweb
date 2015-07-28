@@ -17,7 +17,7 @@ function fundWallet(wallet, amount) {
   var deferred = Q.defer();
   amount = amount || 60;
 
-  
+
   var ripple_address = wallet.address;
 
   if (ripple_address === ROOT_RIPPLE_ACCOUNT.address) {
@@ -85,23 +85,27 @@ function convertRippleToRiwebWallet(ownerEmail){
 }
 
 function createWalletForEmail(ownerEmail) {
-  
+  var deferred = Q.defer();
+
   return Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet){
     if(!foundWallet){
       var createWallet = getCreateWallet(ownerEmail);
-  
+
       var promise = createWallet()
           .then(convertRippleToRiwebWallet(ownerEmail))
           .then(saveWalletToDb)
           .then(fundWallet);
-  
+
       return promise;
     } else {
       return Q(foundWallet);
     }
   }).then(function(foundWallet){
+    deferred.resolve(foundWallet);
     socket.emit('post:create_wallet', foundWallet.address);
   });
+
+  return deferred.promise;
 }
 
 exports.createWalletForEmail = createWalletForEmail;

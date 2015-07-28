@@ -35,7 +35,7 @@ describe('Test list_transactions', function() {
             }
             return Q([]);
         });
-        
+
         sinon.stub(Wallet, 'findByRippleAddress', function (address) {
             var thePromise = Q({});
             if (address === aliceWallet.address) {
@@ -46,8 +46,8 @@ describe('Test list_transactions', function() {
             thePromise.rippleAddress = address;
             return thePromise;
         });
-        
-        
+
+
         fromAliceToBobTx = { tx: {
     			Account: aliceWallet.address,
     			Destination: bobWallet.address,
@@ -55,7 +55,7 @@ describe('Test list_transactions', function() {
                 date: '123456',
                 TransactionType: 'Payment',
     			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 100 }}};
-        
+
         fromBobToAliceTx = { tx: {
     			Account: bobWallet.address,
     			Destination: aliceWallet.address,
@@ -70,7 +70,7 @@ describe('Test list_transactions', function() {
         emitSpy.restore();
         TestingUtils.restoreWalletSpy();
     });
-    
+
     afterEach(function () {
         TestingUtils.dropMongodbDatabase();
     });
@@ -107,7 +107,7 @@ describe('Test list_transactions', function() {
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
             expect(socketSpy.emit).to.have.callCount(1);
-            expect(socketSpy.emit).to.have.been.calledWith('post:list_transactions', 
+            expect(socketSpy.emit).to.have.been.calledWith('post:list_transactions',
                 { status: 'success', transactions: expectedHumanTransactions });
           done();
         }).done(null, function (error) {
