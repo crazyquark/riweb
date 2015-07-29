@@ -7,5 +7,5 @@ module.exports = {
   mongo: {
     uri: 'mongodb://localhost/riweb-test'
   },
-  seedDB: true
+  seedDB: false
 };

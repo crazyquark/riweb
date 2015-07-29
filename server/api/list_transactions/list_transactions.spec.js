@@ -71,8 +71,8 @@ describe('Test list_transactions', function() {
         TestingUtils.restoreWalletSpy();
     });
 
-    afterEach(function () {
-        TestingUtils.dropMongodbDatabase();
+    afterEach(function (done) {
+        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should list transactions from Alice to Bob', function (done) {

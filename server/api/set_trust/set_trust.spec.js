@@ -22,8 +22,8 @@ describe('Test set_trust', function () {
         Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
     });
     
-    afterEach(function () {
-        TestingUtils.dropMongodbDatabase();
+    afterEach(function (done) {
+        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should respond with success on proper trust set', function (done) {

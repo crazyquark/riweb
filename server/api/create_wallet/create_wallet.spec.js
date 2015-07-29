@@ -38,8 +38,8 @@ describe('Test create_wallet', function () {
         emitSpy.restore();
     });
 
-    afterEach(function () {
-        TestingUtils.dropMongodbDatabase();
+    afterEach(function (done) {
+        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should create root wallet for admin@admin.com', function (done) {

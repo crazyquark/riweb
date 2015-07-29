@@ -33,8 +33,8 @@ describe('Test account_info', function () {
     afterEach(function () {
         TestingUtils.restoreWalletSpy();
     });
-    afterEach(function () {
-        TestingUtils.dropMongodbDatabase();
+    afterEach(function (done) {
+        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should get account_info for unexisting email', function (done) {

@@ -1,13 +1,18 @@
 var sinon = require('sinon');
 var Q = require('q');
 var Wallet = require('./../../server/api/wallet/wallet.model');
+var Bankaccount = require('./../../server/api/bankaccount/bankaccount.model');
 var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
 var mongoose = require('mongoose-q')(require('mongoose'));
 
+var io = require('socket.io');
+
 // Add debugging
-var debug = require('debug')('mongodb');
-mongoose.set('debug', debug);
+var mongodbDebug = require('debug')('mongodb');
+mongoose.set('debug', mongodbDebug);
+
+var debug = require('debug')('TestingUtils');
 
 function buildSocketSpy() {
     return {
@@ -106,6 +111,10 @@ function buildWalletSpy() {
     buildGenericSpy(Wallet, ['create']);
 }
 
+function buildBankaccountSpy() {
+    buildGenericSpy(Bankaccount, ['create']);
+}
+
 function restoreWalletSpy() {
     restoreGenericSpy(Wallet, ['create', 'findByOwnerEmail', 'findByRippleAddress']);
 }
@@ -116,36 +125,49 @@ function buildNewConnectedRemoteStub() {
 }
 
 function dropMongodbDatabase() {
+    debug('dropMongodbDatabase');
     // TODO: make promise work
     var deferred = Q.defer();
 
-    mongoose.connection.db.dropDatabase();
-    // var connection = mongoose.createConnection(config.mongo.uri, config.mongo.options);
+    var connection = mongoose.createConnection(config.mongo.uri, config.mongo.options);
+    connection.on('open', function () {
+        debug('connection.on(open)');
+        connection.db.dropDatabase(function (err, result) {
+            debug('connection.db.dropDatabase(err, result)', err, result);
+            if (err) {
+                deferred.reject(err);
+            } else {
+                deferred.resolve(result);
+            }
+        });
+    });
 
-    // connection.on('open', function () {
-    //     connection.db.dropDatabase(function (err, result) {
-    //         if (err) {
-    //             deferred.reject(err);
-    //         } else {
-    //             deferred.resolve(result);
-    //         }
-    //     });
-    // });
-    deferred.resolve({});
+    // mongoose.connection.db.dropDatabase();
+    // deferred.resolve({});
+
     return deferred.promise;
 }
 
-function buildClientSocketIoConnection(){
-    var io = require('socket.io');
-      var ioSocket = io('', {
-        // Send auth token on connection, you will need to DI the Auth service above
-        // 'query': 'token=' + Auth.getToken()
-        path: '/socket.io-client'
-      });
+function buildClientSocketIoConnection() {
+    // var ioSocket = io('ws://localhost:9000', {
+    //     path: '/socket.io-client'
+    // })
+    // .then(function(){})
+    // .catch(function(error){
+    //     console.error(error);
+    // });
+    
+    // debug('buildClientSocketIoConnection new ioSocket');
 
-      var socket = socketFactory({
-        ioSocket: ioSocket
-      });
+    // var socket = socketFactory({
+    //     ioSocket: ioSocket
+    // })
+    // .then(function(){})
+    // .catch(function(error){
+    //     console.error(error);
+    // });
+
+    // debug('buildClientSocketIoConnection new socketFactory');
 }
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
@@ -154,6 +176,7 @@ exports.buildSocketSpy = buildSocketSpy;
 exports.buildClientSocketIoConnection = buildClientSocketIoConnection;
 exports.buildRemoteStub = buildRemoteStub;
 exports.buildWalletSpy = buildWalletSpy;
+exports.buildBankaccountSpy = buildBankaccountSpy;
 exports.restoreWalletSpy = restoreWalletSpy;
 exports.buildNewConnectedRemoteStub = buildNewConnectedRemoteStub;
 exports.buildCreateForEmailStub = buildCreateForEmailStub;
