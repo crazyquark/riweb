@@ -20,7 +20,7 @@ describe('Test account_info', function () {
     beforeEach(function () {
         socket = TestingUtils.buildSocketSpy();
 
-        ripple.Wallet.generate = sinon.stub().returns(TestingUtils.getNonAdminRippleGeneratedWallet());
+        TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
         AccountInfo.register(socket);
 
@@ -35,6 +35,7 @@ describe('Test account_info', function () {
     });
     afterEach(function (done) {
         TestingUtils.dropMongodbDatabase().then(function(){done();});
+        TestingUtils.restoreRippleWalletGenerate();
     });
 
     it('should get account_info for unexisting email', function (done) {

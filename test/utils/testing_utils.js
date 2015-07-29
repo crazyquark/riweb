@@ -7,6 +7,7 @@ var config = require('../../server/config/environment');
 var mongoose = require('mongoose-q')(require('mongoose'));
 
 var io = require('socket.io');
+var ripple = require('ripple-lib');
 
 // Add debugging
 var mongodbDebug = require('debug')('mongodb');
@@ -174,6 +175,18 @@ function buildClientSocketIoConnection() {
     // debug('buildClientSocketIoConnection new socketFactory');
 }
 
+var originalRippleWalletGenerate;
+function buildRippleWalletGenerateForNonAdmin(){
+  if(!originalRippleWalletGenerate){
+    originalRippleWalletGenerate = ripple.Wallet.generate;
+  }
+  ripple.Wallet.generate = sinon.stub().returns(getNonAdminRippleGeneratedWallet());
+}
+
+function restoreRippleWalletGenerate(){
+  ripple.Wallet.generate = originalRippleWalletGenerate;
+}
+
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
 exports.dropMongodbDatabase = dropMongodbDatabase;
 exports.buildSocketSpy = buildSocketSpy;
@@ -191,3 +204,5 @@ exports.getNonAdminMongooseWallet = getNonAdminMongooseWallet;
 exports.getAdminMongooseWallet = getAdminMongooseWallet;
 exports.buildFindByOwnerEmailForAdmin = buildFindByOwnerEmailForAdmin;
 exports.buildFindByOwnerEmailForUnexisting = buildFindByOwnerEmailForUnexisting;
+exports.buildRippleWalletGenerateForNonAdmin = buildRippleWalletGenerateForNonAdmin;
+exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;

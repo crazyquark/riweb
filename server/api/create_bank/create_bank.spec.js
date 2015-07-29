@@ -25,7 +25,7 @@ describe('Test create_bank', function() {
     beforeEach(function () {
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
-        ripple.Wallet.generate = sinon.stub().returns(nonAdminRippleGeneratedWallet);
+        TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
         socketSpy = TestingUtils.buildSocketSpy();
         CreateBank.register(socketSpy);
@@ -39,6 +39,7 @@ describe('Test create_bank', function() {
     afterEach(function () {
         TestingUtils.restoreBankaccountSpy();
         emitSpy.restore();
+        TestingUtils.restoreRippleWalletGenerate();
     });
 
     afterEach(function (done) {

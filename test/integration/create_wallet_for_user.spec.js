@@ -54,12 +54,12 @@ describe('ITest signup', function () {
   beforeEach(function(done){
     this.timeout(10000);
     TestingUtils.dropMongodbDatabase().then(function(){
-      
+
       //ugly hack for an integration test but hope it works
       CreateWallet.register(TestingUtils.buildSocketSpy());
-      
+
       debug('dropMongodbDatabase');
-      // TestingUtils.buildClientSocketIoConnection();      
+      // TestingUtils.buildClientSocketIoConnection();
       debug('buildClientSocketIoConnection');
       done();
     });
@@ -67,19 +67,27 @@ describe('ITest signup', function () {
 
   xit('should create an wallet for the user', function (done) {
     this.timeout(10000);
+    debug('should create an wallet1');
     seedBankAndUser(function(theUser){
+      debug('should create an wallet2');
       CreateWallet.createWalletForEmail(theUser.email).then(function() {
+        debug('should create an wallet3');
         Wallet.findByOwnerEmail(theUser.email).then(function(wallet){
+          debug('should create an wallet4');
           expect(wallet.ownerEmail).to.eql('james.bond@mi6.com');
 
+          debug('should create an wallet5');
           Utils.getNewConnectedRemote().then(function(remote){
+            debug('should create an wallet6');
 
             var options = {
               account: wallet.address,
               ledger: 'validated'
             };
 
+            debug('remote.requestAccountInfo', options);
             remote.requestAccountInfo(options, function(err, info) {
+              debug('should create an wallet7');
               expect(err).to.eql(null);
               expect(info).to.have.deep.property('account_data.Account', wallet.address);
               expect(info).to.have.deep.property('account_data.Balance', '60000000');
