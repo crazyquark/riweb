@@ -97,19 +97,15 @@ function makeTransfer(fromEmail, toEmail, amount) {
 exports.makeTransfer = makeTransfer;
 
 exports.register = function (socket) {
-    console.log('register post:make_transfer');
     Utils.getEventEmitter().on('post:make_transfer', function (data) {
-        console.log('post:make_transfer', data);
         socket.emit('post:make_transfer', data);
     });
 
     Utils.getEventEmitter().on('make_transfer', function (data) {
-        console.log('EventEmitter.on make_transfer', data);
         makeTransfer(data.fromEmail, data.toEmail, data.amount);
     });
 
     socket.on('make_transfer', function (data) {
-        console.log('socket.on make_transfer', data);
         makeTransfer(data.fromEmail, data.toEmail, data.amount);
     });
 };

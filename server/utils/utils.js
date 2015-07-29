@@ -4,8 +4,7 @@ var Q = require('q');
 
 var LoggedEmitterService = require('./LoggedEmitter/LoggedEmitter.service');
 
-var debug = require('debug')('EventEmitter');
-var error = debug('app:error');
+var debug = require('debug')('Utils');
 
 var ROOT_RIPPLE_ACCOUNT = {
     address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
@@ -15,13 +14,24 @@ var ROOT_RIPPLE_ACCOUNT = {
 var RIPPLED_WS_SERVER = 'ws://localhost:6006';
 
 function getNewRemote(){
-    return new ripple.Remote({
+  var newRemote = new ripple.Remote({
         servers: [ RIPPLED_WS_SERVER ]
         //fee_cushion: 0.0
     });
+    
+  newRemote.on('disconect', function(){
+    console.log('remote disconect');
+  });
+    
+  newRemote.on('disconected', function(){
+    console.log('remote disconected');
+  });
+
+  return newRemote;
 }
 
 function getNewConnectedRemote(rippleAddress, rippleSecret){
+  debug('getNewConnectedRemote', rippleAddress, rippleSecret);
   var deferred = Q.defer();
   var remote = getNewRemote();
 
@@ -30,6 +40,7 @@ function getNewConnectedRemote(rippleAddress, rippleSecret){
   }
 
   remote.connect(function(err){
+    debug('getNewConnectedRemote remote.connect', err);
     if(!err){
       deferred.resolve(remote);
     } else {

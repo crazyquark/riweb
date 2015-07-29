@@ -11,6 +11,7 @@ var loggedEmitter = {
 };
 
 function loggedOn(eventName, listenerFunction) {
+    loggedEmitter.debug(' ==== register on(', eventName, listenerFunction, ')');
     eventEmitter.on(eventName, loggedListenerFunction);
 
     function loggedListenerFunction() {

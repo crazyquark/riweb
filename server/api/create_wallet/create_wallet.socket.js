@@ -9,11 +9,14 @@ var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
 var Utils = require('./../../utils/utils');
 
+var debug = require('debug')('CreateWallet');
+
 var socket;
 
 var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
 
 function fundWallet(wallet, amount) {
+  debug('fundWallet', wallet, amount);
   var deferred = Q.defer();
   amount = amount || 60;
 
@@ -31,13 +34,15 @@ function fundWallet(wallet, amount) {
                     };
 
       var transaction = remote.createTransaction('Payment', options);
+      debug('fundWallet remote.createTransaction', options);
       transaction.submit(function (err) {
+          debug('fundWallet transaction.submit', err);
           if (err) {
-              console.log('Failed to make initial XRP transfer because: ' +
+              debug('Failed to make initial XRP transfer because: ' +
                             err);
               deferred.reject(err);
           } else {
-              console.log('Successfully funded wallet ' + ripple_address +
+              debug('Successfully funded wallet ' + ripple_address +
                           ' with 60 XRP');
               deferred.resolve(wallet);
               Utils.getEventEmitter().emit('set_trust', {
@@ -85,6 +90,8 @@ function convertRippleToRiwebWallet(ownerEmail){
 }
 
 function createWalletForEmail(ownerEmail) {
+  debug('createWalletForEmail', ownerEmail);
+
   var deferred = Q.defer();
 
   return Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet){

@@ -1,6 +1,7 @@
 'use strict';
 
 var app = require('../../server/app');
+var config = require('../../server/config/environment');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -79,11 +80,10 @@ describe('ITest signup', function () {
               expect(info).to.have.deep.property('account_data.Account', wallet.address);
               expect(info).to.have.deep.property('account_data.Balance', '60000000');
               done();
-            });
-
-          });
-        });
-      });
+            })
+          })
+        })
+      }).done(null, function (error) {done(error);});
     });
   });
 
