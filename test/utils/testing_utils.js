@@ -116,26 +116,42 @@ function buildNewConnectedRemoteStub() {
 }
 
 function dropMongodbDatabase() {
+    // TODO: make promise work
     var deferred = Q.defer();
 
-    var connection = mongoose.createConnection(config.mongo.uri, config.mongo.options);
+    mongoose.connection.db.dropDatabase();
+    // var connection = mongoose.createConnection(config.mongo.uri, config.mongo.options);
 
-    connection.on('open', function () {
-        connection.db.dropDatabase(function (err, result) {
-            if (err) {
-                deferred.reject(err);
-            } else {
-                deferred.resolve(result);
-            }
-        });
-    });
-
+    // connection.on('open', function () {
+    //     connection.db.dropDatabase(function (err, result) {
+    //         if (err) {
+    //             deferred.reject(err);
+    //         } else {
+    //             deferred.resolve(result);
+    //         }
+    //     });
+    // });
+    deferred.resolve({});
     return deferred.promise;
+}
+
+function buildClientSocketIoConnection(){
+    var io = require('socket.io');
+      var ioSocket = io('', {
+        // Send auth token on connection, you will need to DI the Auth service above
+        // 'query': 'token=' + Auth.getToken()
+        path: '/socket.io-client'
+      });
+
+      var socket = socketFactory({
+        ioSocket: ioSocket
+      });
 }
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
 exports.dropMongodbDatabase = dropMongodbDatabase;
 exports.buildSocketSpy = buildSocketSpy;
+exports.buildClientSocketIoConnection = buildClientSocketIoConnection;
 exports.buildRemoteStub = buildRemoteStub;
 exports.buildWalletSpy = buildWalletSpy;
 exports.restoreWalletSpy = restoreWalletSpy;

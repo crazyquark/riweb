@@ -5,6 +5,7 @@
 'use strict';
 
 var config = require('./environment');
+var debug = require('debug')('ConfigSocketio');
 
 // When the user disconnects.. perform this
 function onDisconnect(socket) {
@@ -18,6 +19,7 @@ function onConnect(socket) {
   });
 
   // Insert sockets below
+  debug('------Registering all the things');
   require('../api/list_transactions/list_transactions.socket').register(socket);
   require('../api/set_root_flags/set_root_flags.socket').register(socket);
   require('../api/make_transfer/make_transfer.socket').register(socket);

@@ -53,6 +53,7 @@ describe('ITest signup', function () {
   beforeEach(function(done){
     TestingUtils.dropMongodbDatabase().then(function(){
       done();
+      TestingUtils.buildClientSocketIoConnection();      
     });
   });
 
