@@ -2,6 +2,7 @@ var sinon = require('sinon');
 var Q = require('q');
 var Wallet = require('./../../server/api/wallet/wallet.model');
 var Utils = require('./../../server/utils/utils');
+var config = require('../../server/config/environment');
 var mongoose = require('mongoose-q')(require('mongoose'));
 
 function buildSocketSpy() {
@@ -113,14 +114,18 @@ function buildNewConnectedRemoteStub() {
 function dropMongodbDatabase() {
     var deferred = Q.defer();
 
-    mongoose.connection.db.dropDatabase(function (err, result) {
-        if (err) {
-            deferred.reject(err);
-        } else {
-            deferred.resolve(result);
-        }
+    var connection = mongoose.createConnection(config.mongo.uri, config.mongo.options);
+
+    connection.on('open', function () {
+        connection.db.dropDatabase(function (err, result) {
+            if (err) {
+                deferred.reject(err);
+            } else {
+                deferred.resolve(result);
+            }
+        });
     });
-    
+
     return deferred.promise;
 }
 

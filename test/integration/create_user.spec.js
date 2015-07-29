@@ -56,7 +56,7 @@ describe('ITest signup', function () {
     });
   });
 
-  xit('should create an user', function (done) {
+  it('should create an user', function (done) {
     seedBankAndUser(function(theUser){
       expect(theUser.email).to.eql('james.bond@mi6.com');
       done()
