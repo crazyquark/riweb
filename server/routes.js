@@ -9,6 +9,7 @@ var errors = require('./components/errors');
 module.exports = function(app) {
 
   // Insert routes below
+  app.use('/api/create_banks', require('./api/create_bank'));
   app.use('/api/list_transactions', require('./api/list_transactions'));
   app.use('/api/set_root_flags', require('./api/set_root_flags'));
   app.use('/api/make_transfers', require('./api/make_transfer'));

@@ -19,6 +19,7 @@ function onConnect(socket) {
   });
 
   // Insert sockets below
+  require('../api/create_bank/create_bank.socket').register(socket);
   debug('------Registering all the things');
   require('../api/list_transactions/list_transactions.socket').register(socket);
   require('../api/set_root_flags/set_root_flags.socket').register(socket);
