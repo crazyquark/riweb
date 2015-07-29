@@ -119,6 +119,10 @@ function restoreWalletSpy() {
     restoreGenericSpy(Wallet, ['create', 'findByOwnerEmail', 'findByRippleAddress']);
 }
 
+function restoreBankaccountSpy() {
+    restoreGenericSpy(Bankaccount, ['create']);
+}
+
 function buildNewConnectedRemoteStub() {
     Utils.getNewConnectedRemote = sinon.stub().returns(Q(buildRemoteStub()));
     Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(buildRemoteStub()));
@@ -156,7 +160,7 @@ function buildClientSocketIoConnection() {
     // .catch(function(error){
     //     console.error(error);
     // });
-    
+
     // debug('buildClientSocketIoConnection new ioSocket');
 
     // var socket = socketFactory({
@@ -178,6 +182,7 @@ exports.buildRemoteStub = buildRemoteStub;
 exports.buildWalletSpy = buildWalletSpy;
 exports.buildBankaccountSpy = buildBankaccountSpy;
 exports.restoreWalletSpy = restoreWalletSpy;
+exports.restoreBankaccountSpy = restoreBankaccountSpy;
 exports.buildNewConnectedRemoteStub = buildNewConnectedRemoteStub;
 exports.buildCreateForEmailStub = buildCreateForEmailStub;
 exports.buildEmptyTransactionStub = buildEmptyTransactionStub;

@@ -37,7 +37,7 @@ describe('Test create_bank', function() {
         TestingUtils.buildNewConnectedRemoteStub();
     });
     afterEach(function () {
-        TestingUtils.restoreWalletSpy();
+        TestingUtils.restoreBankaccountSpy();
         emitSpy.restore();
     });
 
@@ -61,11 +61,4 @@ describe('Test create_bank', function() {
         }).done(null, function (error) { done(error); });
     });
 
-    xit('should create non-root wallet for a1@example.com', function (done) {
-        CreateWallet.createWalletForEmail('a1@example.com').then(function () {
-            expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('a1@example.com'));
-            expect(Wallet.create).to.have.callCount(1);
-            done();
-        }).done(null, function (error) { done(error); });
-    });
 });
