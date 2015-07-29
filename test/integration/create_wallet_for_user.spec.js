@@ -50,18 +50,13 @@ function seedBankAndUser(callback){
 
 describe('ITest signup', function () {
 
-  beforeEach(function(){
-    TestingUtils.dropMongodbDatabase();
-  });
-
-  it('should create an user', function (done) {
-    seedBankAndUser(function(theUser){
-      expect(theUser.email).to.eql('james.bond@mi6.com');
-      done()
+  beforeEach(function(done){
+    TestingUtils.dropMongodbDatabase().then(function(){
+      done();
     });
   });
 
-  it('should create an wallet for the user', function (done) {
+  xit('should create an wallet for the user', function (done) {
     this.timeout(10000);
     seedBankAndUser(function(theUser){
       CreateWallet.createWalletForEmail(theUser.email).then(function() {

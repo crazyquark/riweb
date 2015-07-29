@@ -111,7 +111,17 @@ function buildNewConnectedRemoteStub() {
 }
 
 function dropMongodbDatabase() {
-    mongoose.connection.db.dropDatabase();
+    var deferred = Q.defer();
+
+    mongoose.connection.db.dropDatabase(function (err, result) {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve(result);
+        }
+    });
+    
+    return deferred.promise;
 }
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
