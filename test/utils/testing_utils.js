@@ -5,6 +5,10 @@ var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
 var mongoose = require('mongoose-q')(require('mongoose'));
 
+// Add debugging
+var debug = require('debug')('mongodb');
+mongoose.set('debug', debug);
+
 function buildSocketSpy() {
     return {
         emit: sinon.spy(),
