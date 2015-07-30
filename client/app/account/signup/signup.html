@@ -38,6 +38,9 @@
           <label>IBAN</label>
           <input type="text" name="iban" class="form-control" ng-model="user.iban"
                  required ng-iban/>
+          <p class="help-block" ng-show="form.iban.$error.iban && submitted">
+            Doesn't look like a valid IBAN.
+          </p>
           <p class="help-block" ng-show="form.iban.$error.required && submitted">
             An IBAN is required
           </p>
