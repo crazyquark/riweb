@@ -19,12 +19,13 @@ describe('Test set_root_flags', function () {
     var remote;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(remote));
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
+        sinon.stub(Utils, 'getNewConnectedAdminRemote').returns(Q(remote));
+        sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
     });
 
     afterEach(function (done) {
-        TestingUtils.dropMongodbDatabase().then(function(){done();});
+      TestingUtils.restoreAll();
+      TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should respond with success on proper trust set', function (done) {

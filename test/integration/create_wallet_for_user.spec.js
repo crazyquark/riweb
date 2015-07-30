@@ -65,7 +65,7 @@ describe('ITest signup', function () {
     });
   });
 
-  xit('should create an wallet for the user', function (done) {
+  it('should create an wallet for the user', function (done) {
     this.timeout(10000);
     debug('should create an wallet1');
     seedBankAndUser(function(theUser){

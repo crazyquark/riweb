@@ -21,7 +21,7 @@ describe('Test list_transactions', function() {
 
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
+        sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
         socketSpy = TestingUtils.buildSocketSpy();
 
@@ -66,12 +66,9 @@ describe('Test list_transactions', function() {
 
     });
 
-    afterEach(function () {
-        emitSpy.restore();
-        TestingUtils.restoreWalletSpy();
-    });
-
     afterEach(function (done) {
+        TestingUtils.restoreAll();
+        emitSpy.restore();
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 

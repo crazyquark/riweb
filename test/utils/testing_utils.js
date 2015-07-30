@@ -125,8 +125,12 @@ function restoreBankaccountSpy() {
 }
 
 function buildNewConnectedRemoteStub() {
-    Utils.getNewConnectedRemote = sinon.stub().returns(Q(buildRemoteStub()));
-    Utils.getNewConnectedAdminRemote = sinon.stub().returns(Q(buildRemoteStub()));
+    sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(buildRemoteStub()));
+    sinon.stub(Utils, 'getNewConnectedAdminRemote').returns(Q(buildRemoteStub()));
+}
+
+function restoreNewConnectedRemoteStub() {
+  restoreGenericSpy(Utils, ['getNewConnectedRemote', 'getNewConnectedAdminRemote']);
 }
 
 function dropMongodbDatabase() {
@@ -175,16 +179,28 @@ function buildClientSocketIoConnection() {
     // debug('buildClientSocketIoConnection new socketFactory');
 }
 
-var originalRippleWalletGenerate;
 function buildRippleWalletGenerateForNonAdmin(){
-  if(!originalRippleWalletGenerate){
-    originalRippleWalletGenerate = ripple.Wallet.generate;
-  }
-  ripple.Wallet.generate = sinon.stub().returns(getNonAdminRippleGeneratedWallet());
+  sinon.stub(ripple.Wallet, 'generate').returns(getNonAdminRippleGeneratedWallet());
 }
 
 function restoreRippleWalletGenerate(){
-  ripple.Wallet.generate = originalRippleWalletGenerate;
+  //ripple.Wallet.generate = originalRippleWalletGenerate;
+  restoreGenericSpy(ripple.Wallet, ['generate']);
+}
+
+function restoreEventEmitter(){
+  //ripple.Wallet.generate = originalRippleWalletGenerate;
+  restoreGenericSpy(Utils.getEventEmitter(), ['on', 'emit']);
+}
+
+function restoreAll(){
+  restoreWalletSpy();
+  restoreRippleWalletGenerate();
+  restoreNewConnectedRemoteStub();
+  restoreRippleWalletGenerate();
+  restoreEventEmitter();
+  restoreBankaccountSpy();
+  restoreRippleWalletGenerate();
 }
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
@@ -206,3 +222,4 @@ exports.buildFindByOwnerEmailForAdmin = buildFindByOwnerEmailForAdmin;
 exports.buildFindByOwnerEmailForUnexisting = buildFindByOwnerEmailForUnexisting;
 exports.buildRippleWalletGenerateForNonAdmin = buildRippleWalletGenerateForNonAdmin;
 exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;
+exports.restoreAll = restoreAll;

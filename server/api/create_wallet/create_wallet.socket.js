@@ -27,7 +27,7 @@ function fundWallet(wallet, amount) {
     Utils.getEventEmitter().emit('set_root_flags', {});
     deferred.resolve(wallet);
   } else {
-    Utils.getNewConnectedAdminRemote().then(function(remote){
+      Utils.getNewConnectedAdminRemote().then(function(remote){
       var options = { account: ROOT_RIPPLE_ACCOUNT.address,
                       destination: ripple_address,
                       amount : amount * 1000000

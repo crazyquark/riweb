@@ -19,11 +19,12 @@ describe('Test set_trust', function () {
     var remote;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
+        sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
     });
-    
+
     afterEach(function (done) {
-        TestingUtils.dropMongodbDatabase().then(function(){done();});
+      TestingUtils.restoreAll();
+      TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should respond with success on proper trust set', function (done) {

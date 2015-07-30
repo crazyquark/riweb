@@ -36,13 +36,9 @@ describe('Test create_bank', function() {
         TestingUtils.buildBankaccountSpy();
         TestingUtils.buildNewConnectedRemoteStub();
     });
-    afterEach(function () {
-        TestingUtils.restoreBankaccountSpy();
-        emitSpy.restore();
-        TestingUtils.restoreRippleWalletGenerate();
-    });
-
     afterEach(function (done) {
+        TestingUtils.restoreAll();
+        emitSpy.restore();
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 

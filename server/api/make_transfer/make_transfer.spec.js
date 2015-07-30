@@ -21,7 +21,7 @@ describe('Test make_transfer', function () {
     var remote, emitSpy, aliceWallet, bobWallet;
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
-        Utils.getNewConnectedRemote = sinon.stub().returns(Q(remote));
+        sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
@@ -36,11 +36,9 @@ describe('Test make_transfer', function () {
         sinon.mock(remote, 'createTransaction');
     });
 
-    afterEach(function () {
-        emitSpy.restore();
-        TestingUtils.restoreWalletSpy();
-    });
     afterEach(function (done) {
+        TestingUtils.restoreAll();
+        emitSpy.restore();
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 

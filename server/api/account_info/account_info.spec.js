@@ -30,12 +30,9 @@ describe('Test account_info', function () {
     beforeEach(function () {
         TestingUtils.buildWalletSpy();
     });
-    afterEach(function () {
-        TestingUtils.restoreWalletSpy();
-    });
     afterEach(function (done) {
+        TestingUtils.restoreAll();
         TestingUtils.dropMongodbDatabase().then(function(){done();});
-        TestingUtils.restoreRippleWalletGenerate();
     });
 
     it('should get account_info for unexisting email', function (done) {

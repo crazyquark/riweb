@@ -11,6 +11,8 @@ var ripple = require('ripple-lib');
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
 
+var TestingUtils = require('./../../../test/utils/testing_utils');
+
 var LoggedEmitter = require('../LoggedEmitter/LoggedEmitter.service');
 
 describe('Testing LoggedEmitter', function () {
@@ -22,6 +24,7 @@ describe('Testing LoggedEmitter', function () {
         debugSpy = sinon.spy(LoggedEmitter, 'debug');
     });
     afterEach(function () {
+        TestingUtils.restoreAll();
         emitSpy.restore();
         onSpy.restore();
         debugSpy.restore();

@@ -33,14 +33,10 @@ describe('Test create_wallet', function () {
         TestingUtils.buildWalletSpy();
         TestingUtils.buildNewConnectedRemoteStub();
     });
-    afterEach(function () {
-        TestingUtils.restoreWalletSpy();
-        emitSpy.restore();
-        TestingUtils.restoreRippleWalletGenerate();
-    });
-
     afterEach(function (done) {
-        TestingUtils.dropMongodbDatabase().then(function(){done();});
+      TestingUtils.restoreAll();
+      emitSpy.restore();
+      TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should create root wallet for admin@admin.com', function (done) {
