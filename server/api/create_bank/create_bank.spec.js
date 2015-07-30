@@ -18,7 +18,7 @@ var Bankaccount = require('./../bankaccount/bankaccount.model');
 var CreateBank = require('./create_bank.socket');
 
 
-describe('Test create_bank', function() {
+describe('Test create_bank', function () {
 
     var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy;
 
@@ -39,23 +39,49 @@ describe('Test create_bank', function() {
     afterEach(function (done) {
         TestingUtils.restoreAll();
         emitSpy.restore();
-        TestingUtils.dropMongodbDatabase().then(function(){done();});
+        TestingUtils.dropMongodbDatabase().then(function () { done(); });
     });
 
     it('should create new account for a bank', function (done) {
         var newBank = {
-          name: 'brd',
-          info: 'The french one'
+            name: 'brd',
+            info: 'The french one'
         };
         CreateBank.createBank(newBank).then(function () {
             expect(Bankaccount.create).to.have.been.calledWith({
                 name: 'brd',
                 info: 'The french one',
-                hotWallet : nonAdminRippleGeneratedWallet
+                hotWallet: nonAdminRippleGeneratedWallet
             });
             expect(Bankaccount.create).to.have.callCount(1);
             done();
         }).done(null, function (error) { done(error); });
     });
 
+    it.only('should fail create same account again for a bank', function (done) {
+        var newBank = {
+            name: 'bcr',
+            info: 'dummy BCR bank'
+        };
+        var newBankAgain = {
+            name: 'bcr',
+            info: 'dummy BCR bank (2nd time)'
+        };
+
+        CreateBank.createBank(newBank)
+            .then(function () {
+                return CreateBank.createBank(newBankAgain);
+            })
+            .then(function(data) {
+                
+            })
+            .fail(function (bank) {
+                expect(Bankaccount.create).to.have.callCount(1);
+                expect(bank).to.eql(null);
+                done();
+            })
+            .done(null, function (error) {
+                done(error);
+            });
+    });
 });

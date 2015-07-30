@@ -10,34 +10,39 @@ var Wallet = require('./../wallet/wallet.model');
 var Utils = require('./../../utils/utils');
 var Bankaccount = require('./../bankaccount/bankaccount.model');
 
-var debug = require('debug')('CreateWallet');
+var debug = require('debug')('CreateBank');
 
 var socket;
 
 var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
 
-function createBank(newBank) {
-  var deferred = Q.defer();
-  
+function createNewBank(newBank) {
   var newRippleAddress = ripple.Wallet.generate();
-  
+
   var newBankAccount = {
     name: newBank.name,
     info: newBank.info,
     hotWallet: newRippleAddress
   };
-  
-  Bankaccount.createQ(newBankAccount).then(function(createdBankAccount){
-    deferred.resolve(createdBankAccount);
+
+  return Bankaccount.createQ(newBankAccount);
+}
+
+
+function createBank(newBank) {
+  var deferred = Q.defer();
+
+  Bankaccount.findOneQ({ name: newBank.name }).then(function (foundBank) {
+    if (foundBank) {
+      debug('Found existing bank', foundBank.name);
+      deferred.reject(null);
+    } else {
+      createNewBank(newBank).then(function (createdBank) {
+        debug('resolve create', createdBank.info);
+        deferred.resolve(createdBank);
+      });
+    }
   });
-  
-  // Bankaccount.findOneQ({ name: newBank.name }).then(function (foundBank) {
-  //   if (foundBank && foundBank.name) {
-  //     deferred.resolve(foundBank);
-  //   } else {
-      
-  //   }
-  // });
 
   return deferred.promise;
 }
@@ -46,6 +51,12 @@ exports.createBank = createBank;
 exports.register = function (newSocket) {
   socket = newSocket;
   socket.on('create_bank', function (data) {
-    createBank(data);
+    createBank(data)
+      .then(function (bank) {
+        socket.emit('post:createBank', { status: 'success', bank: bank });
+      })
+      .catch(function (error) {
+        socket.emit('post:createBank', { status: 'error', error: 'Bank already exists' });
+      });
   });
-};
+}
