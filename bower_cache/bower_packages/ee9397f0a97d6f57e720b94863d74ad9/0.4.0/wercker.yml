@@ -1,0 +1,7 @@
+box: olger/box-yeoman
+build:
+  steps:
+    - npm-install
+    - olger/yeoman-bower-install
+    - grunt:
+        tasks: default
