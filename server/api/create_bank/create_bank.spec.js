@@ -45,7 +45,8 @@ describe('Test create_bank', function () {
     it('should create new account for a bank', function (done) {
         var newBank = {
             name: 'brd',
-            info: 'The french one'
+            info: 'The french one',
+            email: 'admin@brd.com'
         };
         CreateBank.createBank(newBank).then(function () {
             expect(Bankaccount.create).to.have.been.calledWith({
@@ -58,14 +59,16 @@ describe('Test create_bank', function () {
         }).done(null, function (error) { done(error); });
     });
 
-    it.only('should fail create same account again for a bank', function (done) {
+    it.only('should fail to create same account again for a bank', function (done) {
         var newBank = {
             name: 'bcr',
-            info: 'dummy BCR bank'
+            info: 'dummy BCR bank',
+            email: 'admin@bcr.com',
         };
         var newBankAgain = {
             name: 'bcr',
-            info: 'dummy BCR bank (2nd time)'
+            info: 'dummy BCR bank (2nd time)',
+            email: 'admin@bcr.com'
         };
 
         CreateBank.createBank(newBank)

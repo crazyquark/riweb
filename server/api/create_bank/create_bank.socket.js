@@ -22,6 +22,7 @@ function createNewBank(newBank) {
   var newBankAccount = {
     name: newBank.name,
     info: newBank.info,
+    email: newBank.email,
     hotWallet: newRippleAddress
   };
 

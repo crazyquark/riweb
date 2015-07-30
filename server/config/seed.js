@@ -13,6 +13,7 @@ BankAccount.find({}).remove(function() {
   BankAccount.create({
     name: 'ing',
     info: 'ING Bank',
+    email: 'admin@ing.com',
     coldWallet: {
       address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
     },
@@ -24,6 +25,7 @@ BankAccount.find({}).remove(function() {
   {
     name: 'abnamro',
     info: 'ABN Amro Bank',
+    email: 'admin@abnamro.com',
     coldWallet: {
       address: ''
     },
