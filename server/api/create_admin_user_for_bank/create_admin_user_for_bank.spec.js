@@ -42,7 +42,7 @@ describe('Test create admin user for bank', function () {
       expect(user.email).to.eql(adminInfo.email);
       expect(user.name).to.eql(adminInfo.info);
       expect(emitSpy).to.have.callCount(1);
-      expect(emitSpy).to.have.been.calledWith({status: 'success', user: ''});
+      expect(emitSpy).to.have.been.calledWith('post:create_admin_user_for_bank', {status: 'success', user: user});
       done();
     }).fail(function (error) { done(error); });;
   });
