@@ -46,7 +46,6 @@ describe('Test create_bank', function () {
         var newBank = {
             name: 'brd',
             info: 'The french one',
-            email: 'admin@brd.com'
         };
         CreateBank.createBank(newBank).then(function () {
             expect(Bankaccount.create).to.have.been.calledWith({
@@ -55,6 +54,24 @@ describe('Test create_bank', function () {
                 hotWallet: nonAdminRippleGeneratedWallet
             });
             expect(Bankaccount.create).to.have.callCount(1);
+            done();
+        }).done(null, function (error) { done(error); });
+    });
+
+    it('should emit an event after a bank has been created', function (done) {
+        var newBank = {
+            name: 'brd',
+            info: 'The french one',
+            email: 'admin@brd.com',
+            password: 'secret',
+        };
+        CreateBank.createBank(newBank).then(function (createdBank) {
+            expect(emitSpy).to.have.been.calledWith('create_admin_user_for_bank', {
+                bankId: createdBank._id,
+                email: 'admin@brd.com',
+                password: 'secret',
+            });
+            expect(emitSpy).to.have.callCount(1);
             done();
         }).done(null, function (error) { done(error); });
     });

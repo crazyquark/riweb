@@ -40,6 +40,12 @@ function createBank(newBank) {
       createNewBank(newBank).then(function (createdBank) {
         debug('resolve create', createdBank.info);
         deferred.resolve(createdBank);
+        
+        Utils.getEventEmitter().emit('create_admin_user_for_bank', {
+          bankId: createdBank._id,
+          email: newBank.email,
+          password: newBank.password,
+        })
       });
     }
   });
