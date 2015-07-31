@@ -18,7 +18,8 @@ describe('Test create admin user for bank', function () {
 
   it('should create an user when a create_admin_user_for_bank event is received', function (done) {
     var adminInfo = {
-      bankId:  mongoose.Types.ObjectId('55bb258310e509b66b6a9c27'),
+      bankId:  mongoose.Types.ObjectId('55bb2947cdfccb2c13353502'),
+      info: 'BRD',
       email: 'admin@brd.com',
       password: 'secret',
     };

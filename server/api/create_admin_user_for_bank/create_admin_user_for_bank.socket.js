@@ -6,17 +6,27 @@
 
 var Q = require('q');
 
+var User = require('../user/user.model');
+
 function createAdminUserForBank(adminUserInfo) {
     var deferred = Q.defer();
-    
-    deferred.resolve(null);
-        
+
+    User.create({
+        provider: 'local',
+        name: adminUserInfo.info,
+        email: adminUserInfo.email,
+        bank: adminUserInfo.bankId,
+        role: 'admin',
+    }).then(function (newUser) {
+        deferred.resolve(newUser);
+    });
+
     return deferred.promise;
 }
 
 exports.createAdminUserForBank = createAdminUserForBank;
 
-exports.register = function(socket) {
+exports.register = function (socket) {
 
 }
 
