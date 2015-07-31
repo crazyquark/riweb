@@ -86,7 +86,7 @@ function getBankForUser(ownerEmail) {
     if (foundUser) {
       return Bankaccount.findById(foundUser.bank).then(function(foundBank) {
         if (foundBank) {
-          if (foundBank.hotWallet && foundBank.hotWallet.address && foundBank.secret) {
+          if (foundBank.hotWallet && foundBank.hotWallet.address && foundBank.hotWallet.secret) {
             return { status: 'success', bank: foundBank };
           } else {
             return { status: 'error', message: 'bank wallet not correct' };
@@ -127,7 +127,7 @@ function createWalletForEmail(ownerEmail) {
   Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet){
     if(!foundWallet){
       
-      var bankWallet = getBankForUser(ownerEmail).then(function(foundBank){
+      var bankWalletQ = getBankForUser(ownerEmail).then(function(foundBank){
         if (foundBank.status == 'error') {
                               
           // var failurePromise = Q.defer();                    
@@ -140,27 +140,23 @@ function createWalletForEmail(ownerEmail) {
           
         } else {
           
-          var createWallet = getCreateWallet(ownerEmail);
+          var createWalletQ = getCreateWallet(ownerEmail);
     
-          var promise = createWallet()
+          var promise = createWalletQ()
               .then(convertRippleToRiwebWallet(ownerEmail))
-              .then(saveWalletToDb) //TODO: switch these 2
-              .then(function(createdWallet)
-                {
-                  fundWallet(bankWallet.hotWallet, createdWallet, 60);
+              .then(saveWalletToDb)
+              .then(function(createdWallet){
+                  return fundWallet(foundBank.bank.hotWallet, createdWallet, 60);
                 });
     
           return promise;          
         }
       });
       
-      return bankWallet.promise;
+      return bankWalletQ;
               
     } else {
-      //TODO: load the bank account info here as well
-      
-      return Q(foundWallet);
-      
+      return Q(foundWallet);      
     }
   }).then(function(foundWallet){
     deferred.resolve(foundWallet);
