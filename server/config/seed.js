@@ -17,8 +17,8 @@ BankAccount.find({}).remove(function() {
       address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
     },
     hotWallet : {
-      address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
-      secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
+      address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+      secret: 'masterpassphrase'
     }
   },
   {
