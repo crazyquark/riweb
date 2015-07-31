@@ -59,7 +59,7 @@ describe('Test create_bank', function () {
         }).done(null, function (error) { done(error); });
     });
 
-    it.only('should fail to create same account again for a bank', function (done) {
+    it('should fail to create same account again for a bank', function (done) {
         var newBank = {
             name: 'bcr',
             info: 'dummy BCR bank',
