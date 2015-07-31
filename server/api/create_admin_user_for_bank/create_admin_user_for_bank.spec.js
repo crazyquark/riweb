@@ -34,7 +34,7 @@ describe('Test create admin user for bank', function () {
   afterEach(function (done) {
     TestingUtils.dropMongodbDatabase().then(function() { done(); });
     emitSpy.restore();;
-    //TestingUtils.restoreAll();
+    TestingUtils.restoreAll();
   })
 
   it('should create an admin user for the given bank ID', function (done) {
