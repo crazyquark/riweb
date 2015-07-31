@@ -1,35 +1,23 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('CreatebankCtrl', function ($scope) {
+  .controller('CreatebankCtrl', function ($scope, $location, RiwebSocketService) {
     $scope.bank = {};
 
     $scope.register = function (form) {
       $scope.submitted = true;
 
       if (form.$valid) {
-        // Auth.createUser({
-        //   name: $scope.user.name,
-        //   email: $scope.user.email,
-        //   password: $scope.user.password,
-        //   iban: $scope.user.iban,
-        //   bank: $scope.user.bank._id
-        // })
-        //   .then(function () {
-        //     // Account created, redirect to home
-        //     $location.path('/myaccount');
-        //   })
-        //   .catch(function (err) {
-        //     err = err.data;
-        //     $scope.errors = {};
+        RiwebSocketService.on('post:create_admin_user_for_bank', function (data) {
+          if (data.status === 'success') {
+            $scope.user = data.user;
+            $location.path('/myaccount');
+          }
+        });
 
-        //     // Update validity of form fields that match the mongoose errors
-        //     angular.forEach(err.errors, function (error, field) {
-        //       form[field].$setValidity('mongoose', false);
-        //       $scope.errors[field] = error.message;
-        //     });
-        //   });
+        RiwebSocketService.emit('create_bank', $scope.bank);
       }
+
     };
   });
  
