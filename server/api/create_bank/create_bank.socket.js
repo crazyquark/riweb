@@ -59,10 +59,10 @@ exports.register = function (newSocket) {
   socket.on('create_bank', function (data) {
     createBank(data)
       .then(function (bank) {
-        socket.emit('post:createBank', { status: 'success', bank: bank });
+        socket.emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });
       })
-      .catch(function (error) {
-        socket.emit('post:createBank', { status: 'error', error: 'Bank already exists' });
+      .fail(function (error) {
+        socket.emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
       });
   });
 }
