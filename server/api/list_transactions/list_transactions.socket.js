@@ -51,8 +51,8 @@ function listTransactions(ownerEmail, socket) {
 
 	var wallet;
 	Wallet.findByOwnerEmail(ownerEmail).then(function (wallets) {
-		if (wallets.constructor == Array) {
-			if (wallets.length != 1) {
+		if (wallets.constructor === Array) {
+			if (wallets.length !== 1) {
 				buildMissingError();
 
 				return deferred.promise;

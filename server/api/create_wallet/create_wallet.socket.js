@@ -94,7 +94,7 @@ function createWalletForEmail(ownerEmail) {
 
   var deferred = Q.defer();
 
-  return Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet){
+  Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet){
     if(!foundWallet){
       var createWallet = getCreateWallet(ownerEmail);
 

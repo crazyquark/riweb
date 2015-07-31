@@ -44,7 +44,6 @@ function getNewConnectedRemote(rippleAddress, rippleSecret){
     if(!err){
       deferred.resolve(remote);
     } else {
-      error(err);
       deferred.reject(err);
     }
   });
