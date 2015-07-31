@@ -32,7 +32,7 @@ describe('Test create admin user for bank', function () {
   });
 
   afterEach(function (done) {
-    TestingUtils.dropMongodbDatabase().then(function() { done(); });
+    TestingUtils.dropMongodbDatabase().then(function () { done(); });
     emitSpy.restore();;
     TestingUtils.restoreAll();
   })
@@ -42,7 +42,7 @@ describe('Test create admin user for bank', function () {
       expect(user.email).to.eql(adminInfo.email);
       expect(user.name).to.eql(adminInfo.info);
       expect(emitSpy).to.have.callCount(1);
-      expect(emitSpy).to.have.been.calledWith('post:create_admin_user_for_bank', {status: 'success', user: user});
+      expect(emitSpy).to.have.been.calledWith('post:create_admin_user_for_bank', { status: 'success', user: { email: user.email, name: user.name } });
       done();
     }).fail(function (error) { done(error); });;
   });

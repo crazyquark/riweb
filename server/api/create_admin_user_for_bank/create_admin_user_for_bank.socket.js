@@ -22,9 +22,11 @@ function createAdminUserForBank(adminUserInfo) {
         password: adminUserInfo.password,
         role: 'admin',
     }).then(function (newUser) {
+        var newUserStripped = { email: newUser.email, name: newUser.name };
+        
         deferred.resolve(newUser);
-        Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'success', user: newUser });
-        socket.emit('post:create_admin_user_for_bank', { status: 'success', user: newUser });
+        Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'success', user:  newUserStripped});
+        socket.emit('post:create_admin_user_for_bank', { status: 'success', user: newUserStripped });
     }, function (err) {
         deferred.reject(err);
         Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'error', error: err });
