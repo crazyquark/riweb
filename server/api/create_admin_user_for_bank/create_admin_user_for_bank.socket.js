@@ -11,14 +11,17 @@ var User = require('../user/user.model');
 function createAdminUserForBank(adminUserInfo) {
     var deferred = Q.defer();
 
-    User.create({
+    User.createQ({
         provider: 'local',
         name: adminUserInfo.info,
         email: adminUserInfo.email,
         bank: adminUserInfo.bankId,
+        password: adminUserInfo.password,
         role: 'admin',
     }).then(function (newUser) {
         deferred.resolve(newUser);
+    }, function(err) {
+        deferred.resolve(null);
     });
 
     return deferred.promise;
