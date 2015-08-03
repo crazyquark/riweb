@@ -133,6 +133,28 @@ function restoreNewConnectedRemoteStub() {
   restoreGenericSpy(Utils, ['getNewConnectedRemote', 'getNewConnectedAdminRemote']);
 }
 
+function getNonAdminMongooseUser(name, email_address, bankId) {
+    name = name || 'testJoe@danger.io';
+    email_address = email_address || 'joe@danger.io';
+    bankId = bankId || 'id_bank_ING';    
+    return {
+        name: name,
+        email: email_address,
+        bank: bankId,  
+        role: 'user'        
+    };
+}
+
+function getMongooseBankAccount(bankId, bankName, wallet) {
+    return {
+        _id: bankId,
+        name: name,
+        info: name,
+        hotWallet: wallet  
+    };
+}
+
+
 function dropMongodbDatabase() {
     debug('dropMongodbDatabase');
     // TODO: make promise work
@@ -221,5 +243,7 @@ exports.getAdminMongooseWallet = getAdminMongooseWallet;
 exports.buildFindByOwnerEmailForAdmin = buildFindByOwnerEmailForAdmin;
 exports.buildFindByOwnerEmailForUnexisting = buildFindByOwnerEmailForUnexisting;
 exports.buildRippleWalletGenerateForNonAdmin = buildRippleWalletGenerateForNonAdmin;
+exports.getNonAdminMongooseUser = getNonAdminMongooseUser;
+exports.getMongooseBankAccount = getMongooseBankAccount;
 exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;
 exports.restoreAll = restoreAll;

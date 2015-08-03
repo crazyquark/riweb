@@ -27,6 +27,29 @@ describe('Test create_wallet', function () {
         socketSpy = TestingUtils.buildSocketSpy();
         CreateWallet.register(socketSpy);
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
+        
+        bank1 = Utils.getMongooseBankAccount('_bank1', 'Test bank #1', Utils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
+        bank2 = Utils.getMongooseBankAccount('_bank2', 'Test foreing bank', Utils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK_FOREIGN'));
+        nonAdminUser = TestingUtils.getNonAdminMongooseUser('Alice', 'alice@example.com', bank1._id);
+        
+        
+        sinon.stub(User, 'findByEmail', function (email) {
+            if (email === 'admin@admin.com') {
+                return Q([nonAdminUser]); //TODO: should no longer be needed, since Admins will not have special wallets anymore 
+            } else if (email === 'a1@example.com' || email === 'a2@example.com' || email === 'a3@example.com' || email === 'a4@example.com') {
+                return Q([nonAdminUser]);
+            }
+            return Q([]);
+        });
+        
+        sinon.stub(Bankaccount, 'findById', function (bankId) {
+            if (bankId === bank1._id) {
+                return Q([bank1]); 
+            } else if (baId === bank2._id) {
+                return Q([bank2]);
+            }
+            return Q([]);
+        });        
     });
 
     beforeEach(function () {

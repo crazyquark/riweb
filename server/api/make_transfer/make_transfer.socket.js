@@ -53,6 +53,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
             recvWallet = recvWallets;
         }
 
+        //TODO: should retrieve the BANK wallet, to specify the issuing currency adress
         Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
             var transaction = remote.createTransaction('Payment', {
                 account: senderWallet.address,

@@ -25,6 +25,7 @@ function fundWallet(sourceWallet, wallet, amount) {
 
   var ripple_address = wallet.address;
 
+  //TODO: this needs to be moved to the BANK registration section
   if (ripple_address === sourceWallet.address) {
     Utils.getEventEmitter().emit('set_root_flags', {});
     deferred.resolve(wallet);
@@ -130,14 +131,8 @@ function createWalletForEmail(ownerEmail) {
       var bankWalletQ = getBankForUser(ownerEmail).then(function(foundBank){
         if (foundBank.status == 'error') {
                               
-          // var failurePromise = Q.defer();                    
-          // failurePromise.reject(foundBank.message);
-          // return failurePromise.promise;
-
           return Q.reject(foundBank.message);
-          
-          // throw new Error("foundBank.message");
-          
+                    
         } else {
           
           var createWalletQ = getCreateWallet(ownerEmail);
