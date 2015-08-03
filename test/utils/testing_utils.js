@@ -70,6 +70,16 @@ function getNonAdminMongooseWallet(email_address, sufix) {
     };
 }
 
+function getBadMongooseWallet(email_address) {
+    email_address = email_address || 'joe@danger.io';
+    return {
+        ownerEmail: email_address,
+        secret: undefined,
+        address: undefined
+    };
+}
+
+
 function getAdminMongooseWallet() {
     return {
         ownerEmail: 'admin@admin.com',
@@ -259,6 +269,7 @@ exports.buildCreateForEmailStub = buildCreateForEmailStub;
 exports.buildEmptyTransactionStub = buildEmptyTransactionStub;
 exports.getNonAdminRippleGeneratedWallet = getNonAdminRippleGeneratedWallet;
 exports.getNonAdminMongooseWallet = getNonAdminMongooseWallet;
+exports.getBadMongooseWallet = getBadMongooseWallet;
 exports.getAdminMongooseWallet = getAdminMongooseWallet;
 exports.buildFindByOwnerEmailForAdmin = buildFindByOwnerEmailForAdmin;
 exports.buildFindByOwnerEmailForUnexisting = buildFindByOwnerEmailForUnexisting;

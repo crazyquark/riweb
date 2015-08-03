@@ -6,32 +6,39 @@
 
 var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
+var CreateWallet = require('./../create_wallet/create_wallet.socket');
 var Utils = require('./../../utils/utils');
 
 function makeTransfer(fromEmail, toEmail, amount) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
 
-    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet]).spread(function (senderWalletPromise, recvWalletPromise) {
+    var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
+
+    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank])
+            .spread(function (senderWalletPromise, recvWalletPromise, findIssuingBankPromise) {
         var deferred = Q.defer();
 
         var senderWallets = senderWalletPromise.value;
         var recvWallets = recvWalletPromise.value;
+        var findIssuingBank = findIssuingBankPromise.value; 
 
-        function buildMissingError() {
+        function buildMissingError(errorMessage) {
+            errorMessage = errorMessage || 'missing account';
             var result = {
                 fromEmail: fromEmail,
                 toEmail: toEmail,
                 amount: amount,
+                issuer: issuingAddress,
                 status: 'error',
-                message: 'missing account'
+                message: errorMessage
             };
 
             Utils.getEventEmitter().emit('post:make_transfer', result);
             deferred.resolve(result);
         }
         
-        var senderWallet, recvWallet;
+        var senderWallet, recvWallet, issuingAddress;
         
         if (senderWallets.constructor === Array) {
             if (!(senderWallets.length === 1 && recvWallets.length === 1)) {
@@ -52,13 +59,22 @@ function makeTransfer(fromEmail, toEmail, amount) {
             senderWallet = senderWallets;
             recvWallet = recvWallets;
         }
+        if (!findIssuingBank || findIssuingBank.status == 'error' || !findIssuingBank.bank 
+            || !findIssuingBank.bank.hotWallet || !findIssuingBank.bank.hotWallet.address) {
+                
+            buildMissingError('issuing bank not resolved');
+                        
+            return deferred.promise;            
+        } else {
+            issuingAddress = findIssuingBank.bank.hotWallet.address;
+        }
 
-        //TODO: should retrieve the BANK wallet, to specify the issuing currency adress
+        
         Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
             var transaction = remote.createTransaction('Payment', {
                 account: senderWallet.address,
                 destination: recvWallet.address,
-                amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
+                amount: amount + '/EUR/' + findIssuingBank.bank.hotWallet.address
             });
 
             transaction.submit(function (err, res) {
@@ -68,6 +84,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
                         fromEmail: fromEmail,
                         toEmail: toEmail,
                         amount: amount,
+                        issuer: issuingAddress,
                         message: 'Ripple error',
                         status: 'ripple error'
                     });
@@ -83,6 +100,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
                         fromEmail: fromEmail,
                         toEmail: toEmail,
                         amount: amount,
+                        issuer: issuingAddress,
                         status: 'success'
                     });
                     deferred.resolve({ status: 'success', transaction: transaction });

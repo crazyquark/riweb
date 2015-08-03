@@ -168,6 +168,7 @@ function createWalletForEmail(ownerEmail) {
 
 exports.createWalletForEmail = createWalletForEmail;
 exports.fundWallet = fundWallet;
+exports.getBankForUser = getBankForUser;
 
 exports.register = function(newSocket) {
   socket = newSocket;
