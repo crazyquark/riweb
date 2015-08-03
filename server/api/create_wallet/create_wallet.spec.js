@@ -14,10 +14,13 @@ var CreateWallet = require('./create_wallet.socket');
 var TestingUtils = require('./../../../test/utils/testing_utils');
 var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
+var User = require('./../user/user.model');
+var Bankaccount = require('./../bankaccount/bankaccount.model');
 
 describe('Test create_wallet', function () {
 
     var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy;
+    var bank1, bank2, nonAdminUser;
 
     beforeEach(function () {
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
@@ -28,41 +31,28 @@ describe('Test create_wallet', function () {
         CreateWallet.register(socketSpy);
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
         
-        bank1 = Utils.getMongooseBankAccount('_bank1', 'Test bank #1', Utils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
-        bank2 = Utils.getMongooseBankAccount('_bank2', 'Test foreing bank', Utils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK_FOREIGN'));
+        bank1 = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
+        bank2 = TestingUtils.getMongooseBankAccount('_bank2', 'Test foreing bank', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK_FOREIGN'));
         nonAdminUser = TestingUtils.getNonAdminMongooseUser('Alice', 'alice@example.com', bank1._id);
-        
-        
-        sinon.stub(User, 'findByEmail', function (email) {
-            if (email === 'admin@admin.com') {
-                return Q([nonAdminUser]); //TODO: should no longer be needed, since Admins will not have special wallets anymore 
-            } else if (email === 'a1@example.com' || email === 'a2@example.com' || email === 'a3@example.com' || email === 'a4@example.com') {
-                return Q([nonAdminUser]);
-            }
-            return Q([]);
-        });
-        
-        sinon.stub(Bankaccount, 'findById', function (bankId) {
-            if (bankId === bank1._id) {
-                return Q([bank1]); 
-            } else if (baId === bank2._id) {
-                return Q([bank2]);
-            }
-            return Q([]);
-        });        
+          
+        TestingUtils.buildWalletSpy();
+        TestingUtils.buildNewConnectedRemoteStub();                
     });
 
-    beforeEach(function () {
-        TestingUtils.buildWalletSpy();
-        TestingUtils.buildNewConnectedRemoteStub();
-    });
+    // beforeEach(function () {
+    //     TestingUtils.buildWalletSpy();
+    //     TestingUtils.buildNewConnectedRemoteStub();
+    // });
     afterEach(function (done) {
       TestingUtils.restoreAll();
       emitSpy.restore();
       TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
-    it('should create root wallet for admin@admin.com', function (done) {
+    it.only('should create root wallet for admin@admin.com', function (done) {
+        TestingUtils.buildUserFindEmailStub(User, nonAdminUser);
+        TestingUtils.buildBankaccountFindById(Bankaccount, [bank1, bank2]);
+        
         CreateWallet.createWalletForEmail('admin@admin.com').then(function () {
             expect(Wallet.create).to.have.been.calledWith(TestingUtils.getAdminMongooseWallet());
             expect(Wallet.create).to.have.callCount(1);

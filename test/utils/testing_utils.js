@@ -148,12 +148,35 @@ function getNonAdminMongooseUser(name, email_address, bankId) {
 function getMongooseBankAccount(bankId, bankName, wallet) {
     return {
         _id: bankId,
-        name: name,
-        info: name,
+        name: bankName,
+        info: bankName,
         hotWallet: wallet  
     };
 }
 
+function buildUserFindEmailStub(user, nonAdminGeneratedUser) {
+
+    sinon.stub(user, 'findByEmail', function (email) {
+        if (email === 'admin@admin.com') {
+            return Q([nonAdminGeneratedUser]); //TODO: should no longer be needed, since Admins will not have special wallets anymore 
+        } else if (email.indexOf('@example.com') > -1) {
+            return Q([nonAdminGeneratedUser]);
+        }
+        return Q([]);
+    });    
+}
+
+
+function buildBankaccountFindById(bankaccount, banksList) {
+        sinon.stub(bankaccount, 'findById', function (bankId) {
+        var index;
+        for (index = 0; index < banksList.length; ++index) {
+            if (banksList[index]._id === bankId)
+                return Q([banksList[index]]);
+        }        
+        return Q([]);
+    });
+}
 
 function dropMongodbDatabase() {
     debug('dropMongodbDatabase');
@@ -245,5 +268,7 @@ exports.buildFindByOwnerEmailForUnexisting = buildFindByOwnerEmailForUnexisting;
 exports.buildRippleWalletGenerateForNonAdmin = buildRippleWalletGenerateForNonAdmin;
 exports.getNonAdminMongooseUser = getNonAdminMongooseUser;
 exports.getMongooseBankAccount = getMongooseBankAccount;
+exports.buildUserFindEmailStub = buildUserFindEmailStub;
+exports.buildBankaccountFindById = buildBankaccountFindById;
 exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;
 exports.restoreAll = restoreAll;
