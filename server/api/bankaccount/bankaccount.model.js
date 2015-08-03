@@ -6,6 +6,7 @@ var Schema = mongoose.Schema;
 var BankaccountSchema = new Schema({
   name: String,
   info: String,
+  email: String,
   coldWallet: {
     address: String
   },

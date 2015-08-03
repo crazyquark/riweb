@@ -7,6 +7,7 @@
 var ripple = require('ripple-lib');
 var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
+var BankAccount = require('../bankaccount/bankaccount.model');
 var Utils = require('./../../utils/utils');
 
 var debug = require('debug')('CreateWallet');
@@ -89,21 +90,30 @@ function convertRippleToRiwebWallet(ownerEmail){
     return walletConverterFunction;
 }
 
-function createWalletForEmail(ownerEmail) {
+function createWalletForEmail(ownerEmail, role) {
   debug('createWalletForEmail', ownerEmail);
 
   var deferred = Q.defer();
 
   Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet){
-    if(!foundWallet){
-      var createWallet = getCreateWallet(ownerEmail);
+    if (!foundWallet) {
+      if (role === 'admin') {
+        // Admin users have their wallet stored in the bankaccount doc, created apriori
+        BankAccount.findOneQ({ email: ownerEmail }).then(function (bank) {
+          deferred.resolve(bank.hotWallet);
+          socket.emit('post:create_wallet', bank.hotWallet.address);
+        });
 
-      var promise = createWallet()
+      } else {
+        var createWallet = getCreateWallet(ownerEmail);
+
+        var promise = createWallet()
           .then(convertRippleToRiwebWallet(ownerEmail))
           .then(saveWalletToDb)
           .then(fundWallet);
 
-      return promise;
+        return promise;
+      }
     } else {
       return Q(foundWallet);
     }
@@ -121,6 +131,6 @@ exports.fundWallet = fundWallet;
 exports.register = function(newSocket) {
   socket = newSocket;
   socket.on('create_wallet', function(data) {
-      createWalletForEmail(data.ownerEmail);
+      createWalletForEmail(data.ownerEmail, data.role);
   });
 };
