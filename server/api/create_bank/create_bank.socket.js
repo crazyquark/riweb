@@ -50,6 +50,7 @@ function createBank(newBank) {
 
         Utils.getEventEmitter().emit('create_admin_user_for_bank', {
           bankId: createdBank._id,
+          info: createdBank.info,
           email: newBank.email,
           password: newBank.password,
         });
