@@ -1,10 +1,12 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('LoginCtrl', function ($scope, $http, Auth, $location) {
+  .controller('LoginCtrl', function ($scope, $rootScope, $http, Auth, $location) {
     $scope.user = {};
     $scope.errors = {};
-
+    
+    $scope.message = $rootScope.message;
+    
     $scope.login = function(form) {
       $scope.submitted = true;
 

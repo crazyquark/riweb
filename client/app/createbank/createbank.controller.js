@@ -10,10 +10,8 @@ angular.module('riwebApp')
       if (form.$valid) {
         RiwebSocketService.on('post:create_admin_user_for_bank', function (data) {
           if (data.status === 'success') {
-            
-            $rootScope.$broadcast('currentUser', data.user);
-            
-            $location.path('/myaccount');
+            $rootScope.message = 'User was created, please login now.';
+            $location.path('/login');
           }
         });
 
