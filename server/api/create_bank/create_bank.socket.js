@@ -8,7 +8,8 @@ var ripple = require('ripple-lib');
 var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
 var Utils = require('./../../utils/utils');
-var Bankaccount = require('./../bankaccount/bankaccount.model');
+var BankAccount = require('./../bankaccount/bankaccount.model');
+var CreateWallet = require('../create_wallet/create_wallet.socket');
 
 var debug = require('debug')('CreateBank');
 
@@ -25,27 +26,30 @@ function createNewBank(newBank) {
     hotWallet: newRippleAddress
   };
 
-  return Bankaccount.createQ(newBankAccount);
+  return BankAccount.createQ(newBankAccount);
 }
 
 
 function createBank(newBank) {
   var deferred = Q.defer();
 
-  Bankaccount.findOneQ({ name: newBank.name }).then(function (foundBank) {
+  BankAccount.findOneQ({ name: newBank.name }).then(function (foundBank) {
     if (foundBank) {
       debug('Found existing bank', foundBank.name);
       deferred.reject(null);
     } else {
-      createNewBank(newBank).then(function (createdBank) {
-        debug('resolve create', createdBank.info);
-        deferred.resolve(createdBank);
-        
-        Utils.getEventEmitter().emit('create_admin_user_for_bank', {
-          bankId: createdBank._id,
-          email: newBank.email,
-          password: newBank.password,
-        })
+      createNewBank(newBank).then(function (createdBank) {        
+        // Need to also fund this newly minted wallet
+        CreateWallet.fundWallet(createdBank.hotWallet.address).then(function () {
+          Utils.getEventEmitter().emit('create_admin_user_for_bank', {
+            bankId: createdBank._id,
+            email: newBank.email,
+            password: newBank.password,
+          });
+
+          debug('resolve create', createdBank.info);
+          deferred.resolve(createdBank);
+        });
       });
     }
   });

@@ -58,7 +58,7 @@ describe('Test create_bank', function () {
         }).done(null, function (error) { done(error); });
     });
 
-    it('should emit an event after a bank has been created', function (done) {
+    it('should emit 2 events after a bank has been created', function (done) {
         var newBank = {
             name: 'brd',
             info: 'The french one',
@@ -71,7 +71,7 @@ describe('Test create_bank', function () {
                 email: 'admin@brd.com',
                 password: 'secret',
             });
-            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.callCount(2); // set_trust, create_admin_user_for bank
             done();
         }).done(null, function (error) { done(error); });
     });
