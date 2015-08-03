@@ -155,26 +155,23 @@ function getMongooseBankAccount(bankId, bankName, wallet) {
 }
 
 function buildUserFindEmailStub(user, nonAdminGeneratedUser) {
-
     sinon.stub(user, 'findByEmail', function (email) {
-        if (email === 'admin@admin.com') {
-            return Q([nonAdminGeneratedUser]); //TODO: should no longer be needed, since Admins will not have special wallets anymore 
-        } else if (email.indexOf('@example.com') > -1) {
-            return Q([nonAdminGeneratedUser]);
+        if (email.indexOf('@example.com') > -1) {
+            return Q(nonAdminGeneratedUser);
         }
-        return Q([]);
+        return Q();
     });    
 }
 
 
 function buildBankaccountFindById(bankaccount, banksList) {
-        sinon.stub(bankaccount, 'findById', function (bankId) {
+    sinon.stub(bankaccount, 'findById', function (bankId) {
         var index;
         for (index = 0; index < banksList.length; ++index) {
             if (banksList[index]._id === bankId)
-                return Q([banksList[index]]);
+                return Q(banksList[index]);
         }        
-        return Q([]);
+        return Q();
     });
 }
 
