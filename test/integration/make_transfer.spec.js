@@ -37,7 +37,8 @@ describe('ITest transfers', function () {
 		});
 	});
 
-	it.only('Transfer from admin to regular user', function (done) {
+	it('Transfer from admin to regular user', function (done) {
+		this.timeout(10000);
 		MakeTransfer.makeTransfer(bank.email, user.email).then(function (result) {
 			expect(result.status).to.eql('success');
 			done();
