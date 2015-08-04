@@ -13,24 +13,26 @@ BankAccount.find({}).remove(function() {
   BankAccount.create({
     name: 'ing',
     info: 'ING Bank',
+    email: 'admin@ing.com',
     coldWallet: {
       address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
     },
     hotWallet : {
       address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
       secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
-    }
+    },
   },
   {
     name: 'abnamro',
     info: 'ABN Amro Bank',
+    email: 'admin@abnamro.com',
     coldWallet: {
       address: ''
     },
     hotWallet: {
       address: '',
       secret: ''
-    }
+    },
   }, function() {
       BankAccount.findOne(function (err, firstBank) {
           seedUsers(firstBank);

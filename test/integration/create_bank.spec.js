@@ -34,7 +34,7 @@ describe('ITest Create Bank', function () {
 		};
 
 		Utils.getEventEmitter().on('post:create_admin_user_for_bank', function (result) {
-			expect(result.status === 'success');
+			expect(result.status).to.eql('success');
 			if (result.status === 'success') {
 				expect(result.user.email).to.eql(bankInfo.email);
 				expect(result.user.name).to.eql(bankInfo.info);

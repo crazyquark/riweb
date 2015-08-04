@@ -131,7 +131,7 @@ function buildNewConnectedRemoteStub() {
 }
 
 function restoreNewConnectedRemoteStub() {
-  restoreGenericSpy(Utils, ['getNewConnectedRemote', 'getNewConnectedAdminRemote']);
+    restoreGenericSpy(Utils, ['getNewConnectedRemote', 'getNewConnectedAdminRemote']);
 }
 
 function dropMongodbDatabase() {
@@ -180,59 +180,63 @@ function buildClientSocketIoConnection() {
     // debug('buildClientSocketIoConnection new socketFactory');
 }
 
-function buildRippleWalletGenerateForNonAdmin(){
-  sinon.stub(ripple.Wallet, 'generate').returns(getNonAdminRippleGeneratedWallet());
+function buildRippleWalletGenerateForNonAdmin() {
+    sinon.stub(ripple.Wallet, 'generate').returns(getNonAdminRippleGeneratedWallet());
 }
 
-function restoreRippleWalletGenerate(){
-  //ripple.Wallet.generate = originalRippleWalletGenerate;
-  restoreGenericSpy(ripple.Wallet, ['generate']);
+function restoreRippleWalletGenerate() {
+    //ripple.Wallet.generate = originalRippleWalletGenerate;
+    restoreGenericSpy(ripple.Wallet, ['generate']);
 }
 
-function restoreEventEmitter(){
-  //ripple.Wallet.generate = originalRippleWalletGenerate;
-  restoreGenericSpy(Utils.getEventEmitter(), ['on', 'emit']);
+function restoreEventEmitter() {
+    //ripple.Wallet.generate = originalRippleWalletGenerate;
+    restoreGenericSpy(Utils.getEventEmitter(), ['on', 'emit']);
 }
 
-function restoreAll(){
-  restoreWalletSpy();
-  restoreRippleWalletGenerate();
-  restoreNewConnectedRemoteStub();
-  restoreRippleWalletGenerate();
-  restoreEventEmitter();
-  restoreBankaccountSpy();
-  restoreRippleWalletGenerate();
+function restoreAll() {
+    restoreWalletSpy();
+    restoreRippleWalletGenerate();
+    restoreNewConnectedRemoteStub();
+    restoreRippleWalletGenerate();
+    restoreEventEmitter();
+    restoreBankaccountSpy();
+    restoreRippleWalletGenerate();
 }
 
-function seedBankAndUser(callback){
-  BankAccount.create({
-    name: 'ing',
-    info: 'ING Bank',
-    coldWallet: {
-      address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
-    },
-    hotWallet : {
-      address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
-      secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
-    }
-  }, function() {
-    BankAccount.findOne(function (err, firstBank) {
-      seedUsers(firstBank);
-    });
-  });
+function seedBankAndUser(callback) {
+    var bank = {
+        name: 'ing',
+        info: 'ING Bank',
+        email: 'admin@ing.com',
+        coldWallet: {
+            address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
+        },
+        hotWallet: {
+            address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
+            secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
 
-  function seedUsers(bank){
-    var newUser = {
-      provider: 'local',
-      name: 'James Bond',
-      email: 'james.bond@mi6.com',
-      password: '1234',
-      bank: bank._id
+        }
     };
-    User.create(newUser, function() {
-      callback(newUser, bank);
-    });
-  }
+    BankAccount.create(
+        bank, function () {
+            BankAccount.findOne(function (err, firstBank) {
+                seedUsers(firstBank);
+            });
+        });
+
+    function seedUsers(createdBank) {
+        var newUser = {
+            provider: 'local',
+            name: 'James Bond',
+            email: 'james.bond@mi6.com',
+            password: '1234',
+            bank: createdBank._id
+        };
+        User.create(newUser, function () {
+            callback(newUser, bank);
+        });
+    }
 }
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';

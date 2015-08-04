@@ -38,7 +38,8 @@ describe('ITest transfers', function () {
 	});
 
 	it.only('Transfer from admin to regular user', function (done) {
-		MakeTransfer.makeTransfer(bank.email, user.email).then(function () {
+		MakeTransfer.makeTransfer(bank.email, user.email).then(function (result) {
+			expect(result.status).to.eql('success');
 			done();
 		}, function (err) {
 			done(err);
