@@ -33,7 +33,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
         
         var senderWallet, recvWallet;
         
-        if (senderWallets.constructor === Array) {
+        if (senderWallets && senderWallets.constructor === Array) {
             if (!(senderWallets.length === 1 && recvWallets.length === 1)) {
                 buildMissingError();
 
