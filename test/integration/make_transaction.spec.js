@@ -16,6 +16,6 @@ describe('ITest transfers', function () {
 	});
 	
 	it('Transfer from admin to regular user', function(done) {
-		
+		done();
 	});
 });
