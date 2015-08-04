@@ -12,29 +12,28 @@ var CreateAdminUser = require('../../server/api/create_admin_user_for_bank/creat
 
 describe('ITest Create Bank', function () {
 	var socketSpy;
-	
-	beforeEach(function (done) {
+
+	beforeEach(function () {
 		socketSpy = TestingUtils.buildSocketSpy();
 		CreateAdminUser.register(socketSpy);
-		
+	});
+
+	afterEach(function (done) {
+		TestingUtils.restoreAll();
 		TestingUtils.dropMongodbDatabase().then(function () {
 			done();
 		});
 	});
-	
-	afterEach(function() {
-		TestingUtils.restoreAll();
-	});
-	
+
 	it('should create a bank and an admin user for it', function (done) {
 		var bankInfo = {
-			name : 'brd',
+			name: 'brd',
 			info: 'BRD Societe Generale',
 			email: 'admin@brd.com',
 			password: '1234',
 		};
-		
-		Utils.getEventEmitter().on('post:create_admin_user_for_bank', function(result) {
+
+		Utils.getEventEmitter().on('post:create_admin_user_for_bank', function (result) {
 			expect(result.status === 'success');
 			if (result.status === 'success') {
 				expect(result.user.email).to.eql(bankInfo.email);
@@ -42,14 +41,14 @@ describe('ITest Create Bank', function () {
 			}
 			done();
 		});
-		
-		CreateBank.createBank(bankInfo).then(function(bank) {
+
+		CreateBank.createBank(bankInfo).then(function (bank) {
 			expect(bank.email).to.eql(bankInfo.email);
 			expect(bank.info).to.eql(bankInfo.info);
 			expect(bank.name).to.eql(bankInfo.name);
 		},
-		function(error) {
-			
-		});
+			function (error) {
+
+			});
 	});
 });

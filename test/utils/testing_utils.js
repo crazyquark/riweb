@@ -1,7 +1,8 @@
 var sinon = require('sinon');
 var Q = require('q');
 var Wallet = require('./../../server/api/wallet/wallet.model');
-var Bankaccount = require('./../../server/api/bankaccount/bankaccount.model');
+var BankAccount = require('./../../server/api/bankaccount/bankaccount.model');
+var User = require('../../server/api/user/user.model');
 var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
 var mongoose = require('mongoose-q')(require('mongoose'));
@@ -113,7 +114,7 @@ function buildWalletSpy() {
 }
 
 function buildBankaccountSpy() {
-    buildGenericSpy(Bankaccount, ['create']);
+    buildGenericSpy(BankAccount, ['create']);
 }
 
 function restoreWalletSpy() {
@@ -121,7 +122,7 @@ function restoreWalletSpy() {
 }
 
 function restoreBankaccountSpy() {
-    restoreGenericSpy(Bankaccount, ['create']);
+    restoreGenericSpy(BankAccount, ['create']);
 }
 
 function buildNewConnectedRemoteStub() {
@@ -203,6 +204,37 @@ function restoreAll(){
   restoreRippleWalletGenerate();
 }
 
+function seedBankAndUser(callback){
+  BankAccount.create({
+    name: 'ing',
+    info: 'ING Bank',
+    coldWallet: {
+      address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
+    },
+    hotWallet : {
+      address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
+      secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
+    }
+  }, function() {
+    BankAccount.findOne(function (err, firstBank) {
+      seedUsers(firstBank);
+    });
+  });
+
+  function seedUsers(bank){
+    var newUser = {
+      provider: 'local',
+      name: 'James Bond',
+      email: 'james.bond@mi6.com',
+      password: '1234',
+      bank: bank._id
+    };
+    User.create(newUser, function() {
+      callback(newUser);
+    });
+  }
+}
+
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
 exports.dropMongodbDatabase = dropMongodbDatabase;
 exports.buildSocketSpy = buildSocketSpy;
@@ -223,3 +255,4 @@ exports.buildFindByOwnerEmailForUnexisting = buildFindByOwnerEmailForUnexisting;
 exports.buildRippleWalletGenerateForNonAdmin = buildRippleWalletGenerateForNonAdmin;
 exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;
 exports.restoreAll = restoreAll;
+exports.seedBankAndUser = seedBankAndUser;
