@@ -5,10 +5,12 @@ angular.module('riwebApp')
         RippleRemoteService, FormattingService, RipplePeersService,
         RippleAccountService, RippleWalletService, RippleTransactionService) {
         
+        // Dismiss user message
         if ($rootScope.message) {
 
             delete $rootScope.message
         }
+        
         $scope.amountToTransfer = 100;
 
         $scope.getMyAccountUser = Auth.getCurrentUser;

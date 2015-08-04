@@ -54,9 +54,10 @@ function createBank(newBank) {
           email: newBank.email,
           password: newBank.password,
         });
+        
         debug('resolve create', createdBank.info);
         deferred.resolve(createdBank);
-      
+
       });
 
     }
