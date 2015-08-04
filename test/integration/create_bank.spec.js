@@ -31,12 +31,14 @@ describe('ITest Create Bank', function () {
 			name : 'brd',
 			info: 'BRD Societe Generale',
 			email: 'admin@brd.com',
+			password: '1234',
 		};
 		
 		Utils.getEventEmitter().on('post:create_admin_user_for_bank', function(result) {
+			expect(result.status === 'success');
 			if (result.status === 'success') {
 				expect(result.user.email).to.eql(bankInfo.email);
-				expect(result.user.role).to.eql('admin');
+				expect(result.user.name).to.eql(bankInfo.info);
 			}
 			done();
 		});
