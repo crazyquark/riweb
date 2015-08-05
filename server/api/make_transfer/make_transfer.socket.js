@@ -6,18 +6,23 @@
 
 var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
+var BankAccount = require('../bankaccount/bankaccount.model');
 var Utils = require('./../../utils/utils');
 
 function makeTransfer(fromEmail, toEmail, amount) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
+    var promiseFindSenderBankAccount = BankAccount.findOneQ({ email: fromEmail }); // TODO what about when the bank is the receiver? should this happen?
 
-    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet]).spread(function (senderWalletPromise, recvWalletPromise) {
+    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindSenderBankAccount])
+            .spread(function (senderWalletPromise, recvWalletPromise, senderBankAccount) {
+        
         var deferred = Q.defer();
 
-        var senderWallets = senderWalletPromise.value;
-        var recvWallets = recvWalletPromise.value;
-
+        var senderWallet = senderWalletPromise.value;
+        var recvWallet = recvWalletPromise.value;
+        var senderBank = senderBankAccount.value;
+        
         function buildMissingError() {
             var result = {
                 fromEmail: fromEmail,
@@ -31,26 +36,15 @@ function makeTransfer(fromEmail, toEmail, amount) {
             deferred.resolve(result);
         }
         
-        var senderWallet, recvWallet;
+        // If the sender was a bank admin, get its wallet from bankaccounts
+        if (!senderWallet && senderBank && recvWallet) {
+            senderWallet = senderBank.hotWallet;
+        }
         
-        if (senderWallets && senderWallets.constructor === Array) {
-            if (!(senderWallets.length === 1 && recvWallets.length === 1)) {
-                buildMissingError();
-
-                return deferred.promise;
-            }
-
-            senderWallet = senderWallets[0];
-            recvWallet = recvWallets[0];
-        } else {
-            if (!senderWallets || !recvWallets) {
-                buildMissingError();
-
-                return deferred.promise;
-            }
-
-            senderWallet = senderWallets;
-            recvWallet = recvWallets;
+        if (!senderWallet && !recvWallet) {
+            // No wallets, it's a bust
+            buildMissingError();
+            return deferred.promise;
         }
 
         Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
