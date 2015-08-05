@@ -60,7 +60,7 @@ describe('Test create_bank', function () {
         }).done(null, function (error) { done(error); });
     });
 
-    it.only('should emit 2 events after a bank has been created', function (done) {
+    it('should emit 2 events after a bank has been created', function (done) {
         var newBank = {
             name: 'brd',
             info: 'The french one',
