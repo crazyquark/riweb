@@ -46,7 +46,15 @@ function makeTransfer(fromEmail, toEmail, amount) {
             buildMissingError();
             return deferred.promise;
         }
-
+        
+        // Not sure why these are arrays sometimes
+        if (senderWallet.constructor === Array) {
+            senderWallet = senderWallet[0];
+        }
+        if (recvWallet.constructor === Array) {
+            recvWallet = recvWallet[0];
+        }
+        
         Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
             var transaction = remote.createTransaction('Payment', {
                 account: senderWallet.address,
