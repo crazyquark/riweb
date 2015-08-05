@@ -17,11 +17,12 @@ var socket;
 
 //var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
 
-function fundWallet(sourceWallet, wallet, amount) {
+function fundWallet(wallet, sourceWallet, amount) {
   debug('fundWallet', wallet, amount);
   var deferred = Q.defer();
-  amount = amount || 60;
 
+  amount = amount || 60;
+  sourceWallet = sourceWallet || Utils.ROOT_RIPPLE_ACCOUNT; // By default use the root account for now  
 
   var ripple_address = wallet.address;
 
@@ -144,7 +145,7 @@ function createWalletForEmail(ownerEmail, role) {
             .then(convertRippleToRiwebWallet(ownerEmail))
             .then(saveWalletToDb)
             .then(function (createdWallet) {
-              return fundWallet(foundBank.bank.hotWallet, createdWallet, 60);
+              return fundWallet(createdWallet, foundBank.bank.hotWallet, 60);
             });
 
           return promise;
