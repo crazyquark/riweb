@@ -17,4 +17,8 @@ var BankaccountSchema = new Schema({
   active: Boolean
 });
 
+BankaccountSchema.statics.findById = function(bankId){
+  return this.findOneQ({_id: bankId});
+};
+
 module.exports = mongoose.model('Bankaccount', BankaccountSchema);

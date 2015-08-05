@@ -148,4 +148,9 @@ UserSchema.methods = {
   }
 };
 
+
+UserSchema.statics.findByEmail = function(email){
+  return this.findOneQ({email: email});
+};
+
 module.exports = mongoose.model('User', UserSchema);
