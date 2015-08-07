@@ -5,6 +5,7 @@
 'use strict';
 
 var Q = require('q');
+
 var Wallet = require('./../wallet/wallet.model');
 var BankAccount = require('../bankaccount/bankaccount.model');
 var CreateWallet = require('./../create_wallet/create_wallet.socket');
@@ -88,7 +89,6 @@ function makeTransfer(fromEmail, toEmail, amount) {
 
                 transaction.submit(function (err, res) {
                     if (err) {
-                        console.log(err);
                         Utils.getEventEmitter().emit('post:make_transfer', {
                             fromEmail: fromEmail,
                             toEmail: toEmail,
@@ -97,12 +97,8 @@ function makeTransfer(fromEmail, toEmail, amount) {
                             message: 'Ripple error',
                             status: 'ripple error'
                         });
-                        var stupidJavascriptError;
-                        try {
-                            stupidJavascriptError = new Error('ripple error')
-                        } catch (e) {
-                            deferred.reject(e);
-                        }
+                        
+                        deferred.reject(err);
                     }
                     if (res) {
                         Utils.getEventEmitter().emit('post:make_transfer', {

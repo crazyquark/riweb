@@ -5,6 +5,7 @@ var app = require('../../app');
 var chai = require('chai');
 var expect = chai.expect;
 var Q = require('q');
+var RippleError = require('ripple-lib').RippleError;
 var ripple = require('ripple-lib');
 var sinonChai = require("sinon-chai");
 chai.use(sinonChai);
@@ -110,16 +111,19 @@ describe('Test make_transfer', function () {
         });
     });
 
-    it('should send to upstream ripple error', function (done) {
+    it.only('should send to upstream ripple error', function (done) {
         var amount = 50;
 
         sinon.mock(remote, 'createTransaction');
 
-        var rippleError = 'ripple error';
+        var rippleError;
+        try {
+            rippleError = new RippleError();
+        } catch(e) { }
 
         remote._stub_transaction.submit.yields(rippleError, {});
 
-        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).done(function (error) {
+        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).fail(function (error) {
             expect(remote.createTransaction).to.have.callCount(1);
             expect(Utils.getNewConnectedRemote).to.have.callCount(1);
 
