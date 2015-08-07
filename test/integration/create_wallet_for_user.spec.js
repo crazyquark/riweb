@@ -33,7 +33,7 @@ describe('ITest signup', function () {
     });
   });
 
-  it.only('should create an wallet for the user', function (done) {
+  it('should create an wallet for the user', function (done) {
     this.timeout(10000);
     //TODO: should first send rippled credits to the bank (create bank wallet)
     debug('should create an wallet1');

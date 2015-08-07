@@ -10,7 +10,7 @@ var BankAccount = require('../bankaccount/bankaccount.model');
 var CreateWallet = require('./../create_wallet/create_wallet.socket');
 var Utils = require('./../../utils/utils');
 
-function makeTransferU2U(fromEmail, toEmail, amount) {
+function makeTransfer(fromEmail, toEmail, amount) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
 
@@ -102,7 +102,7 @@ function makeTransferU2U(fromEmail, toEmail, amount) {
                         toEmail: toEmail,
                         amount: amount,
                         issuer: issuingAddress,
-                        status: 'success'
+                        status: 'success'  
                     });
                     deferred.resolve({ status: 'success', transaction: transaction });
                 }
@@ -115,7 +115,7 @@ function makeTransferU2U(fromEmail, toEmail, amount) {
 }
 
 
-function makeTransfer(fromEmail, toEmail, amount) {
+function makeTransferA2U(fromEmail, toEmail, amount) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
     var promiseFindSenderBankAccount = BankAccount.findOneQ({ email: fromEmail }); // TODO what about when the bank is the receiver? should this happen?
