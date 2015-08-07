@@ -7,19 +7,22 @@
 var ripple = require('ripple-lib');
 var Q = require('q');
 var Utils = require('./../../utils/utils');
+var debug = require('debug')('SetRootFlags');
 
-function setRootFlags() {
+function setRootFlags(account) {
     var deferred = Q.defer();
 	
-	Utils.getNewConnectedAdminRemote().then(function(remote) {
+    account = account || Utils.ROOT_RIPPLE_ACCOUNT.address;
+    
+	Utils.getNewConnectedRemote(account.address, account.secret).then(function(remote) {
         var transaction = remote.createTransaction('AccountSet', {
-            account: Utils.ROOT_RIPPLE_ACCOUNT.address,
+            account: account,
             set: 'DefaultRipple'
         });
 
         transaction.submit(function(err){
             if (err) {
-                console.error(err);
+                debug(err);
              	deferred.reject(err);
             } else {
      	        deferred.resolve({status: 'success'});
@@ -32,8 +35,8 @@ function setRootFlags() {
 
 exports.setRootFlags = setRootFlags;
 exports.register = function() {
-	Utils.getEventEmitter().on('set_root_flags', function() {
-		setRootFlags();
+	Utils.getEventEmitter().on('set_root_flags', function(data) {
+		setRootFlags(data.account);
 	})  
 }
 

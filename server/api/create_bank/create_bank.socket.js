@@ -41,7 +41,8 @@ function createBank(newBank) {
     } else {
       createNewBank(newBank).then(function (createdBank) {        
         // Need to also fund this newly minted wallet
-        CreateWallet.fundWallet(createdBank.hotWallet).then(function () {
+        // XXX: need lots of XRP for banks to fund wallets
+        CreateWallet.fundWallet(createdBank.hotWallet, ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
           debug('funded bank wallet');
           // XXX should the funding be chained or should we return to user immediately? I'd rather not wait for the costly ripple operation
           // Utils.getEventEmitter().emit('post:fund_wallet', createdBank.hotWallet);
