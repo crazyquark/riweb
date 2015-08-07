@@ -47,22 +47,21 @@ function fundWallet(wallet, sourceWallet, amount) {
   transaction.submit(function (err) {
       debug('fundWallet transaction.submit', err);
       if (err) {
-          debug('Failed to make initial XRP transfer because: ' +
-                        err);
+          debug('Failed to make initial XRP transfer because: ' + err);
           deferred.reject(err);
       } else {
-          debug('Successfully funded wallet ' + ripple_address +
-                      ' with ' + amount + ' XRP');
-          if (ripple_address === Utils.ROOT_RIPPLE_ACCOUNT) {
+          debug('Successfully funded wallet ' + ripple_address + ' with ' + amount + ' XRP');
+          if (sourceWallet.address === Utils.ROOT_RIPPLE_ACCOUNT.address) {
                             
               SetRootFlags.setRootFlags(wallet).then(function(res) {
                 if (res.status === 'success') {
-                  setTrustEmit();
+                  deferred.resolve(wallet);
                 } 
               }, function(err) {
                 deferred.reject(err);
               });
           } else {
+            //normal user - trust the bank!
             setTrustEmit();
           }
       }
@@ -139,9 +138,11 @@ function createWalletForEmail(ownerEmail, role) {
     if (!foundWallet) {
       if (role === 'admin') {
         // Admin users have their wallet stored in the bankaccount doc, created apriori
-        BankAccount.findOneQ({ email: ownerEmail }).then(function (bank) {
+        var existingBankWallet = BankAccount.findOneQ({ email: ownerEmail }).then(function (bank) {
           return Q(bank.hotWallet);
         });
+        
+        return existingBankWallet; 
       }
       
       var bankWalletQ = getBankForUser(ownerEmail).then(function (foundBank) {

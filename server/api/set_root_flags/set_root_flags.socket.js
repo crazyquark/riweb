@@ -12,11 +12,11 @@ var debug = require('debug')('SetRootFlags');
 function setRootFlags(account) {
     var deferred = Q.defer();
 	
-    account = account || Utils.ROOT_RIPPLE_ACCOUNT.address;
+//    account = account || Utils.ROOT_RIPPLE_ACCOUNT.address;
     
 	Utils.getNewConnectedRemote(account.address, account.secret).then(function(remote) {
         var transaction = remote.createTransaction('AccountSet', {
-            account: account,
+            account: account.address,
             set: 'DefaultRipple'
         });
 
