@@ -111,7 +111,7 @@ describe('Test make_transfer', function () {
         });
     });
 
-    it.only('should send to upstream ripple error', function (done) {
+    it('should send to upstream ripple error', function (done) {
         var amount = 50;
 
         sinon.mock(remote, 'createTransaction');
