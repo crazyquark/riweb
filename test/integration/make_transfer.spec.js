@@ -9,6 +9,7 @@ var expect = chai.expect;
 var TestingUtils = require('../utils/testing_utils');
 var MakeTransfer = require('../../server/api/make_transfer/make_transfer.socket');
 var CreateWallet = require('../../server/api/create_wallet/create_wallet.socket')
+var SetTrust = require('../../server/api/set_trust/set_trust.socket');
 
 describe('ITest transfers', function () {
 	var socketSpy, user, bank, userWallet;
@@ -24,7 +25,12 @@ describe('ITest transfers', function () {
 			CreateWallet.fundWallet(bank.hotWallet).then(function () {
 				CreateWallet.createWalletForEmail(user.email).then(function (wallet) {
 					userWallet = wallet;
-					done();
+					SetTrust.setTrust(userBank.hotWallet.address, 
+							userWallet.address, userWallet.secret, 1000, 'EUR').then(function (result) {
+						expect(result.status).to.eql('success');
+						
+						done();
+					});
 				})
 			});
 		});
