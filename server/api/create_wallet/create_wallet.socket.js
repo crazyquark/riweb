@@ -28,45 +28,45 @@ function fundWallet(wallet, sourceWallet, amount) {
 
   //TODO: this needs to be moved to the BANK registration section
   Utils.getNewConnectedRemote(sourceWallet.address, sourceWallet.secret).then(function(remote) {
-  var options = { account: sourceWallet.address,
-                  destination: ripple_address,
-                  amount : amount * 1000000
-                };
-  
-  function setTrustEmit() {
-    deferred.resolve(wallet);
-    Utils.getEventEmitter().emit('set_trust', {
-      rippleDestinationAddr: sourceWallet.address,
-      rippleSourceAddr: wallet.address,
-      rippleSourceSecret: wallet.secret
-     });
-   }
-          
-  var transaction = remote.createTransaction('Payment', options);
-  debug('fundWallet remote.createTransaction', options);
-  transaction.submit(function (err) {
-      debug('fundWallet transaction.submit', err);
-      if (err) {
-          debug('Failed to make initial XRP transfer because: ' +
-                        err);
-          deferred.reject(err);
-      } else {
-          debug('Successfully funded wallet ' + ripple_address +
-                      ' with ' + amount + ' XRP');
-          if (ripple_address === Utils.ROOT_RIPPLE_ACCOUNT) {
-                            
-              SetRootFlags.setRootFlags(wallet).then(function(res) {
-                if (res.status === 'success') {
-                  setTrustEmit();
-                } 
-              }, function(err) {
-                deferred.reject(err);
-              });
-          } else {
-            setTrustEmit();
-          }
-      }
-    });
+    var options = { account: sourceWallet.address,
+                    destination: ripple_address,
+                    amount : amount * 1000000
+                  };
+    
+    function setTrustEmit() {
+      deferred.resolve(wallet);
+      Utils.getEventEmitter().emit('set_trust', {
+        rippleDestinationAddr: sourceWallet.address,
+        rippleSourceAddr: wallet.address,
+        rippleSourceSecret: wallet.secret
+       });
+     }
+            
+    var transaction = remote.createTransaction('Payment', options);
+    debug('fundWallet remote.createTransaction', options);
+    transaction.submit(function (err) {
+        debug('fundWallet transaction.submit', err);
+        if (err) {
+            debug('Failed to make initial XRP transfer because: ' +
+                          err);
+            deferred.reject(err);
+        } else {
+            debug('Successfully funded wallet ' + ripple_address +
+                        ' with ' + amount + ' XRP');
+            if (sourceWallet.address === Utils.ROOT_RIPPLE_ACCOUNT) {
+                              
+                SetRootFlags.setRootFlags(wallet).then(function(res) {
+                  if (res.status === 'success') {
+                    setTrustEmit();
+                  } 
+                }, function(err) {
+                  deferred.reject(err);
+                });
+            } else {
+              setTrustEmit();
+            }
+        }
+      });
 });
 
   return deferred.promise;
