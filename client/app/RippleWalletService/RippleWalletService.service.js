@@ -20,12 +20,17 @@ angular.module('riwebApp')
             socket.socket.on('post:create_wallet', function (rippleAddress) {
                 socket.socket.removeAllListeners('post:create_wallet');
                 walletInfo.wallet = rippleAddress;
-                
+
                 RippleAccountService.accountInfo.account = currentUser.name;
                 RippleAccountService.accountInfo.iban = currentUser.iban;
 
                 callback();
             });
+
+            socket.socket.on('post:fund_wallet', function (rippleAddress) {
+                // XXX use this info for something?
+            });
+
             socket.socket.emit('create_wallet', { ownerEmail: currentUser.email, role: currentUser.role });
         }
 

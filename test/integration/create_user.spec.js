@@ -43,7 +43,7 @@ function seedBankAndUser(callback){
       bank: bank._id
     };
     User.create(newUser, function() {
-      callback(newUser);
+      callback(newUser, bank);
     });
   }
 }

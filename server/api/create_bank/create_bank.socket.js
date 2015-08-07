@@ -23,6 +23,7 @@ function createNewBank(newBank) {
   var newBankAccount = {
     name: newBank.name,
     info: newBank.info,
+    email: newBank.email,
     hotWallet: newRippleAddress
   };
 
@@ -40,17 +41,25 @@ function createBank(newBank) {
     } else {
       createNewBank(newBank).then(function (createdBank) {        
         // Need to also fund this newly minted wallet
-        CreateWallet.fundWallet(createdBank.hotWallet.address).then(function () {
-          Utils.getEventEmitter().emit('create_admin_user_for_bank', {
-            bankId: createdBank._id,
-            email: newBank.email,
-            password: newBank.password,
-          });
-
-          debug('resolve create', createdBank.info);
-          deferred.resolve(createdBank);
+        CreateWallet.fundWallet(createdBank.hotWallet).then(function () {
+          debug('funded bank wallet');
+          // XXX should the funding be chained or should we return to user immediately? I'd rather not wait for the costly ripple operation
+          // Utils.getEventEmitter().emit('post:fund_wallet', createdBank.hotWallet);
+          socket.emit('post:fund_wallet', createdBank.hotWallet.address);
         });
+
+        Utils.getEventEmitter().emit('create_admin_user_for_bank', {
+          bankId: createdBank._id,
+          info: createdBank.info,
+          email: newBank.email,
+          password: newBank.password,
+        });
+        
+        debug('resolve create', createdBank.info);
+        deferred.resolve(createdBank);
+
       });
+
     }
   });
 

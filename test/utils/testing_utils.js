@@ -1,7 +1,8 @@
 var sinon = require('sinon');
 var Q = require('q');
 var Wallet = require('./../../server/api/wallet/wallet.model');
-var Bankaccount = require('./../../server/api/bankaccount/bankaccount.model');
+var BankAccount = require('./../../server/api/bankaccount/bankaccount.model');
+var User = require('../../server/api/user/user.model');
 var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
 var mongoose = require('mongoose-q')(require('mongoose'));
@@ -70,6 +71,16 @@ function getNonAdminMongooseWallet(email_address, sufix) {
     };
 }
 
+function getBadMongooseWallet(email_address) {
+    email_address = email_address || 'joe@danger.io';
+    return {
+        ownerEmail: email_address,
+        secret: undefined,
+        address: undefined
+    };
+}
+
+
 function getAdminMongooseWallet() {
     return {
         ownerEmail: 'admin@admin.com',
@@ -113,7 +124,7 @@ function buildWalletSpy() {
 }
 
 function buildBankaccountSpy() {
-    buildGenericSpy(Bankaccount, ['create']);
+    buildGenericSpy(BankAccount, ['create']);
 }
 
 function restoreWalletSpy() {
@@ -121,7 +132,7 @@ function restoreWalletSpy() {
 }
 
 function restoreBankaccountSpy() {
-    restoreGenericSpy(Bankaccount, ['create']);
+    restoreGenericSpy(BankAccount, ['create']);
 }
 
 function buildNewConnectedRemoteStub() {
@@ -130,7 +141,7 @@ function buildNewConnectedRemoteStub() {
 }
 
 function restoreNewConnectedRemoteStub() {
-  restoreGenericSpy(Utils, ['getNewConnectedRemote', 'getNewConnectedAdminRemote']);
+    restoreGenericSpy(Utils, ['getNewConnectedRemote', 'getNewConnectedAdminRemote']);
 }
 
 function getNonAdminMongooseUser(name, email_address, bankId) {
@@ -148,12 +159,32 @@ function getNonAdminMongooseUser(name, email_address, bankId) {
 function getMongooseBankAccount(bankId, bankName, wallet) {
     return {
         _id: bankId,
-        name: name,
-        info: name,
+        name: bankName,
+        info: bankName,
         hotWallet: wallet  
     };
 }
 
+function buildUserFindEmailStub(user, nonAdminGeneratedUser) {
+    sinon.stub(user, 'findByEmail', function (email) {
+        if (email.indexOf('@example.com') > -1) {
+            return Q(nonAdminGeneratedUser);
+        }
+        return Q();
+    });    
+}
+
+
+function buildBankaccountFindById(bankaccount, banksList) {
+    sinon.stub(bankaccount, 'findById', function (bankId) {
+        var index;
+        for (index = 0; index < banksList.length; ++index) {
+            if (banksList[index]._id === bankId)
+                return Q(banksList[index]);
+        }        
+        return Q();
+    });
+}
 
 function dropMongodbDatabase() {
     debug('dropMongodbDatabase');
@@ -201,28 +232,63 @@ function buildClientSocketIoConnection() {
     // debug('buildClientSocketIoConnection new socketFactory');
 }
 
-function buildRippleWalletGenerateForNonAdmin(){
-  sinon.stub(ripple.Wallet, 'generate').returns(getNonAdminRippleGeneratedWallet());
+function buildRippleWalletGenerateForNonAdmin() {
+    sinon.stub(ripple.Wallet, 'generate').returns(getNonAdminRippleGeneratedWallet());
 }
 
-function restoreRippleWalletGenerate(){
-  //ripple.Wallet.generate = originalRippleWalletGenerate;
-  restoreGenericSpy(ripple.Wallet, ['generate']);
+function restoreRippleWalletGenerate() {
+    //ripple.Wallet.generate = originalRippleWalletGenerate;
+    restoreGenericSpy(ripple.Wallet, ['generate']);
 }
 
-function restoreEventEmitter(){
-  //ripple.Wallet.generate = originalRippleWalletGenerate;
-  restoreGenericSpy(Utils.getEventEmitter(), ['on', 'emit']);
+function restoreEventEmitter() {
+    //ripple.Wallet.generate = originalRippleWalletGenerate;
+    restoreGenericSpy(Utils.getEventEmitter(), ['on', 'emit']);
 }
 
-function restoreAll(){
-  restoreWalletSpy();
-  restoreRippleWalletGenerate();
-  restoreNewConnectedRemoteStub();
-  restoreRippleWalletGenerate();
-  restoreEventEmitter();
-  restoreBankaccountSpy();
-  restoreRippleWalletGenerate();
+function restoreAll() {
+    restoreWalletSpy();
+    restoreRippleWalletGenerate();
+    restoreNewConnectedRemoteStub();
+    restoreRippleWalletGenerate();
+    restoreEventEmitter();
+    restoreBankaccountSpy();
+    restoreRippleWalletGenerate();
+}
+
+function seedBankAndUser(callback) {
+    var bank = {
+        name: 'ing',
+        info: 'ING Bank',
+        email: 'admin@ing.com',
+        coldWallet: {
+            address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
+        },
+        hotWallet: {
+            address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
+            secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
+
+        }
+    };
+    BankAccount.create(
+        bank, function () {
+            BankAccount.findOne(function (err, firstBank) {
+                seedUsers(firstBank);
+            });
+        });
+
+    function seedUsers(createdBank) {
+        var newUser = {
+            provider: 'local',
+            name: 'James Bond',
+            email: 'james.bond@mi6.com',
+            password: '1234',
+            bank: createdBank._id
+        };
+        User.create(newUser, function () {
+            callback(newUser, bank);
+        });
+    }
 }
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
@@ -239,11 +305,15 @@ exports.buildCreateForEmailStub = buildCreateForEmailStub;
 exports.buildEmptyTransactionStub = buildEmptyTransactionStub;
 exports.getNonAdminRippleGeneratedWallet = getNonAdminRippleGeneratedWallet;
 exports.getNonAdminMongooseWallet = getNonAdminMongooseWallet;
+exports.getBadMongooseWallet = getBadMongooseWallet;
 exports.getAdminMongooseWallet = getAdminMongooseWallet;
 exports.buildFindByOwnerEmailForAdmin = buildFindByOwnerEmailForAdmin;
 exports.buildFindByOwnerEmailForUnexisting = buildFindByOwnerEmailForUnexisting;
 exports.buildRippleWalletGenerateForNonAdmin = buildRippleWalletGenerateForNonAdmin;
 exports.getNonAdminMongooseUser = getNonAdminMongooseUser;
 exports.getMongooseBankAccount = getMongooseBankAccount;
+exports.buildUserFindEmailStub = buildUserFindEmailStub;
+exports.buildBankaccountFindById = buildBankaccountFindById;
 exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;
 exports.restoreAll = restoreAll;
+exports.seedBankAndUser = seedBankAndUser;

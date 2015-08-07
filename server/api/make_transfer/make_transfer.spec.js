@@ -11,20 +11,24 @@ chai.use(sinonChai);
 
 var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
+var User = require('./../user/user.model');
+var Bankaccount = require('./../bankaccount/bankaccount.model');
 
 var TestingUtils = require('./../../../test/utils/testing_utils');
-
 var MakeTransfer = require('./make_transfer.socket');
 
 describe('Test make_transfer', function () {
 
     var remote, emitSpy, aliceWallet, bobWallet;
+    var bank1, bankWithNoWallet, nonAdminUser, nonAdminUserWithNoBank;
+    
     beforeEach(function () {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
+        
         sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
             if (email === 'alice@example.com') {
                 return Q([aliceWallet]);
@@ -33,12 +37,25 @@ describe('Test make_transfer', function () {
             }
             return Q([]);
         });
+        
+        bank1 = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
+        bankWithNoWallet = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getBadMongooseWallet('dumy@nothing.com'));
+        nonAdminUser = TestingUtils.getNonAdminMongooseUser('Alice', 'alice@example.com', bank1._id);        
+        nonAdminUserWithNoBank = TestingUtils.getNonAdminMongooseUser('NoBank', 'no_bank@example.com', '#_no_id#');
+
+        TestingUtils.buildUserFindEmailStub(User, nonAdminUser);
+        TestingUtils.buildBankaccountFindById(Bankaccount, [bank1]);
+
         sinon.mock(remote, 'createTransaction');
     });
 
     afterEach(function (done) {
         TestingUtils.restoreAll();
         emitSpy.restore();
+        
+        User.findByEmail.restore();
+        Bankaccount.findById.restore();
+                
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
@@ -49,7 +66,7 @@ describe('Test make_transfer', function () {
             expect(remote.createTransaction).to.have.been.calledWith('Payment', {
                 account: aliceWallet.address,
                 destination: bobWallet.address,
-                amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
+                amount: amount + '/EUR/' + bank1.hotWallet.address
             });
 
             expect(Utils.getNewConnectedRemote).to.have.been.calledWith(aliceWallet.address, aliceWallet.secret);
@@ -58,6 +75,7 @@ describe('Test make_transfer', function () {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
                 amount: amount,
+                issuer: bank1.hotWallet.address,
                 status: 'success'
             });
 
@@ -81,6 +99,7 @@ describe('Test make_transfer', function () {
                 fromEmail: 'alice@example.com',
                 toEmail: 'charlie@example.com',
                 amount: amount,
+                issuer: undefined,
                 status: 'error',
                 message: 'missing account'
             });
@@ -108,6 +127,7 @@ describe('Test make_transfer', function () {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
                 amount: amount,
+                issuer: bank1.hotWallet.address,
                 message: 'Ripple error',
                 status: 'ripple error'
             });
@@ -116,4 +136,59 @@ describe('Test make_transfer', function () {
         });
     });
 
+
+    it('should not send from user without an issuer (bank)', function (done) {
+        var amount = 50;
+
+        sinon.mock(remote, 'createTransaction');
+        User.findByEmail.restore();        
+        TestingUtils.buildUserFindEmailStub(User, nonAdminUserWithNoBank);
+
+
+        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).then(function () {
+            expect(remote.createTransaction).to.have.callCount(0);
+            expect(Utils.getNewConnectedRemote).to.have.callCount(0);
+
+            expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
+                fromEmail: 'alice@example.com',
+                toEmail: 'bob@example.com',
+                amount: amount,
+                issuer: undefined,
+                status: 'error',
+                message: 'issuing bank not resolved'
+            });
+
+            done();
+        }).done(null, function (error) {
+            done(error);
+        });
+    });
+    
+
+    it('should not send from user with an issuer (bank) with invalid wallet', function (done) {
+        var amount = 50;
+
+        sinon.mock(remote, 'createTransaction');
+        Bankaccount.findById.restore();
+        TestingUtils.buildBankaccountFindById(Bankaccount, [bankWithNoWallet]);
+
+
+        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).then(function () {
+            expect(remote.createTransaction).to.have.callCount(0);
+            expect(Utils.getNewConnectedRemote).to.have.callCount(0);
+
+            expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
+                fromEmail: 'alice@example.com',
+                toEmail: 'bob@example.com',
+                amount: amount,
+                issuer: undefined,
+                status: 'error',
+                message: 'issuing bank not resolved'
+            });
+
+            done();
+        }).done(null, function (error) {
+            done(error);
+        });
+    });    
 });

@@ -17,38 +17,6 @@ var Utils = require('./../../server/utils/utils');
 
 var debug = require('debug')('CreateWalletForUserSpec');
 
-
-function seedBankAndUser(callback){
-  BankAccount.create({
-    name: 'ing',
-    info: 'ING Bank',
-    coldWallet: {
-      address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
-    },
-    hotWallet : {
-      address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
-      secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
-    }
-  }, function() {
-    BankAccount.findOne(function (err, firstBank) {
-      seedUsers(firstBank);
-    });
-  });
-
-  function seedUsers(bank){
-    var newUser = {
-      provider: 'local',
-      name: 'James Bond',
-      email: 'james.bond@mi6.com',
-      password: '1234',
-      bank: bank._id
-    };
-    User.create(newUser, function() {
-      callback(newUser);
-    });
-  }
-}
-
 describe('ITest signup', function () {
 
   beforeEach(function(done){
@@ -67,8 +35,9 @@ describe('ITest signup', function () {
 
   it('should create an wallet for the user', function (done) {
     this.timeout(10000);
+    //TODO: should first send rippled credits to the bank (create bank wallet)
     debug('should create an wallet1');
-    seedBankAndUser(function(theUser){
+    TestingUtils.seedBankAndUser(function(theUser){
       debug('should create an wallet2');
       CreateWallet.createWalletForEmail(theUser.email).then(function() {
         debug('should create an wallet3');

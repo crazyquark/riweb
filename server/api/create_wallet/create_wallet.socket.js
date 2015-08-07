@@ -8,7 +8,7 @@ var ripple = require('ripple-lib');
 var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
 var User = require('./../user/user.model');
-var Bankaccount = require('./../bankaccount/bankaccount.model');
+var BankAccount = require('./../bankaccount/bankaccount.model');
 var Utils = require('./../../utils/utils');
 
 var debug = require('debug')('CreateWallet');
@@ -17,11 +17,12 @@ var socket;
 
 //var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
 
-function fundWallet(sourceWallet, wallet, amount) {
+function fundWallet(wallet, sourceWallet, amount) {
   debug('fundWallet', wallet, amount);
   var deferred = Q.defer();
-  amount = amount || 60;
 
+  amount = amount || 60;
+  sourceWallet = sourceWallet || Utils.ROOT_RIPPLE_ACCOUNT; // By default use the root account for now  
 
   var ripple_address = wallet.address;
 
@@ -85,7 +86,7 @@ function getBankForUser(ownerEmail) {
   var promise = User.findByEmail(ownerEmail).then(function(foundUser) {
     
     if (foundUser) {
-      return Bankaccount.findById(foundUser.bank).then(function(foundBank) {
+      return BankAccount.findById(foundUser.bank).then(function(foundBank) {
         if (foundBank) {
           if (foundBank.hotWallet && foundBank.hotWallet.address && foundBank.hotWallet.secret) {
             return { status: 'success', bank: foundBank };
@@ -119,37 +120,40 @@ function convertRippleToRiwebWallet(ownerEmail){
     return walletConverterFunction;
 }
 
-function createWalletForEmail(ownerEmail) {
+function createWalletForEmail(ownerEmail, role) {
   debug('createWalletForEmail', ownerEmail);
 
   var deferred = Q.defer();
 
-
   Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet){
-    if(!foundWallet){
+    if (!foundWallet) {
+      if (role === 'admin') {
+        // Admin users have their wallet stored in the bankaccount doc, created apriori
+        BankAccount.findOneQ({ email: ownerEmail }).then(function (bank) {
+          return Q(bank.hotWallet);
+        });
+      }
       
-      var bankWalletQ = getBankForUser(ownerEmail).then(function(foundBank){
+      var bankWalletQ = getBankForUser(ownerEmail).then(function (foundBank) {
         if (foundBank.status == 'error') {
-                              
           return Q.reject(foundBank.message);
-                    
         } else {
-          
+
           var createWalletQ = getCreateWallet(ownerEmail);
-    
+
           var promise = createWalletQ()
-              .then(convertRippleToRiwebWallet(ownerEmail))
-              .then(saveWalletToDb)
-              .then(function(createdWallet){
-                  return fundWallet(foundBank.bank.hotWallet, createdWallet, 60);
-                });
-    
-          return promise;          
+            .then(convertRippleToRiwebWallet(ownerEmail))
+            .then(saveWalletToDb)
+            .then(function (createdWallet) {
+              return fundWallet(createdWallet, foundBank.bank.hotWallet, 60);
+            });
+
+          return promise;
         }
       });
-      
+
       return bankWalletQ;
-              
+
     } else {
       return Q(foundWallet);      
     }
@@ -168,10 +172,11 @@ function createWalletForEmail(ownerEmail) {
 
 exports.createWalletForEmail = createWalletForEmail;
 exports.fundWallet = fundWallet;
+exports.getBankForUser = getBankForUser;
 
 exports.register = function(newSocket) {
   socket = newSocket;
   socket.on('create_wallet', function(data) {
-      createWalletForEmail(data.ownerEmail);
+      createWalletForEmail(data.ownerEmail, data.role);
   });
 };

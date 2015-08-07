@@ -37,8 +37,8 @@ describe('Test create_bank', function () {
         TestingUtils.buildNewConnectedRemoteStub();
     });
     afterEach(function (done) {
-        TestingUtils.restoreAll();
         emitSpy.restore();
+        TestingUtils.restoreAll();
         TestingUtils.dropMongodbDatabase().then(function () { done(); });
     });
 
@@ -46,11 +46,13 @@ describe('Test create_bank', function () {
         var newBank = {
             name: 'brd',
             info: 'The french one',
+            email: 'admin@brd.com',
         };
         CreateBank.createBank(newBank).then(function () {
             expect(Bankaccount.create).to.have.been.calledWith({
                 name: 'brd',
                 info: 'The french one',
+                email: 'admin@brd.com',
                 hotWallet: nonAdminRippleGeneratedWallet
             });
             expect(Bankaccount.create).to.have.callCount(1);
@@ -66,12 +68,14 @@ describe('Test create_bank', function () {
             password: 'secret',
         };
         CreateBank.createBank(newBank).then(function (createdBank) {
+            expect(emitSpy).to.have.callCount(2);
             expect(emitSpy).to.have.been.calledWith('create_admin_user_for_bank', {
                 bankId: createdBank._id,
+                info: createdBank.info,
                 email: 'admin@brd.com',
                 password: 'secret',
             });
-            expect(emitSpy).to.have.callCount(2); // set_trust, create_admin_user_for bank
+            expect(emitSpy).to.have.been.calledWith('set_trust');
             done();
         }).done(null, function (error) { done(error); });
     });

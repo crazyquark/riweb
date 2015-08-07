@@ -6,32 +6,40 @@
 
 var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
+var BankAccount = require('../bankaccount/bankaccount.model');
+var CreateWallet = require('./../create_wallet/create_wallet.socket');
 var Utils = require('./../../utils/utils');
 
 function makeTransfer(fromEmail, toEmail, amount) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
 
-    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet]).spread(function (senderWalletPromise, recvWalletPromise) {
+    var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
+
+    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank])
+            .spread(function (senderWalletPromise, recvWalletPromise, findIssuingBankPromise) {
         var deferred = Q.defer();
 
         var senderWallets = senderWalletPromise.value;
         var recvWallets = recvWalletPromise.value;
+        var findIssuingBank = findIssuingBankPromise.value; 
 
-        function buildMissingError() {
+        function buildMissingError(errorMessage) {
+            errorMessage = errorMessage || 'missing account';
             var result = {
                 fromEmail: fromEmail,
                 toEmail: toEmail,
                 amount: amount,
+                issuer: issuingAddress,
                 status: 'error',
-                message: 'missing account'
+                message: errorMessage
             };
 
             Utils.getEventEmitter().emit('post:make_transfer', result);
             deferred.resolve(result);
         }
         
-        var senderWallet, recvWallet;
+        var senderWallet, recvWallet, issuingAddress;
         
         if (senderWallets.constructor === Array) {
             if (!(senderWallets.length === 1 && recvWallets.length === 1)) {
@@ -52,13 +60,22 @@ function makeTransfer(fromEmail, toEmail, amount) {
             senderWallet = senderWallets;
             recvWallet = recvWallets;
         }
+        if (!findIssuingBank || findIssuingBank.status == 'error' || !findIssuingBank.bank 
+            || !findIssuingBank.bank.hotWallet || !findIssuingBank.bank.hotWallet.address) {
+                
+            buildMissingError('issuing bank not resolved');
+                        
+            return deferred.promise;            
+        } else {
+            issuingAddress = findIssuingBank.bank.hotWallet.address;
+        }
 
-        //TODO: should retrieve the BANK wallet, to specify the issuing currency adress
+        
         Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
             var transaction = remote.createTransaction('Payment', {
                 account: senderWallet.address,
                 destination: recvWallet.address,
-                amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
+                amount: amount + '/EUR/' + findIssuingBank.bank.hotWallet.address
             });
 
             transaction.submit(function (err, res) {
@@ -68,6 +85,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
                         fromEmail: fromEmail,
                         toEmail: toEmail,
                         amount: amount,
+                        issuer: issuingAddress,
                         message: 'Ripple error',
                         status: 'ripple error'
                     });
@@ -83,7 +101,8 @@ function makeTransfer(fromEmail, toEmail, amount) {
                         fromEmail: fromEmail,
                         toEmail: toEmail,
                         amount: amount,
-                        status: 'success'
+                        issuer: issuingAddress,
+                        status: 'success'  
                     });
                     deferred.resolve({ status: 'success', transaction: transaction });
                 }
@@ -93,6 +112,94 @@ function makeTransfer(fromEmail, toEmail, amount) {
         return deferred.promise;
 
     });
+}
+
+
+function makeTransferA2U(fromEmail, toEmail, amount) {
+    var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
+    var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
+    var promiseFindSenderBankAccount = BankAccount.findOneQ({ email: fromEmail }); // TODO what about when the bank is the receiver? should this happen?
+
+    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindSenderBankAccount])
+        .spread(function (senderWalletPromise, recvWalletPromise, senderBankAccount) {
+
+            var deferred = Q.defer();
+
+            var senderWallet = senderWalletPromise.value;
+            var recvWallet = recvWalletPromise.value;
+            var senderBank = senderBankAccount.value;
+
+            function buildMissingError() {
+                var result = {
+                    fromEmail: fromEmail,
+                    toEmail: toEmail,
+                    amount: amount,
+                    status: 'error',
+                    message: 'missing account'
+                };
+
+                Utils.getEventEmitter().emit('post:make_transfer', result);
+                deferred.resolve(result);
+            }
+        
+            // If the sender was a bank admin, get its wallet from bankaccounts
+            if (!senderWallet && senderBank) {
+                senderWallet = senderBank.hotWallet;
+            }
+        
+            // Not sure why these are arrays sometimes
+            if (senderWallet && senderWallet.constructor === Array) {
+                senderWallet = senderWallet[0];
+            }
+            if (recvWallet && recvWallet.constructor === Array) {
+                recvWallet = recvWallet[0];
+            }
+
+            if (!senderWallet || !recvWallet) {
+                // At least a wallet is missing, it's a bust
+                buildMissingError();
+                return deferred.promise;
+            }
+
+            Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
+                var transaction = remote.createTransaction('Payment', {
+                    account: senderWallet.address,
+                    destination: recvWallet.address,
+                    amount: amount + '/EUR/' + Utils.ROOT_RIPPLE_ACCOUNT.address
+                });
+
+                transaction.submit(function (err, res) {
+                    if (err) {
+                        console.log(err);
+                        Utils.getEventEmitter().emit('post:make_transfer', {
+                            fromEmail: fromEmail,
+                            toEmail: toEmail,
+                            amount: amount,
+                            message: 'Ripple error',
+                            status: 'ripple error'
+                        });
+                        var stupidJavascriptError;
+                        try {
+                            stupidJavascriptError = new Error('ripple error')
+                        } catch (e) {
+                            deferred.reject(e);
+                        }
+                    }
+                    if (res) {
+                        Utils.getEventEmitter().emit('post:make_transfer', {
+                            fromEmail: fromEmail,
+                            toEmail: toEmail,
+                            amount: amount,
+                            status: 'success'
+                        });
+                        deferred.resolve({ status: 'success', transaction: transaction });
+                    }
+
+                });
+            });
+            return deferred.promise;
+
+        });
 }
 
 exports.makeTransfer = makeTransfer;
