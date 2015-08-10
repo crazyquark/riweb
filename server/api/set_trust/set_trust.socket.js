@@ -8,6 +8,8 @@ var Q = require('q');
 
 var Utils = require('./../../utils/utils');
 
+var debug = require('debug')('SetTrust');
+
 /**
 * Creates a trust line between 2 ripple accounts
 * @param rippleDestinationAddr target trustline endpoint
@@ -21,7 +23,9 @@ function setTrust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, l
   currency = currency || 'EUR';
 
   var deferred = Q.defer();
-
+  
+  debug('setTrust: ', rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, limit, currency);
+  
   Utils.getNewConnectedRemote(rippleSourceAddr, rippleSourceSecret).then(function(remote) {
     var transaction = remote.createTransaction('TrustSet', {
       account: rippleSourceAddr,

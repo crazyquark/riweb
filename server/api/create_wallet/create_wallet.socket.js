@@ -154,9 +154,11 @@ function createWalletForEmail(ownerEmail, role) {
 
           var promise = createWalletQ()
             .then(convertRippleToRiwebWallet(ownerEmail))
-            .then(saveWalletToDb)
-            .then(function (createdWallet) {
-              return fundWallet(createdWallet, foundBank.bank.hotWallet, 60);
+            .then(function(wallet) {
+              return fundWallet(wallet, foundBank.bank.hotWallet, 60);
+            })
+            .then(function (fundedWallet) {
+              return saveWalletToDb(fundedWallet);
             });
 
           return promise;
