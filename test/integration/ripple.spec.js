@@ -2,6 +2,7 @@
 
 var app = require('../../server/app');
 var config = require('../../server/config/environment');
+var local = require('../../server/config/local.env');
 
 var chai = require('chai');
 var expect = chai.expect;
@@ -68,8 +69,11 @@ function setBanksTrust(bank1, bank2, user1, user2) {
 			debug('set trust user1->bank1');
 			SetTrust.setTrust(bank2.address, user2.address, user2.secret).then(function () {
 				debug('set trust user2->bank2');
-				SetTrust.setTrust(bank2.address, bank1.address, bank1.secret).then(function () {
-					deferred.resolve({ status: 'success' });
+				SetTrust.setTrust(bank1.address, bank2.address, bank2.secret).then(function () {
+					debug('set trust bank1->bank2');
+					SetTrust.setTrust(bank2.address, bank1.address, bank1.secret).then(function () {
+						deferred.resolve({ status: 'success' });
+					});
 				});
 			});
 		});
@@ -101,7 +105,7 @@ function makeEurTransfer(senderWallet, recvWallet, amount) {
 	return deferred.promise;
 }
 
-describe.only('ITest rippled', function () {
+describe('ITest rippled', function () {
 	this.timeout(60000);
 	it('Create this scenario on Ripple: user1 -> bank1 -> bank2 <- user2', function (done) {
 		debug('Create 4 Ripple accounts');
