@@ -78,7 +78,30 @@ function setBanksTrust(bank1, bank2, user1, user2) {
 	return deferred.promise;
 }
 
-describe('ITest rippled', function () {
+function makeEurTransfer(senderWallet, recvWallet, amount) {
+	var deferred = Q.defer();
+
+	Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
+		var transaction = remote.createTransaction('Payment', {
+			account: senderWallet.address,
+			destination: recvWallet.address,
+			amount: amount + '/EUR/' + senderWallet.address,
+		});
+
+		transaction.submit(function (err, res) {
+			if (err) {
+				deferred.reject(err);
+			}
+			if (res) {
+				deferred.resolve({ status: 'success', transaction: transaction });
+			}
+
+		});
+	});
+	return deferred.promise;
+}
+
+describe.only('ITest rippled', function () {
 	this.timeout(60000);
 	it('Create this scenario on Ripple: user1 -> bank1 -> bank2 <- user2', function (done) {
 		debug('Create 4 Ripple accounts');
@@ -92,7 +115,14 @@ describe('ITest rippled', function () {
 			debug('funded banks');
 			fundUsers(bank1, bank2, user1, user2).then(function () {
 				setBanksTrust(bank1, bank2, user1, user2).then(function () {
-					done();
+					debug('makeEurTransfers');
+					makeEurTransfer(bank1, user1, 100).then(function () {
+						debug('makeEurTransfer user1');
+						makeEurTransfer(bank2, user2, 100).then(function () {
+							debug('makeEurTransfer user2');
+							done();
+						})
+					})
 				})
 			});
 		});
