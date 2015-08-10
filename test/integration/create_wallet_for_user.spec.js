@@ -36,18 +36,19 @@ describe('ITest signup', function () {
   it('should create an wallet for the user', function (done) {
     this.timeout(10000);
     //TODO: should first send rippled credits to the bank (create bank wallet)
-    debug('should create an wallet1');
+    debug('should create a wallet');
+    //CreateWallet.fundWallet(bank.hotWallet, Utils.ROOT_RIPPLE_ACCOUNT).then(function () {
     TestingUtils.seedBankAndUser(function(theUser){
-      debug('should create an wallet2');
+      debug('seedBankAndUser');
       CreateWallet.createWalletForEmail(theUser.email).then(function() {
-        debug('should create an wallet3');
+        debug('createWalletForEmail');
         Wallet.findByOwnerEmail(theUser.email).then(function(wallet){
-          debug('should create an wallet4');
+          debug('findByOwnerEmail');
           expect(wallet.ownerEmail).to.eql('james.bond@mi6.com');
 
-          debug('should create an wallet5');
+          debug('call getNewConnectedRemote');
           Utils.getNewConnectedRemote().then(function(remote){
-            debug('should create an wallet6');
+            debug('getNewConnectedRemote');
 
             var options = {
               account: wallet.address,
@@ -56,7 +57,7 @@ describe('ITest signup', function () {
 
             debug('remote.requestAccountInfo', options);
             remote.requestAccountInfo(options, function(err, info) {
-              debug('should create an wallet7');
+              debug('requestAccountInfo');
               expect(err).to.eql(null);
               expect(info).to.have.deep.property('account_data.Account', wallet.address);
               expect(info).to.have.deep.property('account_data.Balance', '60000000');
