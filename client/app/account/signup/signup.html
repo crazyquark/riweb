@@ -19,6 +19,33 @@
           </p>
         </div>
 
+        <div class="form-group" ng-class="{ 'has-success': form.bank.$valid && submitted,
+                                            'has-error': form.bank.$invalid && submitted }">
+          <label>Bank</label>
+
+          <!--<input type="text" name="name" class="form-control" ng-model="user.bank"
+                 required/>-->
+          <select name="bank" class="form-control" ng-model="user.bank" ng-options="bank.info for bank in availableBanks">
+          </select>
+
+          <p class="help-block" ng-show="form.bank.$error.required && submitted">
+            A bank is required
+          </p>
+        </div>
+
+        <div class="form-group" ng-class="{ 'has-success': form.iban.$valid && submitted,
+                                            'has-error': form.iban.$invalid && submitted }">
+          <label>IBAN</label>
+          <input type="text" name="iban" class="form-control" ng-model="user.iban"
+                 required ng-iban/>
+          <p class="help-block" ng-show="form.iban.$error.iban && submitted">
+            Doesn't look like a valid IBAN.
+          </p>
+          <p class="help-block" ng-show="form.iban.$error.required && submitted">
+            An IBAN is required
+          </p>
+        </div>
+
         <div class="form-group" ng-class="{ 'has-success': form.email.$valid && submitted,
                                             'has-error': form.email.$invalid && submitted }">
           <label>Email</label>
@@ -62,6 +89,14 @@
             Sign up
           </button>
         </div>
+
+          <ul ng-show="submitted">
+              <li ng-repeat="(key, errors) in form.$error track by $index"> <strong>{{ key }}</strong> errors
+                  <ul>
+                      <li ng-repeat="e in errors">{{ e.$name }} has an error: <strong>{{ key }}</strong>.</li>
+                  </ul>
+              </li>
+          </ul>
 
       </form>
     </div>

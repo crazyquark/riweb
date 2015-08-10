@@ -6,7 +6,8 @@ angular.module('riwebApp', [
   'ngSanitize',
   'ngRoute',
   'btford.socket-io',
-  'ui.bootstrap'
+  'ui.bootstrap',
+  'mm.iban'
 ])
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider

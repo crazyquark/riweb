@@ -8,8 +8,11 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 var express = require('express');
-var mongoose = require('mongoose');
+var mongoose = require('mongoose-q')(require('mongoose'));
 var config = require('./config/environment');
+var debug = require('debug')('App');
+
+debug('----Initializing App');
 
 // Connect to database
 mongoose.connect(config.mongo.uri, config.mongo.options);

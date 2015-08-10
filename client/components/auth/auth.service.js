@@ -3,8 +3,22 @@
 angular.module('riwebApp')
   .factory('Auth', function Auth($location, $rootScope, $http, User, $cookieStore, $q) {
     var currentUser = {};
+
+    function broadcastCurrentUser(currentUser) {
+      if(currentUser.hasOwnProperty('$promise')) {
+        $rootScope.$broadcast('currentUser', {});
+        currentUser.$promise.then(function(theCurrentUser) {
+            delete theCurrentUser.$promise;
+            $rootScope.$broadcast('currentUser', theCurrentUser);
+        });
+      } else {
+          $rootScope.$broadcast('currentUser', currentUser);
+      }
+    }
+
     if($cookieStore.get('token')) {
       currentUser = User.get();
+      broadcastCurrentUser(currentUser);
     }
 
     return {
@@ -27,7 +41,8 @@ angular.module('riwebApp')
         success(function(data) {
           $cookieStore.put('token', data.token);
           currentUser = User.get();
-          deferred.resolve(data);
+          broadcastCurrentUser(currentUser);
+          deferred.resolve(currentUser);
           return cb();
         }).
         error(function(err) {
@@ -47,6 +62,7 @@ angular.module('riwebApp')
       logout: function() {
         $cookieStore.remove('token');
         currentUser = {};
+        broadcastCurrentUser(currentUser);
       },
 
       /**
@@ -63,6 +79,7 @@ angular.module('riwebApp')
           function(data) {
             $cookieStore.put('token', data.token);
             currentUser = User.get();
+            broadcastCurrentUser(currentUser);
             return cb(user);
           },
           function(err) {

@@ -5,6 +5,7 @@
 'use strict';
 
 var config = require('./environment');
+var debug = require('debug')('ConfigSocketio');
 
 // When the user disconnects.. perform this
 function onDisconnect(socket) {
@@ -18,6 +19,15 @@ function onConnect(socket) {
   });
 
   // Insert sockets below
+  require('../api/create_admin_user_for_bank/create_admin_user_for_bank.socket').register(socket);
+  require('../api/create_bank/create_bank.socket').register(socket);
+  debug('------Registering all the things');
+  require('../api/list_transactions/list_transactions.socket').register(socket);
+  require('../api/set_root_flags/set_root_flags.socket').register(socket);
+  require('../api/make_transfer/make_transfer.socket').register(socket);
+  require('../api/set_trust/set_trust.socket').register(socket);
+  require('../api/account_info/account_info.socket').register(socket);
+  require('../api/create_wallet/create_wallet.socket').register(socket);
   require('../api/bankaccount/bankaccount.socket').register(socket);
   require('../api/wallet/wallet.socket').register(socket);
 }
@@ -53,6 +63,6 @@ module.exports = function (socketio) {
 
     // Call onConnect.
     onConnect(socket);
-    console.info('[%s] CONNECTED', socket.address);
+    console.info('[%s] CONNECTED', socket);
   });
 };

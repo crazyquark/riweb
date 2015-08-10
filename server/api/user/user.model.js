@@ -1,6 +1,6 @@
 'use strict';
 
-var mongoose = require('mongoose');
+var mongoose = require('mongoose-q')(require('mongoose'));
 var Schema = mongoose.Schema;
 var crypto = require('crypto');
 
@@ -13,6 +13,8 @@ var UserSchema = new Schema({
   },
   hashedPassword: String,
   provider: String,
+  bank: Schema.Types.ObjectId,
+  iban: String,
   salt: String
 });
 
@@ -60,6 +62,13 @@ UserSchema
   .validate(function(email) {
     return email.length;
   }, 'Email cannot be blank');
+
+// Validate empty IBAN
+UserSchema
+  .path('iban')
+  .validate(function(iban) {
+    return iban.length;
+  }, 'IBAN cannot be blank');
 
 // Validate empty password
 UserSchema
@@ -137,6 +146,11 @@ UserSchema.methods = {
     var salt = new Buffer(this.salt, 'base64');
     return crypto.pbkdf2Sync(password, salt, 10000, 64).toString('base64');
   }
+};
+
+
+UserSchema.statics.findByEmail = function(email){
+  return this.findOneQ({email: email});
 };
 
 module.exports = mongoose.model('User', UserSchema);

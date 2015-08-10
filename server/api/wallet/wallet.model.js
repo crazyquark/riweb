@@ -1,12 +1,24 @@
 'use strict';
 
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
+var mongoose = require('mongoose-q')(require('mongoose'));
+var Schema = mongoose.Schema;
+var Q = require('q');
 
 var WalletSchema = new Schema({
   ownerEmail: String,
-  publicKey: String,
-  passphrase: String
+  address: String,
+  secret: String
 });
+
+WalletSchema.statics.findByOwnerEmail = function(ownerEmail){
+  return this.findOneQ({ownerEmail: ownerEmail});
+};
+
+WalletSchema.statics.findByRippleAddress = function(rippleAddress){
+  var promise = this.findOneQ({address: rippleAddress});
+  promise.rippleAddress = rippleAddress; // let's remember why we're here
+  
+  return promise;
+};
 
 module.exports = mongoose.model('Wallet', WalletSchema);
