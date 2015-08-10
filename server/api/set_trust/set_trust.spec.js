@@ -17,14 +17,14 @@ var TestingUtils = require('./../../../test/utils/testing_utils');
 describe('Test set_trust', function () {
 
     var remote;
-    beforeEach(function () {
+    beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
+        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
-    afterEach(function (done) {
+    afterEach(function () {
       TestingUtils.restoreAll();
-      TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should respond with success on proper trust set', function (done) {

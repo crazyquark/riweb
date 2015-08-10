@@ -24,13 +24,13 @@ function createAdminUserForBank(adminUserInfo) {
     }).then(function (newUser) {
         var newUserStripped = { email: newUser.email, name: newUser.name };
         
-        deferred.resolve(newUser);
         Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'success', user:  newUserStripped});
         socket.emit('post:create_admin_user_for_bank', { status: 'success', user: newUserStripped });
+        deferred.resolve(newUser);
     }, function (err) {
-        deferred.reject(err);
         Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'error', error: err });
         socket.emit('post:create_admin_user_for_bank', { status: 'error', error: err });
+        deferred.reject(err);
     });
 
     return deferred.promise;

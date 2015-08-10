@@ -23,7 +23,7 @@ describe('Test make_transfer', function () {
     var remote, emitSpy, aliceWallet, bobWallet;
     var bank1, bankWithNoWallet, nonAdminUser, nonAdminUserWithNoBank;
     
-    beforeEach(function () {
+    beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
@@ -48,16 +48,16 @@ describe('Test make_transfer', function () {
         TestingUtils.buildBankaccountFindById(Bankaccount, [bank1]);
 
         sinon.mock(remote, 'createTransaction');
+
+        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
-    afterEach(function (done) {
+    afterEach(function () {
         TestingUtils.restoreAll();
         emitSpy.restore();
         
         User.findByEmail.restore();
         Bankaccount.findById.restore();
-                
-        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should send 50 EURO from Alice to Bob', function (done) {

@@ -22,7 +22,7 @@ describe('Test create_bank', function () {
 
     var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy;
 
-    beforeEach(function () {
+    beforeEach(function (done) {
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
@@ -30,16 +30,13 @@ describe('Test create_bank', function () {
         socketSpy = TestingUtils.buildSocketSpy();
         CreateBank.register(socketSpy);
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
-    });
-
-    beforeEach(function () {
         TestingUtils.buildBankaccountSpy();
         TestingUtils.buildNewConnectedRemoteStub();
+        TestingUtils.dropMongodbDatabase().then(function () { done(); });
     });
-    afterEach(function (done) {
+    afterEach(function () {
         emitSpy.restore();
         TestingUtils.restoreAll();
-        TestingUtils.dropMongodbDatabase().then(function () { done(); });
     });
 
     it('should create new account for a bank', function (done) {
@@ -55,7 +52,6 @@ describe('Test create_bank', function () {
                 email: 'admin@brd.com',
                 hotWallet: nonAdminRippleGeneratedWallet
             });
-            expect(Bankaccount.create).to.have.callCount(1);
             done();
         }).done(null, function (error) { done(error); });
     });
@@ -68,14 +64,12 @@ describe('Test create_bank', function () {
             password: 'secret',
         };
         CreateBank.createBank(newBank).then(function (createdBank) {
-            expect(emitSpy).to.have.callCount(2);
             expect(emitSpy).to.have.been.calledWith('create_admin_user_for_bank', {
                 bankId: createdBank._id,
                 info: createdBank.info,
                 email: 'admin@brd.com',
                 password: 'secret',
             });
-            expect(emitSpy).to.have.been.calledWith('set_trust');
             done();
         }).done(null, function (error) { done(error); });
     });
@@ -95,9 +89,6 @@ describe('Test create_bank', function () {
         CreateBank.createBank(newBank)
             .then(function () {
                 return CreateBank.createBank(newBankAgain);
-            })
-            .then(function(data) {
-                
             })
             .fail(function (bank) {
                 expect(Bankaccount.create).to.have.callCount(1);

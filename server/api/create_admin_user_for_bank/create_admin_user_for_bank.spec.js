@@ -25,15 +25,15 @@ describe('Test create admin user for bank', function () {
   };
 
 
-  beforeEach(function () {
+  beforeEach(function (done) {
     emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
     socketSpy = TestingUtils.buildSocketSpy();
     CreateAdminUserForBank.register(socketSpy);
+    TestingUtils.dropMongodbDatabase().then(function () { done(); });
   });
 
-  afterEach(function (done) {
-    TestingUtils.dropMongodbDatabase().then(function () { done(); });
-    emitSpy.restore();;
+  afterEach(function () {
+    emitSpy.restore();
     TestingUtils.restoreAll();
   })
 

@@ -16,32 +16,31 @@ describe('ITest transfers', function () {
 	var socketSpy, user, bank, userWallet;
 
 	beforeEach(function (done) {
-		this.timeout(10000); // The Talented Mr. Ripple takes a long time to fund wallets
+		this.timeout(20000); // The Talented Mr. Ripple takes a long time to fund wallets
 		socketSpy = TestingUtils.buildSocketSpy();
 		MakeTransfer.register(socketSpy);
 
-		TestingUtils.seedBankAndUser(function (newUser, userBank) {
-			user = newUser;
-			bank = userBank;
-			CreateWallet.fundWallet(bank.hotWallet, Utils.ROOT_RIPPLE_ACCOUNT).then(function () {
-				CreateWallet.createWalletForEmail(user.email).then(function (wallet) {
-					userWallet = wallet;
-					SetTrust.setTrust(userBank.hotWallet.address, 
-							userWallet.address, userWallet.secret, 1000, 'EUR').then(function (result) {
-						expect(result.status).to.eql('success');
-						
-						done();
-					});
-				})
+		TestingUtils.dropMongodbDatabase().then(function () {
+			TestingUtils.seedBankAndUser(function (newUser, userBank) {
+				user = newUser;
+				bank = userBank;
+				CreateWallet.fundWallet(bank.hotWallet, Utils.ROOT_RIPPLE_ACCOUNT).then(function () {
+					CreateWallet.createWalletForEmail(user.email).then(function (wallet) {
+						userWallet = wallet;
+						SetTrust.setTrust(userBank.hotWallet.address, 
+								userWallet.address, userWallet.secret, 1000, 'EUR').then(function (result) {
+							expect(result.status).to.eql('success');
+							
+							done();
+						});
+					})
+				});
 			});
 		});
 	});
 
-	afterEach(function (done) {
+	afterEach(function () {
 		TestingUtils.restoreAll();
-		TestingUtils.dropMongodbDatabase().then(function () {
-			done();
-		});
 	});
 
 	it('Transfer from admin to regular user', function (done) {

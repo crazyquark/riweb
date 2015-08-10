@@ -17,25 +17,26 @@ var TestingUtils = require('./../../../test/utils/testing_utils');
 describe('Test set_root_flags', function () {
 
     var remote;
-    beforeEach(function () {
+    beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedAdminRemote').returns(Q(remote));
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
+        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
-    afterEach(function (done) {
+    afterEach(function () {
       TestingUtils.restoreAll();
-      TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should respond with success on proper trust set', function (done) {
         sinon.mock(remote, 'createTransaction');
 
-        SetRootFlags.setRootFlags().then(function (result) {
+        var account = {address: 'foo', secret: 'bar'};
+        SetRootFlags.setRootFlags(account).then(function (result) {
             expect(result.status).to.eql('success');
             expect(remote.createTransaction).to.have.been.calledWith(
                 'AccountSet', {
-                    account: Utils.ROOT_RIPPLE_ACCOUNT.address,
+                    account: account.address,
                     set: 'DefaultRipple'
                 });
             done();

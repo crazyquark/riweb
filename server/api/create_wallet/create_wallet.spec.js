@@ -22,7 +22,7 @@ describe('Test create_wallet', function () {
     var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy;
     var bank1, bank2, nonAdminUser, nonAdminUserWithNoBank;
 
-    beforeEach(function () {
+    beforeEach(function (done) {
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
@@ -41,16 +41,15 @@ describe('Test create_wallet', function () {
           
         TestingUtils.buildWalletSpy();
         TestingUtils.buildNewConnectedRemoteStub();                
+        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
-    afterEach(function (done) {
+    afterEach(function () {
       TestingUtils.restoreAll();
       emitSpy.restore();
       
       User.findByEmail.restore();
       Bankaccount.findById.restore();
-      
-      TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
 /*

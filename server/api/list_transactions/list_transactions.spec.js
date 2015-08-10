@@ -19,7 +19,7 @@ var ListTransactions = require('./list_transactions.socket');
 describe('Test list_transactions', function() {
     var remote, emitSpy, aliceWallet, bobWallet, socketSpy, fromAliceToBobTx, fromBobToAliceTx;
 
-    beforeEach(function () {
+    beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
@@ -63,13 +63,12 @@ describe('Test list_transactions', function() {
                 date: '123456',
                 TransactionType: 'Payment',
     			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 99 }}};
-
+        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
-    afterEach(function (done) {
+    afterEach(function () {
         TestingUtils.restoreAll();
         emitSpy.restore();
-        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should list transactions from Alice to Bob', function (done) {

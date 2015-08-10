@@ -17,7 +17,7 @@ var TestingUtils = require('./../../../test/utils/testing_utils');
 
 describe('Test account_info', function () {
     var socket;
-    beforeEach(function () {
+    beforeEach(function (done) {
         socket = TestingUtils.buildSocketSpy();
 
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
@@ -25,14 +25,11 @@ describe('Test account_info', function () {
         AccountInfo.register(socket);
 
         TestingUtils.buildNewConnectedRemoteStub();
-    });
-
-    beforeEach(function () {
         TestingUtils.buildWalletSpy();
+        TestingUtils.dropMongodbDatabase().then(function () { done(); });
     });
-    afterEach(function (done) {
+    afterEach(function () {
         TestingUtils.restoreAll();
-        TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     it('should get account_info for unexisting email', function (done) {
