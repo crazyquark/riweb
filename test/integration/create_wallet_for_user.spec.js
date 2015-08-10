@@ -19,9 +19,9 @@ var debug = require('debug')('CreateWalletForUserSpec');
 
 describe('ITest signup', function () {
 
-  beforeEach(function(done){
+  beforeEach(function (done) {
     this.timeout(10000);
-    TestingUtils.dropMongodbDatabase().then(function(){
+    TestingUtils.dropMongodbDatabase().then(function () {
 
       //ugly hack for an integration test but hope it works
       CreateWallet.register(TestingUtils.buildSocketSpy());
@@ -34,38 +34,40 @@ describe('ITest signup', function () {
   });
 
   it('should create an wallet for the user', function (done) {
-    this.timeout(10000);
+    this.timeout(20000); // Wait around a bunch for Ripple
     //TODO: should first send rippled credits to the bank (create bank wallet)
     debug('should create a wallet');
-    //CreateWallet.fundWallet(bank.hotWallet, Utils.ROOT_RIPPLE_ACCOUNT).then(function () {
-    TestingUtils.seedBankAndUser(function(theUser){
+    TestingUtils.seedBankAndUser(function (theUser, theBank) {
       debug('seedBankAndUser');
-      CreateWallet.createWalletForEmail(theUser.email).then(function() {
-        debug('createWalletForEmail');
-        Wallet.findByOwnerEmail(theUser.email).then(function(wallet){
-          debug('findByOwnerEmail');
-          expect(wallet.ownerEmail).to.eql('james.bond@mi6.com');
+      CreateWallet.fundWallet(theBank.hotWallet, Utils.ROOT_RIPPLE_ACCOUNT).then(function () {
+        debug('fundWallet');
+        CreateWallet.createWalletForEmail(theUser.email).then(function () {
+          debug('createWalletForEmail');
+          Wallet.findByOwnerEmail(theUser.email).then(function (wallet) {
+            debug('findByOwnerEmail');
+            expect(wallet.ownerEmail).to.eql('james.bond@mi6.com');
 
-          debug('call getNewConnectedRemote');
-          Utils.getNewConnectedRemote().then(function(remote){
-            debug('getNewConnectedRemote');
+            debug('call getNewConnectedRemote');
+            Utils.getNewConnectedRemote().then(function (remote) {
+              debug('getNewConnectedRemote');
 
-            var options = {
-              account: wallet.address,
-              ledger: 'validated'
-            };
+              var options = {
+                account: wallet.address,
+                ledger: 'validated'
+              };
 
-            debug('remote.requestAccountInfo', options);
-            remote.requestAccountInfo(options, function(err, info) {
-              debug('requestAccountInfo');
-              expect(err).to.eql(null);
-              expect(info).to.have.deep.property('account_data.Account', wallet.address);
-              expect(info).to.have.deep.property('account_data.Balance', '60000000');
-              done();
+              debug('remote.requestAccountInfo', options);
+              remote.requestAccountInfo(options, function (err, info) {
+                debug('requestAccountInfo');
+                expect(err).to.eql(null);
+                expect(info).to.have.deep.property('account_data.Account', wallet.address);
+                expect(info).to.have.deep.property('account_data.Balance', '60000000');
+                done();
+              })
             })
           })
         })
-      }).done(null, function (error) {done(error);});
+      }).done(null, function (error) { done(error); });
     });
   });
 
