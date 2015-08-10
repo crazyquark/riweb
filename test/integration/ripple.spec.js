@@ -82,14 +82,16 @@ function setBanksTrust(bank1, bank2, user1, user2) {
 	return deferred.promise;
 }
 
-function makeEurTransfer(senderWallet, recvWallet, amount) {
+function makeEurTransfer(senderWallet, recvWallet, issuer, amount) {
 	var deferred = Q.defer();
-
+	
+	issuer = issuer || senderWallet.address;
+	
 	Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
 		var transaction = remote.createTransaction('Payment', {
 			account: senderWallet.address,
 			destination: recvWallet.address,
-			amount: amount + '/EUR/' + senderWallet.address,
+			amount: amount + '/EUR/' + issuer,
 		});
 
 		transaction.submit(function (err, res) {
@@ -106,15 +108,18 @@ function makeEurTransfer(senderWallet, recvWallet, amount) {
 }
 
 describe('ITest rippled', function () {
-	this.timeout(60000);
-	it('Create this scenario on Ripple: user1 -> bank1 -> bank2 <- user2', function (done) {
+	this.timeout(90000);
+	xit('Create this scenario on Ripple: user1 -> bank1 -> bank2 <- user2', function (done) {
 		debug('Create 4 Ripple accounts');
 
 		var user1 = ripple.Wallet.generate();
 		var user2 = ripple.Wallet.generate();
 		var bank1 = ripple.Wallet.generate();
 		var bank2 = ripple.Wallet.generate();
-
+		
+		debug('user1, user2, bank1, bank2');
+		debug(user1, user2, bank1, bank2);
+		
 		fundBanks(bank1, bank2).then(function () {
 			debug('funded banks');
 			fundUsers(bank1, bank2, user1, user2).then(function () {
@@ -124,7 +129,13 @@ describe('ITest rippled', function () {
 						debug('makeEurTransfer user1');
 						makeEurTransfer(bank2, user2, 100).then(function () {
 							debug('makeEurTransfer user2');
-							done();
+							makeEurTransfer(user1, user2, bank2.address, 10).then(function () {
+								debug('makeEurTransfer user1, user2');
+								done();
+							}).fail(function (err) {
+								debug('error: ', err);
+								done(err);
+							})
 						})
 					})
 				})
