@@ -150,7 +150,7 @@ describe('Test list_transactions', function() {
     });
 
 
-    it.only('should list transactions from bank1 to Alice', function (done) {
+    it('should list transactions from bank1 to Alice', function (done) {
         remote.requestAccountTransactions.yields(null, { transactions: [fromBank1ToAliceTx] });
 
         var expectedHumanTransactions = [{

@@ -44,13 +44,26 @@ function setTrust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, l
   return deferred.promise;
 }
 
-// TODO: this a bit more complicated - and do we need it?
-function set_trust_by_email(userEmail, bankAdminEmail) {
+/**
+* Creates a trust line between a ripple account and a list of ripple accounts
+* @param rippleDestinationAddreses target trustlines endpoints
+* @param rippleSourceAddr source trustline endpoint
+* @param rippleSourceSecret source address secret (used to create the trustline)
+* @param limit the limit of the thrustline (defaults to 1000)
+* @param currency the currency of the thrustline (defaults to 'EUR')
+*/
+function setTrustAll(rippleDestinationAddreses, rippleSourceAddr, rippleSourceSecret, limit, currency) {
+  var setTrustPromises = [];
 
+  rippleDestinationAddreses.forEach(function(rippleDestinationAddr){
+    setTrustPromises.push(setTrust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, limit, currency));
+  });
+  
+  return Q.all(setTrustPromises);
 }
 
+exports.setTrustAll = setTrustAll;
 exports.setTrust = setTrust;
-exports.set_trust_by_email = set_trust_by_email;
 exports.register = function() {
   Utils.getEventEmitter().on('set_trust', function(data) {
     setTrust(data.rippleDestinationAddr, data.rippleSourceAddr, data.rippleSourceSecret);
