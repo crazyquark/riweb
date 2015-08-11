@@ -71,7 +71,9 @@ describe('Test list_transactions', function() {
         });
 
 
-        fromAliceToBobTx = { tx: {
+        fromAliceToBobTx = { 
+            TransactionResult: 'tesSUCCESS',
+            tx: {
     			Account: aliceWallet.address,
     			Destination: bobWallet.address,
     			Fee: 12,
@@ -79,7 +81,9 @@ describe('Test list_transactions', function() {
                 TransactionType: 'Payment',
     			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 100 }}};
 
-        fromBobToAliceTx = { tx: {
+        fromBobToAliceTx = { 
+                TransactionResult: 'tesSUCCESS',
+                tx: {
     			Account: bobWallet.address,
     			Destination: aliceWallet.address,
     			Fee: 12,
@@ -87,7 +91,9 @@ describe('Test list_transactions', function() {
                 TransactionType: 'Payment',
     			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 99 }}};
 
-        fromBank1ToAliceTx = { tx: {
+        fromBank1ToAliceTx = { 
+                TransactionResult: 'tesSUCCESS',
+                tx: {
     			Account: bank1.address,
     			Destination: aliceWallet.address,
     			Fee: 12,

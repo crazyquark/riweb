@@ -98,8 +98,10 @@ function listTransactions(ownerEmail, socket) {
      				var transactionPromises = [];
 
 					res.transactions.forEach(function(rippleTx){
+						debug(rippleTx);
 						if (rippleTx.tx.TransactionType === 'Payment' &&
-							typeof rippleTx.tx.Amount === 'object') {
+							typeof rippleTx.tx.Amount === 'object' &&
+							rippleTx.TransactionResult === 'tesSUCCESS' /* no failed transactions */) {
 								transactionPromises.push(convertRippleTxToHuman(rippleTx));
 						}
 					});
