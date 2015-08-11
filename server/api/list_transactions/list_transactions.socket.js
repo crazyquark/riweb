@@ -9,25 +9,38 @@ var Q = require('q');
 
 var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
+var BankAccounts = require('../bankaccount/bankaccount.model');
 
-function findEmailFromAddress(rippleAddress){
-	return Wallet.findByRippleAddress(rippleAddress).then(function(foundWallet){
-		if(!foundWallet){
-			return '<<< deleted account >>>';
-		} else {
-			return foundWallet.ownerEmail;
-		}
+var debug = require('debug')('ListTransactions');
+
+function findEmailFromAddress(rippleAddress) {
+	return Wallet.findByRippleAddress(rippleAddress).then(function (foundWallet) {
+		return foundWallet ? foundWallet.ownerEmail : null;
+	})
+}
+
+function findBankFromAddress(rippleAddress) {
+	return BankAccounts.findByRippleAddress(rippleAddress).then(function (foundBank) {
+		debug('BankAccounts.findByRippleAddress', rippleAddress, foundBank);
+		return foundBank ? foundBank.email : null;
 	})
 }
 
 function convertRippleTxToHuman(transaction){
 	
   var sourceEmailPromise = findEmailFromAddress(transaction.tx.Account);
+  var sourceBankPromise	 = findBankFromAddress(transaction.tx.Account);
   var destinationEmailPromise = findEmailFromAddress(transaction.tx.Destination);
-  return Q.all([sourceEmailPromise, destinationEmailPromise]).spread(function(sourceEmail, destinationEmail){
-		var transactionHuman = {
-					source: sourceEmail,
-					destination: destinationEmail,
+  var destinationBankPromise  = findBankFromAddress(transaction.tx.Destination);
+  
+  return Q.all([sourceEmailPromise, destinationEmailPromise, sourceBankPromise, destinationBankPromise]).spread(function(sourceUserEmail, destinationUserEmail, sourceBankEmail, destinationBankEmail){
+	  
+	  var sourceEmail = sourceUserEmail?sourceUserEmail:sourceBankEmail;
+	  var destinationEmail = destinationUserEmail?destinationUserEmail:destinationBankEmail;
+	  
+      var transactionHuman = {
+					source: sourceEmail?sourceEmail:'<<< deleted account >>>',
+					destination: destinationEmail?destinationEmail:'<<< deleted account >>>',
 					amount: transaction.tx.Amount.value + '€',
 					fee: transaction.tx.Fee};
 					

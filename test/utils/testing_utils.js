@@ -132,7 +132,7 @@ function restoreWalletSpy() {
 }
 
 function restoreBankaccountSpy() {
-    restoreGenericSpy(BankAccount, ['create']);
+    restoreGenericSpy(BankAccount, ['create', 'findByRippleAddress']);
 }
 
 function buildNewConnectedRemoteStub() {
