@@ -69,12 +69,15 @@ function setBanksTrust(bank1, bank2, user1, user2) {
 			debug('set trust user1->bank1');
 			SetTrust.setTrust(bank2.address, user2.address, user2.secret).then(function () {
 				debug('set trust user2->bank2');
-				SetTrust.setTrust(bank1.address, bank2.address, bank2.secret).then(function () {
-					debug('set trust bank1->bank2');
-					SetTrust.setTrust(bank2.address, bank1.address, bank1.secret).then(function () {
-						deferred.resolve({ status: 'success' });
+				SetTrust.setTrust(bank1.address, user2.address, user2.secret).then(function () {
+					debug('set trust user2->bank1');
+					SetTrust.setTrust(bank1.address, bank2.address, bank2.secret).then(function () {
+						debug('set trust bank1->bank2');
+						SetTrust.setTrust(bank2.address, bank1.address, bank1.secret).then(function () {
+							deferred.resolve({ status: 'success' });
+						});
 					});
-				});
+				})
 			});
 		});
 	});
@@ -129,7 +132,7 @@ describe('ITest rippled', function () {
 						debug('makeEurTransfer user1');
 						makeEurTransfer(bank2, user2, bank2.address, 100).then(function () {
 							debug('makeEurTransfer user2');
-							makeEurTransfer(user1, bank2, bank1.address, 10).then(function () {
+							makeEurTransfer(user1, user2, bank1.address, 10).then(function () {
 								debug('makeEurTransfer user1, user2');
 								done();
 							}).fail(function (err) {
