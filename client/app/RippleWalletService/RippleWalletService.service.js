@@ -27,10 +27,6 @@ angular.module('riwebApp')
                 callback();
             });
 
-            socket.socket.on('post:fund_wallet', function (rippleAddress) {
-                // XXX use this info for something?
-            });
-
             socket.socket.emit('create_wallet', { ownerEmail: currentUser.email, role: currentUser.role });
         }
 

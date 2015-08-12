@@ -10,6 +10,7 @@ var Wallet = require('../api/wallet/wallet.model');
 var CreateBank = require('../api/create_bank/create_bank.socket');
 var CreateAdminUserForBank = require('../api/create_admin_user_for_bank/create_admin_user_for_bank.socket');
 var CreateWallet = require('../api/create_wallet/create_wallet.socket');
+var MakeTransfer = require('../api/make_transfer/make_transfer.socket');
 
 var TestingUtils = require('./../../test/utils/testing_utils');
 
@@ -64,6 +65,9 @@ TestingUtils.dropMongodbDatabase().then(function () {
           iban: 'AZ21NABZ00000000137010001944'
         }, bankAdmin);
       });
+  }).then(function(){
+    MakeTransfer.makeTransfer('admin@alpha.com', 'alice@alpha.com', 101);
+    //MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 102);
   });
 
   var createBankB = createBank({
@@ -76,7 +80,9 @@ TestingUtils.dropMongodbDatabase().then(function () {
       name: 'Bob',
       email: 'bob@brd.com',
       iban: 'BA391290079401028494'
-    }, bankAdmin);
+    }, bankAdmin).then(function() {
+      //MakeTransfer.makeTransfer('admin@brd.com', 'bob@brd.com', 103);
+    });
   });
 
   Q.all([createBankA, createBankB]);

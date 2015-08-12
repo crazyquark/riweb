@@ -67,8 +67,8 @@ function makeTransfer(fromEmail, toEmail, amount) {
             }
 
             if (!senderBank) {
-                if (!findIssuingBank || findIssuingBank.status == 'error' || !findIssuingBank.bank
-                    || !findIssuingBank.bank.hotWallet || !findIssuingBank.bank.hotWallet.address) {
+                if (!findIssuingBank || findIssuingBank.status === 'error' || !findIssuingBank.bank ||
+                  !findIssuingBank.bank.hotWallet || !findIssuingBank.bank.hotWallet.address) {
 
                     buildMissingError('issuing bank not resolved');
 

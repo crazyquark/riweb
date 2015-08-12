@@ -8,6 +8,8 @@ var Q = require('q');
 
 var Utils = require('./../../utils/utils');
 
+var SetRootFlags = require('./../set_root_flags/set_root_flags.socket');
+
 var debug = require('debug')('SetTrust');
 
 /**
@@ -23,22 +25,22 @@ function setTrust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, l
   currency = currency || 'EUR';
 
   var deferred = Q.defer();
-  
+
   debug('setTrust: ', rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, limit, currency);
-  
+
   Utils.getNewConnectedRemote(rippleSourceAddr, rippleSourceSecret).then(function(remote) {
     var transaction = remote.createTransaction('TrustSet', {
       account: rippleSourceAddr,
       limit: limit + '/' + currency + '/' + rippleDestinationAddr
     });
-  
+
     transaction.submit(function(err, res) {
       if(!err) {
         deferred.resolve({status: 'success'}); // See no evil
       } else {
         deferred.reject({status: 'error', error: err});
       }
-    });    
+    });
   });
 
   return deferred.promise;
@@ -58,11 +60,28 @@ function setTrustAll(rippleDestinationAddreses, rippleSourceAddr, rippleSourceSe
   rippleDestinationAddreses.forEach(function(rippleDestinationAddr){
     setTrustPromises.push(setTrust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, limit, currency));
   });
-  
+
   return Q.all(setTrustPromises);
 }
 
+function setBanksTrust(bank1, bank2, user1, user2) {
+  var deferred = Q.defer();
+
+  SetRootFlags.setBankFlags(bank1, bank2, user1, user2).then(function () {
+
+    var user1SetTrustAll = setTrustAll([bank1.address, bank2.address], user1.address, user1.secret);
+    var user2SetTrustAll = setTrustAll([bank1.address, bank2.address], user2.address, user2.secret);
+
+    Q.all(user1SetTrustAll, user2SetTrustAll).then(function(){
+      deferred.resolve({ status: 'success' });
+    });
+  });
+
+  return deferred.promise;
+}
+
 exports.setTrustAll = setTrustAll;
+exports.setBanksTrust = setBanksTrust;
 exports.setTrust = setTrust;
 exports.register = function() {
   Utils.getEventEmitter().on('set_trust', function(data) {
