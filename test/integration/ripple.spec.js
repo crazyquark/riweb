@@ -14,6 +14,7 @@ var Utils = require('../../server/utils/utils');
 var CreateWallet = require('../../server/api/create_wallet/create_wallet.socket');
 var SetRootFlags = require('../../server/api/set_root_flags/set_root_flags.socket');
 var SetTrust = require('../../server/api/set_trust/set_trust.socket');
+var MakeTransfer = require('../../server/api/make_transfer/make_transfer.socket');
 
 function fundBanks(bank1, bank2) {
 	var deferred = Q.defer();
@@ -64,40 +65,15 @@ function setBanksTrust(bank1, bank2, user1, user2) {
 	var deferred = Q.defer();
 
 	setBankFlags(bank1, bank2, user1, user2).then(function () {
-		
+
 		var user1SetTrustAll = SetTrust.setTrustAll([bank1.address, bank2.address], user1.address, user1.secret);
 		var user2SetTrustAll = SetTrust.setTrustAll([bank1.address, bank2.address], user2.address, user2.secret);
-		
+
 		Q.all(user1SetTrustAll, user2SetTrustAll).then(function(){
      		deferred.resolve({ status: 'success' });
 		});
 	});
 
-	return deferred.promise;
-}
-
-function makeEurTransfer(senderWallet, recvWallet, issuer, amount) {
-	var deferred = Q.defer();
-
-	issuer = issuer || senderWallet.address;
-
-	Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
-		var transaction = remote.createTransaction('Payment', {
-			account: senderWallet.address,
-			destination: recvWallet.address,
-			amount: amount + '/EUR/' + issuer,
-		});
-
-		transaction.submit(function (err, res) {
-			if (err) {
-				deferred.reject(err);
-			}
-			if (res) {
-				deferred.resolve({ status: 'success', transaction: transaction });
-			}
-
-		});
-	});
 	return deferred.promise;
 }
 
@@ -118,13 +94,13 @@ describe('ITest rippled', function () {
 			debug('funded banks');
 			fundUsers(bank1, bank2, user1, user2).then(function () {
 				setBanksTrust(bank1, bank2, user1, user2).then(function () {
-					debug('makeEurTransfers');
-					makeEurTransfer(bank1, user1, bank1.address, 100).then(function () {
-						debug('makeEurTransfer user1');
-						makeEurTransfer(bank2, user2, bank2.address, 100).then(function () {
-							debug('makeEurTransfer user2');
-							makeEurTransfer(user1, user2, bank1.address, 10).then(function () {
-								debug('makeEurTransfer user1, user2');
+					debug('makeTransferWithRipple');
+                    MakeTransfer.makeTransferWithRipple(bank1, user1, bank1.address, 100).then(function () {
+						debug('makeTransferWithRipple user1');
+						MakeTransfer.makeTransferWithRipple(bank2, user2, bank2.address, 100).then(function () {
+							debug('makeTransferWithRipple user2');
+							MakeTransfer.makeTransferWithRipple(user1, user2, bank1.address, 10).then(function () {
+								debug('makeTransferWithRipple user1, user2');
 								done();
 							}).fail(function (err) {
 								debug('error: ', err);

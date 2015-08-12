@@ -11,6 +11,8 @@ var BankAccount = require('../bankaccount/bankaccount.model');
 var CreateWallet = require('./../create_wallet/create_wallet.socket');
 var Utils = require('./../../utils/utils');
 
+var debug = require('debug')('MakeTransfer');
+
 function makeTransfer(fromEmail, toEmail, amount) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
@@ -44,12 +46,12 @@ function makeTransfer(fromEmail, toEmail, amount) {
             }
 
             var issuingAddress;
-        
+
             // If the sender was a bank admin, get its wallet from bankaccounts
             if (!senderWallet && senderBank) {
                 senderWallet = senderBank.hotWallet;
             }
-        
+
             // Not sure why these are arrays sometimes
             if (senderWallet && senderWallet.constructor === Array) {
                 senderWallet = senderWallet[0];
@@ -79,46 +81,59 @@ function makeTransfer(fromEmail, toEmail, amount) {
                 issuingAddress = senderBank.hotWallet.address;
             }
 
-
-            Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
-                var transaction = remote.createTransaction('Payment', {
-                    account: senderWallet.address,
-                    destination: recvWallet.address,
-                    amount: amount + '/EUR/' + issuingAddress,
-                });
-
-                transaction.submit(function (err, res) {
-                    if (err) {
-                        Utils.getEventEmitter().emit('post:make_transfer', {
-                            fromEmail: fromEmail,
-                            toEmail: toEmail,
-                            amount: amount,
-                            issuer: issuingAddress,
-                            message: 'Ripple error',
-                            status: 'ripple error'
-                        });
-                        
-                        deferred.reject(err);
-                    }
-                    if (res) {
-                        Utils.getEventEmitter().emit('post:make_transfer', {
-                            fromEmail: fromEmail,
-                            toEmail: toEmail,
-                            amount: amount,
-                            issuer: issuingAddress,
-                            status: 'success'
-                        });
-                        deferred.resolve({ status: 'success', transaction: transaction });
-                    }
-
-                });
+            makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount).then(function(transaction){
+              Utils.getEventEmitter().emit('post:make_transfer', {
+                fromEmail: fromEmail,
+                toEmail: toEmail,
+                amount: amount,
+                issuer: issuingAddress,
+                status: 'success'
+              });
+              deferred.resolve({ status: 'success', transaction: transaction });
+            }, function(err){
+              Utils.getEventEmitter().emit('post:make_transfer', {
+                fromEmail: fromEmail,
+                toEmail: toEmail,
+                amount: amount,
+                issuer: issuingAddress,
+                message: 'Ripple error',
+                status: 'ripple error'
+              });
+              deferred.reject(err);
             });
-            return deferred.promise;
 
+            return deferred.promise;
         });
 }
 
+function makeTransferWithRipple(senderWallet, recvWallet, issuer, amount) {
+  debug('makeTransferWithRipple' ,senderWallet, recvWallet, issuer, amount);
+  var deferred = Q.defer();
+
+  issuer = issuer || senderWallet.address;
+
+  Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
+    var transaction = remote.createTransaction('Payment', {
+      account: senderWallet.address,
+      destination: recvWallet.address,
+      amount: amount + '/EUR/' + issuer
+    });
+
+    transaction.submit(function (err, res) {
+      if (err) {
+        deferred.reject(err);
+      }
+      if (res) {
+        deferred.resolve({ status: 'success', transaction: transaction });
+      }
+    });
+
+  });
+  return deferred.promise;
+}
+
 exports.makeTransfer = makeTransfer;
+exports.makeTransferWithRipple = makeTransferWithRipple;
 
 exports.register = function (socket) {
     Utils.getEventEmitter().on('post:make_transfer', function (data) {
