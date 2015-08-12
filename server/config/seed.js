@@ -14,7 +14,9 @@ var TestingUtils = require('./../../test/utils/testing_utils');
 
 var Q = require('q');
 
-function createAdminIinfo(bankInfo){
+var debug = require('debug')('Seed');
+
+function createAdminInfo(bankInfo){
   return {
     bankId: bankInfo._id,
     info: bankInfo.info,
@@ -25,7 +27,18 @@ function createAdminIinfo(bankInfo){
 
 function createBank(bank){
   return CreateBank.createBank(bank).then(function(bankInfo){
-    CreateAdminUserForBank.createAdminUserForBank(createAdminIinfo(bankInfo));
+    return CreateAdminUserForBank.createAdminUserForBank(createAdminInfo(bankInfo));
+  });
+}
+
+function createUserForBank(user, bankAdmin){
+  return User.create({
+    provider: 'local',
+    name: user.name,
+    email: user.email,
+    password: user.email,
+    iban: user.iban,
+    bank: bankAdmin.bank
   });
 }
 
@@ -35,6 +48,12 @@ TestingUtils.dropMongodbDatabase().then(function () {
     info: 'Alpha Bank',
     email: 'admin@alpha.com',
     password: 'admin@alpha.com'
+  }).then(function(bankAdmin){
+    return createUserForBank({
+          name: 'Alice',
+          email: 'alice@alpha.com',
+          iban: 'AL47212110090000000235698741'
+      }, bankAdmin);
   });
 
   var createBankB = createBank({
@@ -42,63 +61,14 @@ TestingUtils.dropMongodbDatabase().then(function () {
     info: 'BRD Societe Generale',
     email: 'admin@brd.com',
     password: 'admin@brd.com'
+  }).then(function(bankAdmin){
+    return createUserForBank({
+      name: 'Bob',
+      email: 'bob@brd.com',
+      iban: 'BA391290079401028494'
+    }, bankAdmin);
   });
 
   Q.all([createBankA, createBankB]);
 });
 
-//BankAccount.find({}).remove(function() {
-//  BankAccount.create({
-//    name: 'ing',
-//    info: 'ING Bank',
-//    email: 'admin@ing.com',
-//    coldWallet: {
-//      address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
-//    },
-//    hotWallet : {
-//      address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
-//      secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
-//    },
-//  },
-//  {
-//    name: 'abnamro',
-//    info: 'ABN Amro Bank',
-//    email: 'admin@abnamro.com',
-//    coldWallet: {
-//      address: ''
-//    },
-//    hotWallet: {
-//      address: '',
-//      secret: ''
-//    },
-//  }, function() {
-//      BankAccount.findOne(function (err, firstBank) {
-//          seedUsers(firstBank);
-//      });
-//    }
-//  );
-//});
-//
-//function seedUsers(bank){
-//    User.find({}).remove(function() {
-//        User.create({
-//                provider: 'local',
-//                name: 'Test User',
-//                email: 'test@test.com',
-//                password: 'test',
-//                bank: bank._id
-//            }, {
-//                provider: 'local',
-//                role: 'admin',
-//                name: 'Admin',
-//                email: 'admin@admin.com',
-//                password: 'admin',
-//                bank: bank._id
-//            }, function() {
-//                // console.log('finished populating users');
-//            }
-//        );
-//    });
-//}
-//
-//Wallet.find({}).remove().exec();
