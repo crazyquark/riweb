@@ -30,6 +30,7 @@ function setRootFlags(account) {
 
 	return deferred.promise;
 }
+
 function setBankFlags(bank1, bank2) {
   var deferred = Q.defer();
   debug('setBankFlags');

@@ -47,36 +47,6 @@ function fundUsers(bank1, bank2, user1, user2) {
 	return deferred.promise;
 }
 
-function setBankFlags(bank1, bank2) {
-	var deferred = Q.defer();
-	debug('setBankFlags');
-	SetRootFlags.setRootFlags(bank1).then(function () {
-		debug('set root flags bank1');
-		SetRootFlags.setRootFlags(bank2).then(function () {
-			debug('set root flags bank1');
-			deferred.resolve({ status: 'success' });
-		});
-	});
-
-	return deferred.promise;
-}
-
-function setBanksTrust(bank1, bank2, user1, user2) {
-	var deferred = Q.defer();
-
-	setBankFlags(bank1, bank2, user1, user2).then(function () {
-
-		var user1SetTrustAll = SetTrust.setTrustAll([bank1.address, bank2.address], user1.address, user1.secret);
-		var user2SetTrustAll = SetTrust.setTrustAll([bank1.address, bank2.address], user2.address, user2.secret);
-
-		Q.all(user1SetTrustAll, user2SetTrustAll).then(function(){
-     		deferred.resolve({ status: 'success' });
-		});
-	});
-
-	return deferred.promise;
-}
-
 describe('ITest rippled', function () {
 	this.timeout(90000);
 	it('Create this scenario on Ripple: user1 -> bank1 -> bank2 -> user2', function (done) {
