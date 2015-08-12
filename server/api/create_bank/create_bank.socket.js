@@ -39,7 +39,8 @@ function createBank(newBank) {
       debug('Found existing bank', foundBank.name);
       deferred.reject(null);
     } else {
-      createNewBank(newBank).then(function (createdBank) {        
+      debug('createNewBank', newBank);
+      createNewBank(newBank).then(function (createdBank) {
         // Need to also fund this newly minted wallet
         // XXX: need lots of XRP for banks to fund wallets
         CreateWallet.fundWallet(createdBank.hotWallet, ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
@@ -55,7 +56,7 @@ function createBank(newBank) {
           email: newBank.email,
           password: newBank.password,
         });
-        
+
         debug('resolve create', createdBank.info);
         deferred.resolve(createdBank);
 
@@ -79,4 +80,4 @@ exports.register = function (newSocket) {
         socket.emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
       });
   });
-}
+};

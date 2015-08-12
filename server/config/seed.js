@@ -7,60 +7,97 @@
 
 var User = require('../api/user/user.model');
 var Wallet = require('../api/wallet/wallet.model');
-var BankAccount = require('../api/bankaccount/bankaccount.model');
+var CreateBank = require('../api/create_bank/create_bank.socket');
+var CreateAdminUserForBank = require('../api/create_admin_user_for_bank/create_admin_user_for_bank.socket');
 
-BankAccount.find({}).remove(function() {
-  BankAccount.create({
-    name: 'ing',
-    info: 'ING Bank',
-    email: 'admin@ing.com',
-    coldWallet: {
-      address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
-    },
-    hotWallet : {
-      address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
-      secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
-    },
-  },
-  {
-    name: 'abnamro',
-    info: 'ABN Amro Bank',
-    email: 'admin@abnamro.com',
-    coldWallet: {
-      address: ''
-    },
-    hotWallet: {
-      address: '',
-      secret: ''
-    },
-  }, function() {
-      BankAccount.findOne(function (err, firstBank) {
-          seedUsers(firstBank);
-      });
-    }
-  );
-});
+var TestingUtils = require('./../../test/utils/testing_utils');
 
-function seedUsers(bank){
-    User.find({}).remove(function() {
-        User.create({
-                provider: 'local',
-                name: 'Test User',
-                email: 'test@test.com',
-                password: 'test',
-                bank: bank._id
-            }, {
-                provider: 'local',
-                role: 'admin',
-                name: 'Admin',
-                email: 'admin@admin.com',
-                password: 'admin',
-                bank: bank._id
-            }, function() {
-                // console.log('finished populating users');
-            }
-        );
-    });
+var Q = require('q');
+
+function createAdminIinfo(bankInfo){
+  var adminInfo = {
+    bankId: bankInfo._id,
+    info: bankInfo.info,
+    email: bankInfo.email,
+    password: bankInfo.email
+  };
+  return adminInfo;
 }
 
-Wallet.find({}).remove().exec();
+TestingUtils.dropMongodbDatabase().then(function () {
+  var createBankA = CreateBank.createBank({
+    name: 'alpha',
+    info: 'Alpha Bank',
+    email: 'admin@alpha.com',
+    password: 'admin@alpha.com'
+  }).then(function(bankInfo){
+    CreateAdminUserForBank.createAdminUserForBank(createAdminIinfo(bankInfo));
+  });
+
+  var createBankB = CreateBank.createBank({
+    name: 'brd',
+    info: 'BRD Societe Generale',
+    email: 'admin@brd.com',
+    password: 'admin@brd.com'
+  }).then(function(bankInfo){
+    CreateAdminUserForBank.createAdminUserForBank(createAdminIinfo(bankInfo));
+  });
+
+  Q.all([createBankA, createBankB]);
+});
+
+//BankAccount.find({}).remove(function() {
+//  BankAccount.create({
+//    name: 'ing',
+//    info: 'ING Bank',
+//    email: 'admin@ing.com',
+//    coldWallet: {
+//      address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
+//    },
+//    hotWallet : {
+//      address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
+//      secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
+//    },
+//  },
+//  {
+//    name: 'abnamro',
+//    info: 'ABN Amro Bank',
+//    email: 'admin@abnamro.com',
+//    coldWallet: {
+//      address: ''
+//    },
+//    hotWallet: {
+//      address: '',
+//      secret: ''
+//    },
+//  }, function() {
+//      BankAccount.findOne(function (err, firstBank) {
+//          seedUsers(firstBank);
+//      });
+//    }
+//  );
+//});
+//
+//function seedUsers(bank){
+//    User.find({}).remove(function() {
+//        User.create({
+//                provider: 'local',
+//                name: 'Test User',
+//                email: 'test@test.com',
+//                password: 'test',
+//                bank: bank._id
+//            }, {
+//                provider: 'local',
+//                role: 'admin',
+//                name: 'Admin',
+//                email: 'admin@admin.com',
+//                password: 'admin',
+//                bank: bank._id
+//            }, function() {
+//                // console.log('finished populating users');
+//            }
+//        );
+//    });
+//}
+//
+//Wallet.find({}).remove().exec();
