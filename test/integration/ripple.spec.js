@@ -68,19 +68,19 @@ function setBanksTrust(bank1, bank2, user1, user2) {
 
 		var user1SetTrustAll = SetTrust.setTrustAll([bank1.address/*, bank2.address*/], user1.address, user1.secret);
 		var user2SetTrustAll = SetTrust.setTrustAll([/*bank1.address,*/ bank2.address], user2.address, user2.secret);
-		
-		var bank2SetTrust	= SetTrust.setTrustAll([bank1.address], bank2.address, bank2.secret);
-		var bank1SetTrust 	= SetTrust.setTrustAll([bank2.address], bank1.address, bank1.secret);
-		
-		Q.all(user1SetTrustAll, user2SetTrustAll, bank1SetTrust, bank2SetTrust).then(function(){
-     		deferred.resolve({ status: 'success' });
+
+		var bank2SetTrust = SetTrust.setTrustAll([bank1.address], bank2.address, bank2.secret);
+		var bank1SetTrust = SetTrust.setTrustAll([bank2.address], bank1.address, bank1.secret);
+
+		Q.all(user1SetTrustAll, user2SetTrustAll, bank1SetTrust, bank2SetTrust).then(function () {
+			deferred.resolve({ status: 'success' });
 		});
 	});
 
 	return deferred.promise;
 }
 
-describe.only('ITest rippled', function () {
+describe('ITest rippled', function () {
 	this.timeout(90000);
 	it('Create this scenario on Ripple: user1 -> bank1 -> bank2 -> user2', function (done) {
 		debug('Create 4 Ripple accounts');
@@ -92,7 +92,7 @@ describe.only('ITest rippled', function () {
 
 		debug('user1 ', user1);
 		debug('bank1 ', bank1);
-		
+
 		debug('user2 ', user2);
 		debug('bank2 ', bank2);
 
@@ -106,8 +106,11 @@ describe.only('ITest rippled', function () {
 						MakeTransfer.makeTransferWithRipple(bank2, user2, bank2.address, 100).then(function () {
 							debug('makeTransferWithRipple user2');
 							MakeTransfer.makeTransferWithRipple(user1, user2, bank2.address, 5, bank1.address).then(function () {
-								debug('makeTransferWithRipple user1, user2');
-								done();
+								debug('makeTransferWithRipple user1 -> user2');
+								MakeTransfer.makeTransferWithRipple(user2, user1, bank1.address, 5, bank2.address).then(function () {
+									debug('makeTransferWithRipple user2 -> user1');
+									done();
+								})
 							}).fail(function (err) {
 								debug('error: ', err);
 								done(err);
