@@ -9,6 +9,7 @@ var User = require('../api/user/user.model');
 var Wallet = require('../api/wallet/wallet.model');
 var CreateBank = require('../api/create_bank/create_bank.socket');
 var CreateAdminUserForBank = require('../api/create_admin_user_for_bank/create_admin_user_for_bank.socket');
+var CreateWallet = require('../api/create_wallet/create_wallet.socket');
 
 var TestingUtils = require('./../../test/utils/testing_utils');
 
@@ -39,6 +40,8 @@ function createUserForBank(user, bankAdmin){
     password: user.email,
     iban: user.iban,
     bank: bankAdmin.bank
+  }).then(function(newUser){
+    return CreateWallet.createWalletForEmail(newUser.email, 'user');
   });
 }
 
