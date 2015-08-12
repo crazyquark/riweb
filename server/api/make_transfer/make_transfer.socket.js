@@ -106,19 +106,31 @@ function makeTransfer(fromEmail, toEmail, amount) {
         });
 }
 
-function makeTransferWithRipple(senderWallet, recvWallet, issuer, amount) {
-  debug('makeTransferWithRipple' ,senderWallet, recvWallet, issuer, amount);
+function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, srcIssuer) {
+  debug('makeTransferWithRipple', senderWallet, recvWallet, dstIssuer, amount, srcIssuer);
   var deferred = Q.defer();
 
-  issuer = issuer || senderWallet.address;
+  dstIssuer = dstIssuer || senderWallet.address; // Normal issuer, for single gateway transactions
+  // Can't assume anything about source issuer!
 
   Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
     var transaction = remote.createTransaction('Payment', {
       account: senderWallet.address,
       destination: recvWallet.address,
-      amount: amount + '/EUR/' + issuer
+      amount: amount + '/EUR/' + dstIssuer,  
     });
 
+    // Append it if you got it
+    if (srcIssuer) {
+           var maxValue = amount.toString(); // Send all; original code from ripple-rest is:
+                               // new BigNumber(payment.source_amount.value).plus(payment.source_slippage || 0).toString();
+           transaction.sendMax({
+              value: maxValue,
+              currency: 'EUR',      // EUR foreveeer
+              issuer: srcIssuer,    // Gotcha! 
+           });
+    }
+    
     transaction.submit(function (err, res) {
       if (err) {
         deferred.reject(err);

@@ -20,9 +20,9 @@ function fundBanks(bank1, bank2) {
 	var deferred = Q.defer();
 	Utils.getNewConnectedRemote().then(function (remote) {
 		debug('Fund the banks');
-		CreateWallet.fundWallet(bank1, Utils.ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
+		CreateWallet.fundWallet(bank1, Utils.ROOT_RIPPLE_ACCOUNT, 10000).then(function () {
 			debug('Funded bank1');
-			CreateWallet.fundWallet(bank2, Utils.ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
+			CreateWallet.fundWallet(bank2, Utils.ROOT_RIPPLE_ACCOUNT, 10000).then(function () {
 				debug('Funded bank2');
 
 				deferred.resolve({ status: 'success' });
@@ -36,9 +36,9 @@ function fundBanks(bank1, bank2) {
 function fundUsers(bank1, bank2, user1, user2) {
 	var deferred = Q.defer();
 	debug('fundUsers');
-	CreateWallet.fundWallet(user1, bank1).then(function () {
+	CreateWallet.fundWallet(user1, bank1, 100).then(function () {
 		debug('fundUsers user1');
-		CreateWallet.fundWallet(user2, bank2).then(function () {
+		CreateWallet.fundWallet(user2, bank2, 100).then(function () {
 			debug('fundUsers user2');
 			deferred.resolve({ status: 'success' });
 		})
@@ -66,10 +66,13 @@ function setBanksTrust(bank1, bank2, user1, user2) {
 
 	setBankFlags(bank1, bank2, user1, user2).then(function () {
 
-		var user1SetTrustAll = SetTrust.setTrustAll([bank1.address, bank2.address], user1.address, user1.secret);
-		var user2SetTrustAll = SetTrust.setTrustAll([bank1.address, bank2.address], user2.address, user2.secret);
-
-		Q.all(user1SetTrustAll, user2SetTrustAll).then(function(){
+		var user1SetTrustAll = SetTrust.setTrustAll([bank1.address/*, bank2.address*/], user1.address, user1.secret);
+		var user2SetTrustAll = SetTrust.setTrustAll([/*bank1.address,*/ bank2.address], user2.address, user2.secret);
+		
+		var bank2SetTrust	= SetTrust.setTrustAll([bank1.address], bank2.address, bank2.secret);
+		var bank1SetTrust 	= SetTrust.setTrustAll([bank2.address], bank1.address, bank1.secret);
+		
+		Q.all(user1SetTrustAll, user2SetTrustAll, bank1SetTrust, bank2SetTrust).then(function(){
      		deferred.resolve({ status: 'success' });
 		});
 	});
@@ -77,7 +80,7 @@ function setBanksTrust(bank1, bank2, user1, user2) {
 	return deferred.promise;
 }
 
-describe('ITest rippled', function () {
+describe.only('ITest rippled', function () {
 	this.timeout(90000);
 	it('Create this scenario on Ripple: user1 -> bank1 -> bank2 -> user2', function (done) {
 		debug('Create 4 Ripple accounts');
@@ -87,8 +90,11 @@ describe('ITest rippled', function () {
 		var bank1 = ripple.Wallet.generate();
 		var bank2 = ripple.Wallet.generate();
 
-		debug('user1, user2, bank1, bank2');
-		debug(user1, user2, bank1, bank2);
+		debug('user1 ', user1);
+		debug('bank1 ', bank1);
+		
+		debug('user2 ', user2);
+		debug('bank2 ', bank2);
 
 		fundBanks(bank1, bank2).then(function () {
 			debug('funded banks');
@@ -99,7 +105,7 @@ describe('ITest rippled', function () {
 						debug('makeTransferWithRipple user1');
 						MakeTransfer.makeTransferWithRipple(bank2, user2, bank2.address, 100).then(function () {
 							debug('makeTransferWithRipple user2');
-							MakeTransfer.makeTransferWithRipple(user1, user2, bank1.address, 10).then(function () {
+							MakeTransfer.makeTransferWithRipple(user1, user2, bank2.address, 5, bank1.address).then(function () {
 								debug('makeTransferWithRipple user1, user2');
 								done();
 							}).fail(function (err) {
