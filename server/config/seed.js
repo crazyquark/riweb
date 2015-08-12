@@ -53,7 +53,14 @@ TestingUtils.dropMongodbDatabase().then(function () {
           name: 'Alice',
           email: 'alice@alpha.com',
           iban: 'AL47212110090000000235698741'
-      }, bankAdmin);
+      }, bankAdmin)
+      .then(function(){
+        return createUserForBank({
+          name: 'Alan',
+          email: 'alan@alpha.com',
+          iban: 'AZ21NABZ00000000137010001944'
+        }, bankAdmin);
+      });
   });
 
   var createBankB = createBank({
