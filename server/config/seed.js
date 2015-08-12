@@ -15,32 +15,33 @@ var TestingUtils = require('./../../test/utils/testing_utils');
 var Q = require('q');
 
 function createAdminIinfo(bankInfo){
-  var adminInfo = {
+  return {
     bankId: bankInfo._id,
     info: bankInfo.info,
     email: bankInfo.email,
     password: bankInfo.email
   };
-  return adminInfo;
+}
+
+function createBank(bank){
+  return CreateBank.createBank(bank).then(function(bankInfo){
+    CreateAdminUserForBank.createAdminUserForBank(createAdminIinfo(bankInfo));
+  });
 }
 
 TestingUtils.dropMongodbDatabase().then(function () {
-  var createBankA = CreateBank.createBank({
+  var createBankA = createBank({
     name: 'alpha',
     info: 'Alpha Bank',
     email: 'admin@alpha.com',
     password: 'admin@alpha.com'
-  }).then(function(bankInfo){
-    CreateAdminUserForBank.createAdminUserForBank(createAdminIinfo(bankInfo));
   });
 
-  var createBankB = CreateBank.createBank({
+  var createBankB = createBank({
     name: 'brd',
     info: 'BRD Societe Generale',
     email: 'admin@brd.com',
     password: 'admin@brd.com'
-  }).then(function(bankInfo){
-    CreateAdminUserForBank.createAdminUserForBank(createAdminIinfo(bankInfo));
   });
 
   Q.all([createBankA, createBankB]);
