@@ -42,7 +42,11 @@ angular.module('riwebApp')
           $cookieStore.put('token', data.token);
           currentUser = User.get();
           broadcastCurrentUser(currentUser);
-          deferred.resolve(currentUser);
+          if(currentUser.$promise){
+            deferred.resolve(currentUser.$promise);
+          } else {
+            deferred.resolve(currentUser);
+          }
           return cb();
         }).
         error(function(err) {
