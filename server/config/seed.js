@@ -13,6 +13,8 @@ var CreateWallet = require('../api/create_wallet/create_wallet.socket');
 var MakeTransfer = require('../api/make_transfer/make_transfer.socket');
 var SetTrust = require('../api/set_trust/set_trust.socket');
 
+var RealBankAccount = require('../api/RealBankAccount/RealBankAccount.model');
+
 var TestingUtils = require('./../../test/utils/testing_utils');
 
 var Q = require('q');
@@ -45,6 +47,25 @@ function createUserForBank(user, bankAdmin){
   }).then(function(newUser){
     return CreateWallet.createWalletForEmail(newUser.email, 'user');
   });
+}
+
+function createRealbankUsers() {
+  return RealBankAccount.create([{
+    name: 'alpha',
+    iban: 'AL47212110090000000235698741',
+    ballance: '100'
+  },
+  {
+    name: 'alpha',
+    iban: 'AZ21NABZ00000000137010001944',
+    ballance: '101'
+  },
+  {
+    name: 'brd',
+    iban: 'BA391290079401028494',
+    ballance: '102'
+  }]);
+  
 }
 
 TestingUtils.dropMongodbDatabase().then(function () {
@@ -85,5 +106,8 @@ TestingUtils.dropMongodbDatabase().then(function () {
     //SetTrust.setBanksTrust(bank1, bank2, user1, user2)
     //MakeTransfer.makeTransfer('admin@alpha.com', 'alice@alpha.com', 101);
   });
+
+  createRealbankUsers();
+
 });
 
