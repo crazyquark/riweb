@@ -67,16 +67,35 @@ function setTrustAll(rippleDestinationAddreses, rippleSourceAddr, rippleSourceSe
   return Q.all(setTrustPromises);
 }
 
+/**
+* Creates 2 trust lines between 2 accounts: wallet1 <---> wallet2
+* @param wallet1 first wallet(address, secret) for trustlines
+* @param wallet2 second wallet(address, source) for trustlines
+* @param limit the limit of the trustlines (defaults to 1000)
+* @param currency the currency of the trustlines (defaults to 'EUR')
+*/
+function setTrustBidir(wallet1, wallet2, limit, currency) {
+  return setTrust(wallet1.address, wallet2.address, wallet2.secret, limit, currency).then(function(){
+    return setTrust(wallet2.address, wallet1.address, wallet1.secret, limit, currency);
+  });
+}
+
+/**
+* Sets up the trust lines for this scenario: user1 - >bank1 <--> bank2 <- user
+* @param bank1 a bank wallet
+* @param bank2 a bank wallet
+* @param user1 a user wallet
+* @param user2 a user wallet
+*/
 function setBanksTrust(bank1, bank2, user1, user2) {
   var deferred = Q.defer();
 
   SetRootFlags.setBankFlags(bank1, bank2, user1, user2).then(function () {
     var user1SetTrustAll = setTrustAll([bank1.address/*, bank2.address*/], user1.address, user1.secret);
     var user2SetTrustAll = setTrustAll([/*bank1.address,*/ bank2.address], user2.address, user2.secret);
-    var bank2SetTrust = setTrustAll([bank1.address], bank2.address, bank2.secret);
-    var bank1SetTrust = setTrustAll([bank2.address], bank1.address, bank1.secret);
+    var banksSetTrust    = setTrustBidir(bank1, bank2);
 
-    Q.all(user1SetTrustAll, user2SetTrustAll, bank1SetTrust, bank2SetTrust).then(function(){
+    Q.all(user1SetTrustAll, user2SetTrustAll, banksSetTrust).then(function(){
       deferred.resolve({ status: 'success' });
     });
   });
@@ -87,6 +106,7 @@ function setBanksTrust(bank1, bank2, user1, user2) {
 exports.setTrustAll = setTrustAll;
 exports.setBanksTrust = setBanksTrust;
 exports.setTrust = setTrust;
+exports.setTrustBidir = setTrustBidir;
 exports.register = function() {
   Utils.getEventEmitter().on('set_trust', function(data) {
     setTrust(data.rippleDestinationAddr, data.rippleSourceAddr, data.rippleSourceSecret);
