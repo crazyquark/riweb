@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-    .service('RippleWalletService', function (RippleRemoteService, RippleAccountService,
+    .service('RippleWalletService', function (RippleAccountService,
         Auth, socket, $log) {
 
         var walletInfo = {

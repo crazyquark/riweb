@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-    .service('RippleTransactionService', function (RippleRemoteService, RippleWalletService, Wallet, Auth, RiwebSocketService) {
+    .service('RippleTransactionService', function (RippleWalletService, Wallet, Auth, RiwebSocketService) {
         function transferMoney(amountToTransfer) {
             swal({
                 title: 'Transfer money!',
