@@ -17,19 +17,21 @@ function makeTransfer(fromEmail, toEmail, amount) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
 
-    var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
-
+    var promiseFindIssuingBank  = CreateWallet.getBankForUser(fromEmail);
+    var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank
+    
     var promiseFindSenderBankAccount = BankAccount.findOneQ({ email: fromEmail });
 
-    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindSenderBankAccount])
-        .spread(function (senderWalletPromise, recvWalletPromise, findIssuingBankPromise, senderBankPromise) {
+    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindSenderBankAccount, promiseFindDestUserBank])
+        .spread(function (senderWalletPromise, recvWalletPromise, findIssuingBankPromise, senderBankPromise, destUserBankPromise) {
             var deferred = Q.defer();
 
             var senderWallet = senderWalletPromise.value;
             var recvWallet = recvWalletPromise.value;
             var senderBank = senderBankPromise.value;
             var findIssuingBank = findIssuingBankPromise.value;
-
+            var destUserBank    = destUserBankPromise.value ? destUserBankPromise.value.bank : null;
+            
             function buildMissingError(errorMessage) {
                 errorMessage = errorMessage || 'missing account';
                 var result = {
@@ -45,7 +47,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
                 deferred.resolve(result);
             }
 
-            var issuingAddress;
+            var issuingAddress, srcIssuer;
 
             // If the sender was a bank admin, get its wallet from bankaccounts
             if (!senderWallet && senderBank) {
@@ -80,8 +82,15 @@ function makeTransfer(fromEmail, toEmail, amount) {
                 // Sender is a bank
                 issuingAddress = senderBank.hotWallet.address;
             }
-
-            makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount).then(function(transaction){
+            
+            if (destUserBank && destUserBank.hotWallet.address !== issuingAddress) {
+                // Is the destination user from another bank?
+                srcIssuer = issuingAddress;
+                issuingAddress = destUserBank.hotWallet.address;
+                // XXX fix non-intuive var names
+            }
+            
+            makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount, srcIssuer).then(function(transaction){
               Utils.getEventEmitter().emit('post:make_transfer', {
                 fromEmail: fromEmail,
                 toEmail: toEmail,
