@@ -56,17 +56,17 @@ function createRealbankUsers() {
     iban: 'AL47212110090000000235698741',
     ballance: '100'
   },
-  {
-    name: 'alpha',
-    iban: 'AZ21NABZ00000000137010001944',
-    ballance: '101'
-  },
-  {
-    name: 'brd',
-    iban: 'BA391290079401028494',
-    ballance: '102'
-  }]);
-  
+    {
+      name: 'alpha',
+      iban: 'AZ21NABZ00000000137010001944',
+      ballance: '101'
+    },
+    {
+      name: 'brd',
+      iban: 'BA391290079401028494',
+      ballance: '102'
+    }]);
+
 }
 
 TestingUtils.dropMongodbDatabase().then(function () {
@@ -76,21 +76,24 @@ TestingUtils.dropMongodbDatabase().then(function () {
     email: 'admin@alpha.com',
     password: 'admin@alpha.com'
   };
-  
+
   var bankB = {
     name: 'brd',
     info: 'BRD Societe Generale',
     email: 'admin@brd.com',
     password: 'admin@brd.com'
   };
-  
+
+  var aliceWallet;
   var createBankA = createBank(bankA).then(function (bankAdmin) {
     return createUserForBank({
       name: 'Alice',
       email: 'alice@alpha.com',
       iban: 'AL47212110090000000235698741'
     }, bankAdmin)
-      .then(function () {
+      .then(function (aliceWallet) {
+        aliceWallet = aliceWallet; // Well done JS, same name+different scope vars are confusing but fun
+        
         return createUserForBank({
           name: 'Alan',
           email: 'alan@alpha.com',
@@ -107,11 +110,14 @@ TestingUtils.dropMongodbDatabase().then(function () {
     }, bankAdmin);
   });
 
-  Q.all([createBankA, createBankB]).spread(function (user1Wallet, user2Wallet) {
-    SetTrust.setBanksTrust(bankA.bankInfo.hotWallet, bankB.bankInfo.hotWallet, user1Wallet, user2Wallet).then(function () {
-      debug('Set trust bankA <-> bankB and user1, user2');
-      MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function(){
-        debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
+  Q.all([createBankA, createBankB]).spread(function (alanWallet, bobWallet) {
+    SetTrust.setBanksTrust(bankA.bankInfo.hotWallet, bankB.bankInfo.hotWallet, alanWallet, bobWallet).then(function () {
+      debug('Set trust alan -> bankA <-> bankB <- bob');
+      SetTrust.setTrust(bankA.bankInfo.hotWallet, aliceWallet.address, aliceWallet.secret).then(function () {
+        debug('Set trust alice -> bankA');
+        MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
+          debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
+        });
       });
     });
   });
