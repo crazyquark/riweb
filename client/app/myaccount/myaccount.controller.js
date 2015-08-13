@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-    .controller('MyaccountCtrl', function ($scope, $rootScope, Auth, User, Wallet, RIPPLE_ROOT_ACCOUNT,
+    .controller('MyaccountCtrl', function ($scope, $rootScope, Auth, User, Wallet,
         RippleRemoteService, FormattingService, RipplePeersService,
         RippleAccountService, RippleWalletService, RippleTransactionService) {
 
