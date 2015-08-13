@@ -91,12 +91,13 @@ function makeTransfer(fromEmail, toEmail, amount) {
               });
               deferred.resolve({ status: 'success', transaction: transaction });
             }, function(err){
-              Utils.getEventEmitter().emit('post:make_transfer', {
+              var errorMessage = 'Ripple error. Cannot transfer from ' + fromEmail + ' to ' + toEmail + ' ' + amount + ' €!';
+                Utils.getEventEmitter().emit('post:make_transfer', {
                 fromEmail: fromEmail,
                 toEmail: toEmail,
                 amount: amount,
                 issuer: issuingAddress,
-                message: 'Ripple error',
+                message: errorMessage,
                 status: 'ripple error'
               });
               deferred.reject(err);
@@ -117,7 +118,7 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
     var transaction = remote.createTransaction('Payment', {
       account: senderWallet.address,
       destination: recvWallet.address,
-      amount: amount + '/EUR/' + dstIssuer,  
+      amount: amount + '/EUR/' + dstIssuer,
     });
 
     // Append it if you got it
@@ -127,10 +128,10 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
            transaction.sendMax({
               value: maxValue,
               currency: 'EUR',      // EUR foreveeer
-              issuer: srcIssuer,    // Gotcha! 
+              issuer: srcIssuer,    // Gotcha!
            });
     }
-    
+
     transaction.submit(function (err, res) {
       if (err) {
         deferred.reject(err);

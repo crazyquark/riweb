@@ -24,7 +24,7 @@ angular.module('riwebApp')
                 });
         }
 
-        function transferMoneyFromCurrentAccount(amountToTransfer, destinationEmailAddress) {
+    function transferMoneyFromCurrentAccount(amountToTransfer, destinationEmailAddress) {
 
             RiwebSocketService.on('post:make_transfer', function (result) {
                 if (result.status === 'success') {
