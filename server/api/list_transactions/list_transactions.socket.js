@@ -101,7 +101,7 @@ function listTransactions(ownerEmail, socket) {
 						debug(rippleTx);
 						if (rippleTx.tx.TransactionType === 'Payment' &&
 							typeof rippleTx.tx.Amount === 'object' &&
-							rippleTx.TransactionResult === 'tesSUCCESS' /* no failed transactions */) {
+							rippleTx.meta.TransactionResult === 'tesSUCCESS' /* no failed transactions */) {
 								transactionPromises.push(convertRippleTxToHuman(rippleTx));
 						}
 					});
