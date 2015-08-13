@@ -1,0 +1,35 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-12">
+        <div>
+        <h1>Purchase</h1>
+        <p ng-show="message">{{ message }}</p>
+        <form class="form col-sm-4" name="form" ng-submit="purchase(form)" novalidate>
+          <div class="row">
+            <label class="col-sm-6">Merchant email</label>
+            <span class="col-sm-6">
+              <input type="email" name="merchantEmail" class="form-control" ng-model="purchase.merchantEmail"
+                     required ng-readonly="true" />
+            </span>
+          </div>
+          <div class="row">
+            <label class="col-sm-6">Price</label>
+            <span class="col-sm-6">
+              <input type="text" name="price" class="form-control" ng-model="purchase.price"
+                     required ng-readonly="true"/>
+            </span>
+          </div>
+          <div class="row">
+            <span class="col-sm-6">
+              <button class="btn btn-primary btn-lg" type="submit">
+                Purchase
+              </button>
+            </span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
