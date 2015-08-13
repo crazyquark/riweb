@@ -91,8 +91,8 @@ TestingUtils.dropMongodbDatabase().then(function () {
       email: 'alice@alpha.com',
       iban: 'AL47212110090000000235698741'
     }, bankAdmin)
-      .then(function (aliceWallet) {
-        aliceWallet = aliceWallet; // Well done JS, same name+different scope vars are confusing but fun
+      .then(function (wallet) {
+        aliceWallet = { address: wallet.address, secret: wallet.secret }; 
         
         return createUserForBank({
           name: 'Alan',
@@ -113,7 +113,7 @@ TestingUtils.dropMongodbDatabase().then(function () {
   Q.all([createBankA, createBankB]).spread(function (alanWallet, bobWallet) {
     SetTrust.setBanksTrust(bankA.bankInfo.hotWallet, bankB.bankInfo.hotWallet, alanWallet, bobWallet).then(function () {
       debug('Set trust alan -> bankA <-> bankB <- bob');
-      SetTrust.setTrust(bankA.bankInfo.hotWallet, aliceWallet.address, aliceWallet.secret).then(function () {
+      SetTrust.setTrust(bankA.bankInfo.hotWallet.address, aliceWallet.address, aliceWallet.secret).then(function () {
         debug('Set trust alice -> bankA');
         MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
           debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
