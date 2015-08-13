@@ -2,7 +2,7 @@
 
 angular.module('riwebApp')
     .service('RippleWalletService', function (RippleRemoteService, RippleAccountService,
-        Auth, RIPPLE_ROOT_ACCOUNT, socket, $log) {
+        Auth, socket, $log) {
 
         var walletInfo = {
             wallet: {}
