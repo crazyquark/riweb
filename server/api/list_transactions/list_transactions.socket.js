@@ -63,6 +63,7 @@ function listTransactions(ownerEmail, socket) {
 	}
 
 	var wallet;
+	// TODO Bank admins do not have wallets!
 	Wallet.findByOwnerEmail(ownerEmail).then(function (wallets) {
 		if (wallets.constructor === Array) {
 			if (wallets.length !== 1) {
