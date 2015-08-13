@@ -12,6 +12,8 @@ var CreateWallet = require('../../server/api/create_wallet/create_wallet.socket'
 var SetTrust = require('../../server/api/set_trust/set_trust.socket');
 var Utils = require('../../server/utils/utils');
 
+var debug = require('debug')('=======TMakeTransfer');
+
 describe('ITest transfers', function () {
 	var socketSpy, user, bank, userWallet;
 
@@ -27,10 +29,7 @@ describe('ITest transfers', function () {
 				CreateWallet.fundWallet(bank.hotWallet, Utils.ROOT_RIPPLE_ACCOUNT).then(function () {
 					CreateWallet.createWalletForEmail(user.email).then(function (wallet) {
 						userWallet = wallet;
-						SetTrust.setTrust(userBank.hotWallet.address, 
-								userWallet.address, userWallet.secret, 1000, 'EUR').then(function (result) {
-							expect(result.status).to.eql('success');
-							
+              SetTrust.setTrust(userBank.hotWallet.address, userWallet.address, userWallet.secret, 1000, 'EUR').then(function () {
 							done();
 						});
 					})
