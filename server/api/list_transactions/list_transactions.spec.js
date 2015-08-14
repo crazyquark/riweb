@@ -72,7 +72,7 @@ describe('Test list_transactions', function() {
 
 
         fromAliceToBobTx = { 
-            TransactionResult: 'tesSUCCESS',
+            meta: { TransactionResult: 'tesSUCCESS' },
             tx: {
     			Account: aliceWallet.address,
     			Destination: bobWallet.address,
@@ -81,8 +81,8 @@ describe('Test list_transactions', function() {
                 TransactionType: 'Payment',
     			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 100 }}};
 
-        fromBobToAliceTx = { 
-                TransactionResult: 'tesSUCCESS',
+        fromBobToAliceTx = {
+                meta: { TransactionResult: 'tesSUCCESS' },
                 tx: {
     			Account: bobWallet.address,
     			Destination: aliceWallet.address,
@@ -92,7 +92,7 @@ describe('Test list_transactions', function() {
     			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 99 }}};
 
         fromBank1ToAliceTx = { 
-                TransactionResult: 'tesSUCCESS',
+                meta: { TransactionResult: 'tesSUCCESS' },
                 tx: {
     			Account: bank1.address,
     			Destination: aliceWallet.address,
