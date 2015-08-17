@@ -18,7 +18,7 @@ describe('ITest transfers', function () {
 	var socketSpy, user, bank, userWallet;
 
 	beforeEach(function (done) {
-		this.timeout(20000); // The Talented Mr. Ripple takes a long time to fund wallets
+		this.timeout(50000); // The Talented Mr. Ripple takes a long time to fund wallets
 		socketSpy = TestingUtils.buildSocketSpy();
 		MakeTransfer.register(socketSpy);
 
@@ -31,11 +31,11 @@ describe('ITest transfers', function () {
 						userWallet = wallet;
               SetTrust.setTrust(userBank.hotWallet.address, userWallet.address, userWallet.secret, 1000, 'EUR').then(function () {
 							done();
-						});
-					})
-				});
-			});
-		});
+            }).done(null, function(error){done(error);});
+          }).done(null, function(error){done(error);});
+        }).done(null, function(error){done(error);});
+      });
+    }).done(null, function(error){done(error);});
 	});
 
 	afterEach(function () {

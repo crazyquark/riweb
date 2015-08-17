@@ -147,12 +147,12 @@ function restoreNewConnectedRemoteStub() {
 function getNonAdminMongooseUser(name, email_address, bankId) {
     name = name || 'testJoe@danger.io';
     email_address = email_address || 'joe@danger.io';
-    bankId = bankId || 'id_bank_ING';    
+    bankId = bankId || 'id_bank_ING';
     return {
         name: name,
         email: email_address,
-        bank: bankId,  
-        role: 'user'        
+        bank: bankId,
+        role: 'user'
     };
 }
 
@@ -161,7 +161,7 @@ function getMongooseBankAccount(bankId, bankName, wallet) {
         _id: bankId,
         name: bankName,
         info: bankName,
-        hotWallet: wallet  
+        hotWallet: wallet
     };
 }
 
@@ -171,7 +171,7 @@ function buildUserFindEmailStub(user, nonAdminGeneratedUser) {
             return Q(nonAdminGeneratedUser);
         }
         return Q();
-    });    
+    });
 }
 
 
@@ -181,7 +181,7 @@ function buildBankaccountFindById(bankaccount, banksList) {
         for (index = 0; index < banksList.length; ++index) {
             if (banksList[index]._id === bankId)
                 return Q(banksList[index]);
-        }        
+        }
         return Q();
     });
 }
@@ -265,9 +265,8 @@ function seedBankAndUser(callback) {
             address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
         },
         hotWallet: {
-            address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
-            secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
-
+          address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+          secret  : 'masterpassphrase'
         }
     };
     BankAccount.create(
