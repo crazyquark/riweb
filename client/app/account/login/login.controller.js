@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('LoginCtrl', function (OrderRequestService, $scope, $rootScope, $http, Auth, $location) {
+  .controller('LoginCtrl', function ($scope, $rootScope, $http, Auth, $location) {
     $scope.user = {};
     $scope.errors = {};
 
@@ -25,17 +25,5 @@ angular.module('riwebApp')
           });
       }
     };
-
-    $scope.checkout = function () {
-      OrderRequestService.save({
-        receiverEmail: 'alice@alpha.com',
-        amount: 2,
-        details: 'Peanuts!'
-      }).$promise.then(function(orderRequestResp){
-        $location.path('/purchase').search({
-          orderRequestId: orderRequestResp.orderRequestId
-        });
-      });
-    }
 
   });
