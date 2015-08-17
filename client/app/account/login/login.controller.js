@@ -31,6 +31,10 @@ angular.module('riwebApp')
         receiverEmail: 'alice@alpha.com',
         amount: 2,
         details: 'Peanuts!'
+      }).$promise.then(function(orderRequestResp){
+        $location.path('/purchase').search({
+          orderRequestId: orderRequestResp.orderRequestId
+        });
       });
     }
 

@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('PurchaseCtrl', function ($scope, $routeParams, $q, Auth, RippleTransactionService) {
+  .controller('PurchaseCtrl', function ($scope, $routeParams, $q, Auth, RippleTransactionService, OrderRequestService) {
     //private stuff
     function makeSureIsLoggedIn(){
       var deferred = $q.defer();
@@ -28,9 +28,14 @@ angular.module('riwebApp')
 
     //public stuff
     $scope.isLoggedIn = Auth.isLoggedIn;
-    $scope.purchase = {
-      merchantEmail: $routeParams.merchantEmail,
-      price: $routeParams.price
-    };
+    $scope.purchase = {};
+    
+    function loadOrderRequest(orderRequestId){
+      OrderRequestService.get({id: orderRequestId}).$promise.then(function(orderRequest){
+        $scope.purchase.merchantEmail = orderRequest.receiverEmail;
+        $scope.purchase.price = orderRequest.amount;
+      });
+    }
+    loadOrderRequest($routeParams.orderRequestId);
     $scope.purchaseProduct = purchaseProduct;
   });
