@@ -39,6 +39,9 @@ angular.module('riwebApp')
             });
         }
 
+        RippleAccountService.resetAccount();
+        refreshAngular();
+
         $scope.$on('currentUser', function () {
             refreshCurrentUserWallet();
         });
@@ -55,4 +58,5 @@ angular.module('riwebApp')
                 loadCurrentUserBalance(refreshAngular);
             });
         });
+        
     });
