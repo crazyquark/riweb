@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-    .service('RippleTransactionService', function (RippleWalletService, Wallet, Auth, RiwebSocketService) {
+    .service('RippleTransactionService', function ($location, RippleWalletService, Wallet, Auth, RiwebSocketService) {
         function transferMoney(amountToTransfer) {
             swal({
                 title: 'Transfer money!',
@@ -30,7 +30,8 @@ angular.module('riwebApp')
           }
           RiwebSocketService.on('post:make_transfer', function (result) {
               if (result.status === 'success') {
-                  swal('Transfer success!', 'Congratulations ' + currentUser.name + '! You transfered ' + amountToTransfer + ' to ' + destinationEmailAddress, 'success');
+                $location.path('/myaccount');
+                swal('Transfer success!', 'Congratulations ' + currentUser.name + '! You transfered ' + amountToTransfer + ' to ' + destinationEmailAddress, 'success');
               } else {
                   swal('Error', 'Sorry there was a problem processing your request! ' + result.message, 'error');
               }
