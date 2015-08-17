@@ -24,7 +24,7 @@ exports.show = function(req, res) {
 exports.create = function(req, res) {
   OrderRequest.create(req.body, function(err, order_request) {
     if(err) { return handleError(res, err); }
-    return res.json(201, order_request._id);
+    return res.json(201, {orderRequestId: order_request._id});
   });
 };
 
