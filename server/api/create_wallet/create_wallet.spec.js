@@ -82,12 +82,13 @@ describe('Test create_wallet', function () {
 
     it('should set_trust when create new wallet', function (done) {
         CreateWallet.createWalletForEmail('a3@example.com').then(function () {
-            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.callCount(2);
             expect(emitSpy).to.have.been.calledWith('set_trust', {
-                rippleDestinationAddr: bank1.hotWallet.address,
-                rippleSourceAddr: nonAdminRippleGeneratedWallet.address,
-                rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
+              rippleDestinationAddr: bank1.hotWallet.address,
+              rippleSourceAddr: nonAdminRippleGeneratedWallet.address,
+              rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
             });
+            expect(emitSpy).to.have.been.calledWith('post:create_wallet', nonAdminRippleGeneratedWallet.address);
             done();
         }).done(null, function (error) { done(error); });
     });
@@ -111,14 +112,14 @@ describe('Test create_wallet', function () {
         }).done(null, function (error) { done(error); });
     });
 
-    it('should fail when user doesn\'t have a bank', function (done) {
+    it('should fail when user does not have a bank', function (done) {
         //replace the generic 'good'  stub with an invalid user stub
         User.findByEmail.restore();
         TestingUtils.buildUserFindEmailStub(User, nonAdminUserWithNoBank);
 
         CreateWallet.createWalletForEmail(nonAdminUserWithNoBank.email).then(function () { done(); },
             function () {
-                expect(emitSpy).to.have.callCount(2);
+                expect(emitSpy).to.have.callCount(1);
                 expect(emitSpy).to.have.been.calledWith('post:create_wallet', { error: "bank not found"});
                 done();
             }
