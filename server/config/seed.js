@@ -115,8 +115,8 @@ TestingUtils.dropMongodbDatabase().then(function () {
       debug('Set trust alan -> bankA <-> bankB <- bob');
       SetTrust.setTrust(bankA.bankInfo.hotWallet.address, aliceWallet.address, aliceWallet.secret).then(function () {
         debug('Set trust alice -> bankA');
-        MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
-          debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
+        MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 1000).then(function () {
+          debug('admin@alpha.com -> alan@alpha.com: 1000 EUR');
         });
       });
     });

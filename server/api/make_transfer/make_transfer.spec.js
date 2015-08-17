@@ -79,6 +79,7 @@ describe('Test make_transfer', function () {
                 toEmail: 'bob@example.com',
                 amount: amount,
                 issuer: bank1.hotWallet.address,
+                successUrl: "/myaccount",
                 status: 'success'
             });
 
@@ -135,6 +136,7 @@ describe('Test make_transfer', function () {
                 amount: amount,
                 issuer: bank1.hotWallet.address,
                 message: 'Ripple error. Cannot transfer from alice@example.com to bob@example.com 50 €!',
+                successUrl: "/myaccount",
                 status: 'ripple error'
             });
 

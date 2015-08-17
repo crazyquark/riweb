@@ -96,7 +96,8 @@ function makeTransfer(fromEmail, toEmail, amount) {
                 toEmail: toEmail,
                 amount: amount,
                 issuer: issuingAddress,
-                status: 'success'
+                status: 'success',
+                successUrl: '/myaccount'
               });
               deferred.resolve({ status: 'success', transaction: transaction });
             }, function(err){
@@ -107,7 +108,8 @@ function makeTransfer(fromEmail, toEmail, amount) {
                 amount: amount,
                 issuer: issuingAddress,
                 message: errorMessage,
-                status: 'ripple error'
+                status: 'ripple error',
+                successUrl: '/myaccount'
               });
               deferred.reject(err);
             });
@@ -158,9 +160,7 @@ exports.makeTransfer = makeTransfer;
 exports.makeTransferWithRipple = makeTransferWithRipple;
 
 exports.register = function (socket) {
-    Utils.getEventEmitter().on('post:make_transfer', function (data) {
-        socket.emit('post:make_transfer', data);
-    });
+    Utils.forwardFromEventEmitterToSocket('post:make_transfer', socket);
 
     Utils.getEventEmitter().on('make_transfer', function (data) {
         makeTransfer(data.fromEmail, data.toEmail, data.amount);

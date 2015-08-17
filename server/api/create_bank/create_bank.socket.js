@@ -43,18 +43,18 @@ function createBank(newBank) {
       createNewBank(newBank).then(function (createdBank) {
         // Need to also fund this newly minted wallet
         // XXX need lots of XRP for banks to fund wallets
-        CreateWallet.fundWallet(createdBank.hotWallet, ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
+        CreateWallet.fundWallet(createdBank.hotWallet, ROOT_RIPPLE_ACCOUNT, 10000).then(function () {
           debug('funded bank wallet');
           // XXX should the funding be chained or should we return to user immediately? I'd rather not wait for the costly ripple operation
           // Utils.getEventEmitter().emit('post:fund_wallet', createdBank.hotWallet);
-          socket.emit('post:fund_wallet', createdBank.hotWallet.address);
+          Utils.getEventEmitter().emit('post:fund_wallet', createdBank.hotWallet.address);
           
           // Establish trust lines with the other banks. Account must be funded.
           // XXX this is also made async after returning to the client so not to block the create bank page too long;
           // The client should listen for the emitted event
           SetTrust.setMutualBanksTrust(createdBank).then(function () {
             debug('setMutualBanksTrust done');
-            socket.emit('post:set_mutual_banks_trust', { status: 'success' });
+            Utils.getEventEmitter().emit('post:set_mutual_banks_trust', { status: 'success' });
           });
         });
 
@@ -80,13 +80,18 @@ function createBank(newBank) {
 exports.createBank = createBank;
 exports.register = function (newSocket) {
   socket = newSocket;
+  
+  Utils.forwardFromEventEmitterToSocket('post:fund_wallet', socket);
+  Utils.forwardFromEventEmitterToSocket('post:set_mutual_banks_trust', socket);
+  Utils.forwardFromEventEmitterToSocket('post:create_admin_user_for_bank', socket);
+  
   socket.on('create_bank', function (data) {
     createBank(data)
       .then(function (bank) {
-        socket.emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });
+        Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });
       })
       .fail(function (error) {
-        socket.emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
+        Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
       });
   });
 };

@@ -30,10 +30,10 @@ angular.module('riwebApp')
           }
           RiwebSocketService.on('post:make_transfer', function (result) {
               if (result.status === 'success') {
-                $location.path('/myaccount');
+                $location.path(result.successUrl);
                 swal('Transfer success!', 'Congratulations ' + currentUser.name + '! You transfered ' + amountToTransfer + ' to ' + destinationEmailAddress, 'success');
               } else {
-                  swal('Error', 'Sorry there was a problem processing your request! ' + result.message, 'error');
+                swal('Error', 'Sorry there was a problem processing your request! ' + result.message, 'error');
               }
           });
           RiwebSocketService.emit('make_transfer', { fromEmail: currentUser.email, toEmail: destinationEmailAddress, amount: amountToTransfer });

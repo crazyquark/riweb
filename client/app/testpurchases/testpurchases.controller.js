@@ -7,7 +7,9 @@ angular.module('riwebApp')
       OrderRequestService.save({
         receiverEmail: receiverEmail,
         amount: amount,
-        details: 'Peanuts!'
+        details: 'Peanuts!',
+        successUrl: '/myaccount',
+        cancelUrl: '/testpurchases'
       }).$promise.then(function (orderRequestResp) {
         $location.path('/purchase').search({
           orderRequestId: orderRequestResp.orderRequestId
