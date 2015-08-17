@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('NavbarCtrl', function ($scope, $location, Auth, OrderRequestService) {
+  .controller('NavbarCtrl', function ($scope, $location, Auth) {
     $scope.menu = [{
       'title': 'Home',
       'link': '/'
@@ -20,17 +20,5 @@ angular.module('riwebApp')
     $scope.isActive = function (route) {
       return route === $location.path();
     };
-
-    $scope.checkout = function () {
-      OrderRequestService.save({
-        receiverEmail: 'alice@alpha.com',
-        amount: 2,
-        details: 'Peanuts!'
-      }).$promise.then(function (orderRequestResp) {
-        $location.path('/purchase').search({
-          orderRequestId: orderRequestResp.orderRequestId
-        });
-      });
-    }
 
   });
