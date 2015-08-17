@@ -20,17 +20,16 @@ var ListTransactions = require('./list_transactions.socket');
 var debug = require('debug')('TListTransactions');
 
 describe('Test list_transactions', function() {
-    var remote, emitSpy, aliceWallet, bobWallet, bank1, socketSpy, fromAliceToBobTx, fromBobToAliceTx, fromBank1ToAliceTx;
+    var remote, emitSpy, aliceWallet, bobWallet, bank1, fromAliceToBobTx, fromBobToAliceTx, fromBank1ToAliceTx;
 
     beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
         emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
-        socketSpy = TestingUtils.buildSocketSpy();
 
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
-        
+
         bank1 = {
             'email': 'bank1@example.com',
             'hotWallet': {
@@ -38,7 +37,7 @@ describe('Test list_transactions', function() {
                 'secret': 'NONADMINssphraseBank'
             },
         };
-        
+
         sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
             if (email === 'alice@example.com') {
                 return Q([aliceWallet]);
@@ -71,7 +70,7 @@ describe('Test list_transactions', function() {
         });
 
 
-        fromAliceToBobTx = { 
+        fromAliceToBobTx = {
             meta: { TransactionResult: 'tesSUCCESS' },
             tx: {
     			Account: aliceWallet.address,
@@ -91,7 +90,7 @@ describe('Test list_transactions', function() {
                 TransactionType: 'Payment',
     			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 99 }}};
 
-        fromBank1ToAliceTx = { 
+        fromBank1ToAliceTx = {
                 meta: { TransactionResult: 'tesSUCCESS' },
                 tx: {
     			Account: bank1.address,
@@ -118,7 +117,7 @@ describe('Test list_transactions', function() {
 					amount: 100 + '€',
 					fee: 12}];
 
-        ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
+        ListTransactions.listTransactions('alice@example.com', TestingUtils.buildSocketSpy()).then(function(humanTransactions){
 
         expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
 
@@ -137,11 +136,11 @@ describe('Test list_transactions', function() {
 					amount: 99 + '€',
 					fee: 12}];
 
-            ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
+            ListTransactions.listTransactions('alice@example.com', TestingUtils.buildSocketSpy()).then(function(humanTransactions){
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
-            expect(socketSpy.emit).to.have.callCount(1);
-            expect(socketSpy.emit).to.have.been.calledWith('post:list_transactions',
+            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.been.calledWith('post:list_transactions',
                 { status: 'success', transactions: expectedHumanTransactions });
           done();
         }).done(null, function (error) {
@@ -159,11 +158,11 @@ describe('Test list_transactions', function() {
 					amount: 98 + '€',
 					fee: 12}];
 
-            ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
+            ListTransactions.listTransactions('alice@example.com', TestingUtils.buildSocketSpy()).then(function(humanTransactions){
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
-            expect(socketSpy.emit).to.have.callCount(1);
-            expect(socketSpy.emit).to.have.been.calledWith('post:list_transactions',
+            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.been.calledWith('post:list_transactions',
                 { status: 'success', transactions: expectedHumanTransactions });
           done();
         }).done(null, function (error) {
