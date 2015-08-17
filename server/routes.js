@@ -9,6 +9,7 @@ var errors = require('./components/errors');
 module.exports = function(app) {
 
   // Insert routes below
+  app.use('/api/order_requests', require('./api/order_request'));
   app.use('/realbankapi/RealBankAccounts', require('./api/RealBankAccount'));
   app.use('/api/create_admin_user_for_banks', require('./api/create_admin_user_for_bank'));
   app.use('/api/create_banks', require('./api/create_bank'));
