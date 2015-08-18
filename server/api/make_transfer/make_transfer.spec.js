@@ -125,7 +125,7 @@ describe('Test make_transfer', function () {
 
         remote._stub_transaction.submit.yields(rippleError, {});
 
-        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).fail(function (error) {
+        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).then(function (result) {
             expect(remote.createTransaction).to.have.callCount(1);
             expect(Utils.getNewConnectedRemote).to.have.callCount(1);
 
