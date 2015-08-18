@@ -160,14 +160,15 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
                           orderInfo.status = 'rippleSuccess';
                           saveOrderToDB(orderInfo);
                         }
+                        
                         deposit.resolve({status: 'success', transaction: transaction});                        
            
                       }, function(err){
-
-                	  if (orderInfo) {
-	                    orderInfo.status = 'rippleError';
-        	            saveOrderToDB(orderInfo);
-                	  }
+    
+                    	  if (orderInfo) {
+    	                    orderInfo.status = 'rippleError';
+            	            saveOrderToDB(orderInfo);
+                    	  }
 
                           //undo the deposit action (if needed)
                           var rollbackDepositPromise;
