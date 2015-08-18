@@ -205,6 +205,6 @@ exports.register = function (socket) {
     });
 
     socket.on('make_transfer', function (data) {
-        makeTransfer(data.fromEmail, data.toEmail, data.amount, data.ordreRequestId);
+        makeTransfer(data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 };
