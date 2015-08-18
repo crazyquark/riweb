@@ -118,7 +118,11 @@ TestingUtils.dropMongodbDatabase().then(function () {
         MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
           debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
           createRealbankUsers().then(function(){
-            debug('===========SERVER IS STARTED===========');
+            debug('\n\n' +
+              '=======================================\n' +
+              '===========SERVER IS STARTED===========\n' +
+              '=======================================\n'
+            );
           });
         });
       });
