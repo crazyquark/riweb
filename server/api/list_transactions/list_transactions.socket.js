@@ -9,7 +9,7 @@ var Q = require('q');
 
 var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
-var BankAccounts = require('../bankaccount/bankaccount.model');
+var BankAccount = require('../bankaccount/bankaccount.model');
 
 var debug = require('debug')('ListTransactions');
 
@@ -20,7 +20,7 @@ function findEmailFromAddress(rippleAddress) {
 }
 
 function findBankFromAddress(rippleAddress) {
-	return BankAccounts.findByRippleAddress(rippleAddress).then(function (foundBank) {
+	return BankAccount.findByRippleAddress(rippleAddress).then(function (foundBank) {
 		debug('BankAccounts.findByRippleAddress', rippleAddress, foundBank);
 		return foundBank ? foundBank.email : null;
 	})
@@ -62,26 +62,7 @@ function listTransactions(ownerEmail, socket) {
 		deferred.resolve(result);
 	}
 
-	var wallet;
-	Wallet.findByOwnerEmail(ownerEmail).then(function (wallets) {
-		if (wallets.constructor === Array) {
-			if (wallets.length !== 1) {
-				buildMissingError();
-
-				return deferred.promise;
-			} else {
-				wallet = wallets[0];
-			}
-		} else {
-			if (!wallets) {
-				buildMissingError();
-
-				return deferred.promise;
-			} else {
-				wallet = wallets;
-			}
-		}
-
+	function listRippleTransactions() {
 		Utils.getNewConnectedRemote(wallet.address, wallet.secret).then(function (remote) {
 			remote.requestAccountTransactions({
 				account: wallet.address,
@@ -95,25 +76,59 @@ function listTransactions(ownerEmail, socket) {
 					socket.emit('post:list_transactions', result);
 					deferred.resolve(result);
 				} else {
-     				var transactionPromises = [];
+					var transactionPromises = [];
 
-					res.transactions.forEach(function(rippleTx){
+					res.transactions.forEach(function (rippleTx) {
 						debug(rippleTx);
 						if (rippleTx.tx.TransactionType === 'Payment' &&
 							typeof rippleTx.tx.Amount === 'object' &&
-							rippleTx.TransactionResult === 'tesSUCCESS' /* no failed transactions */) {
-								transactionPromises.push(convertRippleTxToHuman(rippleTx));
+							rippleTx.meta.TransactionResult === 'tesSUCCESS' /* no failed transactions */) {
+							transactionPromises.push(convertRippleTxToHuman(rippleTx));
 						}
 					});
-					Q.all(transactionPromises).then(function(transactionsHuman){
-							result = { status: 'success', transactions: transactionsHuman };
-							socket.emit('post:list_transactions', result);
-							deferred.resolve(result);
+					Q.all(transactionPromises).then(function (transactionsHuman) {
+						result = { status: 'success', transactions: transactionsHuman };
+						socket.emit('post:list_transactions', result);
+						deferred.resolve(result);
 					});
-					
+
 				}
 			});
 		});
+	}
+
+	var wallet;
+	// TODO Bank admins do not have wallets!
+	Wallet.findByOwnerEmail(ownerEmail).then(function (wallets) {
+		if (wallets && wallets.constructor === Array) {
+			if (wallets.length !== 1) {
+				buildMissingError();
+
+				return deferred.promise;
+			} else {
+				wallet = wallets[0];
+			}
+		} else {
+				wallet = wallets;
+		}
+		
+				
+		if (wallet) {
+			listRippleTransactions();
+		} else {
+			// OK, could be a bank
+			BankAccount.findOneQ({email: ownerEmail}).then(function(bank) {
+				if (bank) {
+					wallet = bank.hotWallet;
+					
+					listRippleTransactions();
+				} else {
+					buildMissingError();
+					
+					return deferred.promise;
+				}
+			});
+		}
 	});
 
 	return deferred.promise;

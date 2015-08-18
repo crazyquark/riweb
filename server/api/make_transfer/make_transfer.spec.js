@@ -134,11 +134,13 @@ describe('Test make_transfer', function () {
                 toEmail: 'bob@example.com',
                 amount: amount,
                 issuer: bank1.hotWallet.address,
-                message: 'Ripple error',
+                message: 'Ripple error. Cannot transfer from alice@example.com to bob@example.com 50 €!',
                 status: 'ripple error'
             });
 
             done();
+        }).done(null, function (error) {
+          done(error);
         });
     });
 

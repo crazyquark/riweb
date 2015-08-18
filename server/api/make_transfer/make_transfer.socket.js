@@ -9,29 +9,46 @@ var Q = require('q');
 var Wallet = require('./../wallet/wallet.model');
 var BankAccount = require('../bankaccount/bankaccount.model');
 var CreateWallet = require('./../create_wallet/create_wallet.socket');
+var Order = require('../Order/Order.model');
+var OrderRequests = require('../order_request/order_request.model');
 var RealBankAccount = require('../RealBankAccount/RealBankAccount.socket');
 var Utils = require('./../../utils/utils');
 
 var debug = require('debug')('MakeTransfer');
 
-function makeTransfer(fromEmail, toEmail, amount) {
+function saveOrderToDB(orderInfo) {
+    OrderRequests.findOneQ({ _id: orderInfo.orderRequestId }).then(function (orderRequest) {
+        debug('found order request: ', orderRequest);
+        Order.save(orderInfo).then(function (savedOrder) {
+            debug('Saved order: ', savedOrder);
+        }, function (err) {
+
+        });
+    }, function (err) {
+        debug('failed to find order request with ID: ', orderInfo.orderRequestId);
+    });
+}
+
+function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
 
     var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
-
+    var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank
+    
     var promiseFindSenderBankAccount = BankAccount.findOneQ({ email: fromEmail });
     
     var promiseFindSenderRealBankAccount = RealBankAccount.getBankAccountForEmail(toEmail);
 
-    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindSenderBankAccount, promiseFindSenderRealBankAccount])
-        .spread(function (senderWalletPromise, recvWalletPromise, findIssuingBankPromise, senderBankPromise, senderRealBankAccountPromise) {
+    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindSenderBankAccount, promiseFindDestUserBank, promiseFindSenderRealBankAccount])
+        .spread(function (senderWalletPromise, recvWalletPromise, findIssuingBankPromise, senderBankPromise, destUserBankPromise, senderRealBankAccountPromise) {
             var deferred = Q.defer();
 
             var senderWallet = senderWalletPromise.value;
             var recvWallet = recvWalletPromise.value;
             var senderBank = senderBankPromise.value;
             var findIssuingBank = findIssuingBankPromise.value;
+            var destUserBank = destUserBankPromise.value ? destUserBankPromise.value.bank : null;
             var realBankAccount = senderRealBankAccountPromise.value;
 
             function buildMissingError(errorMessage, status) {
@@ -50,7 +67,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
                 deferred.resolve(result);
             }
 
-            var issuingAddress;
+            var issuingAddress, srcIssuer;
 
             // If the sender was a bank admin, get its wallet from bankaccounts
             if (!senderWallet && senderBank) {
@@ -74,7 +91,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
             var isTransferedByBank = false;
             if (!senderBank) {
                 if (!findIssuingBank || findIssuingBank.status === 'error' || !findIssuingBank.bank ||
-                  !findIssuingBank.bank.hotWallet || !findIssuingBank.bank.hotWallet.address) {
+                    !findIssuingBank.bank.hotWallet || !findIssuingBank.bank.hotWallet.address) {
 
                     buildMissingError('issuing bank not resolved');
 
@@ -86,6 +103,24 @@ function makeTransfer(fromEmail, toEmail, amount) {
                 // Sender is a bank
                 issuingAddress = senderBank.hotWallet.address;
                 isTransferedByBank = true;
+            }
+
+	    if (destUserBank && destUserBank.hotWallet.address !== issuingAddress) {
+                // Is the destination user from another bank?
+                srcIssuer = issuingAddress;
+                issuingAddress = destUserBank.hotWallet.address;
+                // XXX fix non-intuive var names
+            }
+
+            var orderInfo = null;
+            if (orderRequestId) {
+                orderInfo = {
+                    requestId: orderRequestId,
+                    senderEmail: fromEmail,
+                    receiverEmail: toEmail,
+                    amount: amount,
+                    status: '',
+                };
             }
             
             if (isTransferedByBank) {
@@ -104,6 +139,7 @@ function makeTransfer(fromEmail, toEmail, amount) {
                 }
             }
 
+
             var initialPromise;
             
             if (isTransferedByBank) {
@@ -120,10 +156,20 @@ function makeTransfer(fromEmail, toEmail, amount) {
                     
                     makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount).then(function(transaction){
                         
+                       if (orderInfo) {
+                          orderInfo.status = 'rippleSuccess';
+                          saveOrderToDB(orderInfo);
+                        }
                         deposit.resolve({status: 'success', transaction: transaction});                        
            
                       }, function(err){
-                          //first undo the deposit action (if needed)
+
+                	  if (orderInfo) {
+	                    orderInfo.status = 'rippleError';
+        	            saveOrderToDB(orderInfo);
+                	  }
+
+                          //undo the deposit action (if needed)
                           var rollbackDepositPromise;
                         
                           if (isTransferedByBank) {
@@ -170,41 +216,48 @@ function makeTransfer(fromEmail, toEmail, amount) {
 }
 
 function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, srcIssuer) {
-  debug('makeTransferWithRipple', senderWallet, recvWallet, dstIssuer, amount, srcIssuer);
-  var deferred = Q.defer();
+    debug('makeTransferWithRipple', senderWallet, recvWallet, dstIssuer, amount, srcIssuer);
+    var deferred = Q.defer();
 
-  dstIssuer = dstIssuer || senderWallet.address; // Normal issuer, for single gateway transactions
-  // Can't assume anything about source issuer!
+    dstIssuer = dstIssuer || senderWallet.address; // Normal issuer, for single gateway transactions
+    // Can't assume anything about source issuer!
 
-  Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
-    var transaction = remote.createTransaction('Payment', {
-      account: senderWallet.address,
-      destination: recvWallet.address,
-      amount: amount + '/EUR/' + dstIssuer,  
+    Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
+        var paymentData = {
+            account: senderWallet.address,
+            destination: recvWallet.address,
+            amount: amount + '/EUR/' + dstIssuer,
+        };
+        
+        var transaction = remote.createTransaction('Payment', paymentData);
+
+        // Append it if you got it
+        if (srcIssuer) {
+            var maxValue = amount.toString(); // Send all; original code from ripple-rest is:
+            // new BigNumber(payment.source_amount.value).plus(payment.source_slippage || 0).toString();
+            transaction.sendMax({
+                value: maxValue,
+                currency: 'EUR',      // EUR foreveeer
+                issuer: srcIssuer,    // Gotcha!
+            });
+        }
+        
+        transaction.on('resubmit', function(){
+           debug('resubmitting ', transaction); 
+        });
+        
+        transaction.submit(function (err, res) {
+            if (err) {
+                //deferred.reject(err);
+                debug('transaction seems to have failed: ', err);
+            }
+            if (res) {
+                deferred.resolve({ status: 'success', transaction: transaction });
+            }
+        });
+
     });
-
-    // Append it if you got it
-    if (srcIssuer) {
-           var maxValue = amount.toString(); // Send all; original code from ripple-rest is:
-                               // new BigNumber(payment.source_amount.value).plus(payment.source_slippage || 0).toString();
-           transaction.sendMax({
-              value: maxValue,
-              currency: 'EUR',      // EUR foreveeer
-              issuer: srcIssuer,    // Gotcha! 
-           });
-    }
-    
-    transaction.submit(function (err, res) {
-      if (err) {
-        deferred.reject(err);
-      }
-      if (res) {
-        deferred.resolve({ status: 'success', transaction: transaction });
-      }
-    });
-
-  });
-  return deferred.promise;
+    return deferred.promise;
 }
 
 exports.makeTransfer = makeTransfer;
@@ -216,10 +269,10 @@ exports.register = function (socket) {
     });
 
     Utils.getEventEmitter().on('make_transfer', function (data) {
-        makeTransfer(data.fromEmail, data.toEmail, data.amount);
+        makeTransfer(data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 
     socket.on('make_transfer', function (data) {
-        makeTransfer(data.fromEmail, data.toEmail, data.amount);
+        makeTransfer(data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 };

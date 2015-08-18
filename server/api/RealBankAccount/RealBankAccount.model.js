@@ -1,9 +1,8 @@
 'use strict';
 
+var mongoose = require('mongoose-q')(require('mongoose'));
+var Schema = mongoose.Schema;
 var Q = require('q');
-
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
 
 var RealBankAccountSchema = new Schema({
     name: String,

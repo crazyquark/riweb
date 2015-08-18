@@ -21,7 +21,7 @@ var Q = require('q');
 
 var debug = require('debug')('Seed');
 
-function createAdminInfo(bankInfo){
+function createAdminInfo(bankInfo) {
   return {
     bankId: bankInfo._id,
     info: bankInfo.info,
@@ -30,13 +30,14 @@ function createAdminInfo(bankInfo){
   };
 }
 
-function createBank(bank){
-  return CreateBank.createBank(bank).then(function(bankInfo){
+function createBank(bank) {
+  return CreateBank.createBank(bank).then(function (bankInfo) {
+    bank.bankInfo = bankInfo;
     return CreateAdminUserForBank.createAdminUserForBank(createAdminInfo(bankInfo));
   });
 }
 
-function createUserForBank(user, bankAdmin){
+function createUserForBank(user, bankAdmin) {
   return User.create({
     provider: 'local',
     name: user.name,
@@ -44,7 +45,7 @@ function createUserForBank(user, bankAdmin){
     password: user.email,
     iban: user.iban,
     bank: bankAdmin.bank
-  }).then(function(newUser){
+  }).then(function (newUser) {
     return CreateWallet.createWalletForEmail(newUser.email, 'user');
   });
 }
@@ -55,46 +56,53 @@ function createRealbankUsers() {
     iban: 'AL47212110090000000235698741',
     ballance: '100'
   },
-  {
-    name: 'alpha',
-    iban: 'AZ21NABZ00000000137010001944',
-    ballance: '101'
-  },
-  {
-    name: 'brd',
-    iban: 'BA391290079401028494',
-    ballance: '102'
-  }]);
-  
+    {
+      name: 'alpha',
+      iban: 'AZ21NABZ00000000137010001944',
+      ballance: '101'
+    },
+    {
+      name: 'brd',
+      iban: 'BA391290079401028494',
+      ballance: '102'
+    }]);
+
 }
 
 TestingUtils.dropMongodbDatabase().then(function () {
-  var createBankA = createBank({
+  var bankA = {
     name: 'alpha',
     info: 'Alpha Bank',
     email: 'admin@alpha.com',
     password: 'admin@alpha.com'
-  }).then(function(bankAdmin){
+  };
+
+  var bankB = {
+    name: 'brd',
+    info: 'BRD Societe Generale',
+    email: 'admin@brd.com',
+    password: 'admin@brd.com'
+  };
+
+  var aliceWallet;
+  var createBankA = createBank(bankA).then(function (bankAdmin) {
     return createUserForBank({
-          name: 'Alice',
-          email: 'alice@alpha.com',
-          iban: 'AL47212110090000000235698741'
-      }, bankAdmin)
-      .then(function(){
+      name: 'Alice',
+      email: 'alice@alpha.com',
+      iban: 'AL47212110090000000235698741'
+    }, bankAdmin)
+      .then(function (wallet) {
+        aliceWallet = { address: wallet.address, secret: wallet.secret };
+
         return createUserForBank({
           name: 'Alan',
           email: 'alan@alpha.com',
           iban: 'AZ21NABZ00000000137010001944'
         }, bankAdmin);
       });
-  });
+  })
 
-  var createBankB = createBank({
-    name: 'brd',
-    info: 'BRD Societe Generale',
-    email: 'admin@brd.com',
-    password: 'admin@brd.com'
-  }).then(function(bankAdmin){
+  var createBankB = createBank(bankB).then(function (bankAdmin) {
     return createUserForBank({
       name: 'Bob',
       email: 'bob@brd.com',
@@ -102,12 +110,24 @@ TestingUtils.dropMongodbDatabase().then(function () {
     }, bankAdmin);
   });
 
-  Q.all([createBankA, createBankB]).then(function(){
-    //SetTrust.setBanksTrust(bank1, bank2, user1, user2)
-    //MakeTransfer.makeTransfer('admin@alpha.com', 'alice@alpha.com', 101);
+  Q.all([createBankA, createBankB]).spread(function (alanWallet, bobWallet) {
+    SetTrust.setBanksTrust(bankA.bankInfo.hotWallet, bankB.bankInfo.hotWallet, alanWallet, bobWallet).then(function () {
+      debug('Set trust alan -> bankA <-> bankB <- bob');
+      SetTrust.setTrust(bankA.bankInfo.hotWallet.address, aliceWallet.address, aliceWallet.secret).then(function () {
+        debug('Set trust alice -> bankA');
+        MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
+          debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
+          createRealbankUsers().then(function(){
+            debug('\n\n' +
+              '=======================================\n' +
+              '===========SERVER IS STARTED===========\n' +
+              '=======================================\n'
+            );
+          });
+        });
+      });
+    });
   });
-
-  createRealbankUsers();
 
 });
 

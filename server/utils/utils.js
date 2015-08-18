@@ -18,11 +18,11 @@ function getNewRemote(){
         servers: [ RIPPLED_WS_SERVER ]
         //fee_cushion: 0.0
     });
-    
+
   newRemote.on('disconect', function(){
     console.log('remote disconect');
   });
-    
+
   newRemote.on('disconected', function(){
     console.log('remote disconected');
   });
@@ -40,7 +40,7 @@ function getNewConnectedRemote(rippleAddress, rippleSecret){
   }
 
   remote.connect(function(err){
-    debug('getNewConnectedRemote remote.connect', err);
+    debug('getNewConnectedRemote remote.connect err=', err);
     if(!err){
       deferred.resolve(remote);
     } else {
