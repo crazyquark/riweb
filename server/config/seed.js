@@ -92,8 +92,8 @@ TestingUtils.dropMongodbDatabase().then(function () {
       iban: 'AL47212110090000000235698741'
     }, bankAdmin)
       .then(function (wallet) {
-        aliceWallet = { address: wallet.address, secret: wallet.secret }; 
-        
+        aliceWallet = { address: wallet.address, secret: wallet.secret };
+
         return createUserForBank({
           name: 'Alan',
           email: 'alan@alpha.com',
@@ -117,12 +117,13 @@ TestingUtils.dropMongodbDatabase().then(function () {
         debug('Set trust alice -> bankA');
         MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
           debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
+          createRealbankUsers().then(function(){
+            debug('===========SERVER IS STARTED===========');
+          });
         });
       });
     });
   });
-
-  createRealbankUsers();
 
 });
 
