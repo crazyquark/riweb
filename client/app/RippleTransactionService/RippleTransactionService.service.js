@@ -24,7 +24,7 @@ angular.module('riwebApp')
                 });
         }
 
-        function transferMoneyFromCurrentAccount(amountToTransfer, destinationEmailAddress, currentUser) {
+        function transferMoneyFromCurrentAccount(amountToTransfer, destinationEmailAddress, currentUser, orderRequestId) {
           if(!currentUser){
             currentUser = Auth.getCurrentUser();
           }
@@ -36,7 +36,7 @@ angular.module('riwebApp')
                   swal('Error', 'Sorry there was a problem processing your request! ' + result.message, 'error');
               }
           });
-          RiwebSocketService.emit('make_transfer', { fromEmail: currentUser.email, toEmail: destinationEmailAddress, amount: amountToTransfer });
+          RiwebSocketService.emit('make_transfer', { fromEmail: currentUser.email, toEmail: destinationEmailAddress, amount: amountToTransfer, orderRequestId: orderRequestId });
         }
 
         return {

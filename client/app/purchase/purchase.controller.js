@@ -22,7 +22,7 @@ angular.module('riwebApp')
 
     function purchaseProduct(){
       makeSureIsLoggedIn().then(function(currentUser){
-        RippleTransactionService.transferMoneyFromCurrentAccount($scope.purchase.price, $scope.purchase.merchantEmail, currentUser);
+        RippleTransactionService.transferMoneyFromCurrentAccount($scope.purchase.price, $scope.purchase.merchantEmail, currentUser, $routeParams.orderRequestId);
       });
     }
 
