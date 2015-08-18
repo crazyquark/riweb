@@ -162,11 +162,13 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
     // Can't assume anything about source issuer!
 
     Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
-        var transaction = remote.createTransaction('Payment', {
+        var paymentData = {
             account: senderWallet.address,
             destination: recvWallet.address,
             amount: amount + '/EUR/' + dstIssuer,
-        });
+        };
+        
+        var transaction = remote.createTransaction('Payment', paymentData);
 
         // Append it if you got it
         if (srcIssuer) {
@@ -178,10 +180,15 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
                 issuer: srcIssuer,    // Gotcha!
             });
         }
-
+        
+        transaction.on('resubmit', function(){
+           debug('resubmitting ', transaction); 
+        });
+        
         transaction.submit(function (err, res) {
             if (err) {
-                deferred.reject(err);
+                //deferred.reject(err);
+                debug('tranasction failed: ', err);
             }
             if (res) {
                 deferred.resolve({ status: 'success', transaction: transaction });
