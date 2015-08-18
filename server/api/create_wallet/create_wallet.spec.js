@@ -84,25 +84,25 @@ describe('Test create_wallet', function () {
         CreateWallet.createWalletForEmail('a3@example.com').then(function () {
             expect(emitSpy).to.have.callCount(2);
             expect(emitSpy).to.have.been.calledWith('set_trust', {
-              rippleDestinationAddr: bank1.hotWallet.address,
-              rippleSourceAddr: nonAdminRippleGeneratedWallet.address,
-              rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
+                rippleDestinationAddr: bank1.hotWallet.address,
+                rippleSourceAddr: nonAdminRippleGeneratedWallet.address,
+                rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
             });
             expect(emitSpy).to.have.been.calledWith('post:create_wallet', nonAdminRippleGeneratedWallet.address);
             done();
         }).done(null, function (error) { done(error); });
     });
 
-/*
-    //Tests for Admin users wallets don't make sense anymore
-    it('should set root flag when create new admin@admin.com wallet', function (done) {
-        CreateWallet.createWalletForEmail('admin@admin.com').then(function () {
-            expect(emitSpy).to.have.callCount(1);
-            expect(emitSpy).to.have.been.calledWith('set_root_flags', {});
-            done();
-        }).done(null, function (error) { done(error); });
-    });
-*/
+    /*
+        //Tests for Admin users wallets don't make sense anymore
+        it('should set root flag when create new admin@admin.com wallet', function (done) {
+            CreateWallet.createWalletForEmail('admin@admin.com').then(function () {
+                expect(emitSpy).to.have.callCount(1);
+                expect(emitSpy).to.have.been.calledWith('set_root_flags', {});
+                done();
+            }).done(null, function (error) { done(error); });
+        });
+    */
 
     it('should emit post:create_wallet flag when create new wallet', function (done) {
         CreateWallet.createWalletForEmail('a5@example.com').then(function () {

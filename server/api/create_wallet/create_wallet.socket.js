@@ -33,15 +33,6 @@ function fundWallet(wallet, sourceWallet, amount) {
                   amount : amount * 1000000
                 };
 
-  function setTrustEmit() {
-    deferred.resolve(wallet);
-    Utils.getEventEmitter().emit('set_trust', {
-      rippleDestinationAddr: sourceWallet.address,
-      rippleSourceAddr: wallet.address,
-      rippleSourceSecret: wallet.secret
-     });
-   }
-
   var transaction = remote.createTransaction('Payment', options);
   debug('fundWallet remote.createTransaction', options);
   transaction.submit(function (err) {
@@ -62,7 +53,8 @@ function fundWallet(wallet, sourceWallet, amount) {
               });
           } else {
             //normal user - trust the bank!
-            setTrustEmit();
+            setTrustEmit(sourceWallet.address, wallet);
+            deferred.resolve(wallet);
           }
       }
     });
@@ -182,6 +174,13 @@ function createWalletForEmail(ownerEmail, role) {
   return deferred.promise;
 }
 
+function setTrustEmit(destinationAddr, sourceWallet) {
+    Utils.getEventEmitter().emit('set_trust', {
+        rippleDestinationAddr: destinationAddr,
+        rippleSourceAddr: sourceWallet.address,
+        rippleSourceSecret: sourceWallet.secret
+    });
+}
 
 exports.createWalletForEmail = createWalletForEmail;
 exports.fundWallet = fundWallet;

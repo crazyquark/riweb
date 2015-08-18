@@ -12,6 +12,7 @@ var CreateAdminUserForBank = require('../api/create_admin_user_for_bank/create_a
 var CreateWallet = require('../api/create_wallet/create_wallet.socket');
 var MakeTransfer = require('../api/make_transfer/make_transfer.socket');
 var SetTrust = require('../api/set_trust/set_trust.socket');
+var BankAccount = require('../api/bankaccount/bankaccount.socket');
 
 var RealBankAccount = require('../api/RealBankAccount/RealBankAccount.model');
 
@@ -20,35 +21,6 @@ var TestingUtils = require('./../../test/utils/testing_utils');
 var Q = require('q');
 
 var debug = require('debug')('Seed');
-
-function createAdminInfo(bankInfo) {
-  return {
-    bankId: bankInfo._id,
-    info: bankInfo.info,
-    email: bankInfo.email,
-    password: bankInfo.email
-  };
-}
-
-function createBank(bank) {
-  return CreateBank.createBank(bank).then(function (bankInfo) {
-    bank.bankInfo = bankInfo;
-    return CreateAdminUserForBank.createAdminUserForBank(createAdminInfo(bankInfo));
-  });
-}
-
-function createUserForBank(user, bankAdmin) {
-  return User.create({
-    provider: 'local',
-    name: user.name,
-    email: user.email,
-    password: user.email,
-    iban: user.iban,
-    bank: bankAdmin.bank
-  }).then(function (newUser) {
-    return CreateWallet.createWalletForEmail(newUser.email, 'user');
-  });
-}
 
 function createRealbankUsers() {
   return RealBankAccount.create([{
@@ -85,8 +57,8 @@ TestingUtils.dropMongodbDatabase().then(function () {
   };
 
   var aliceWallet;
-  var createBankA = createBank(bankA).then(function (bankAdmin) {
-    return createUserForBank({
+  var createBankA = BankAccount.createBank(bankA).then(function (bankAdmin) {
+    return BankAccount.createUserForBank({
       name: 'Alice',
       email: 'alice@alpha.com',
       iban: 'AL47212110090000000235698741'
@@ -94,16 +66,16 @@ TestingUtils.dropMongodbDatabase().then(function () {
       .then(function (wallet) {
         aliceWallet = { address: wallet.address, secret: wallet.secret }; 
         
-        return createUserForBank({
+        return BankAccount.createUserForBank({
           name: 'Alan',
           email: 'alan@alpha.com',
           iban: 'AZ21NABZ00000000137010001944'
         }, bankAdmin);
       });
-  })
+  });
 
-  var createBankB = createBank(bankB).then(function (bankAdmin) {
-    return createUserForBank({
+  var createBankB = BankAccount.createBank(bankB).then(function (bankAdmin) {
+    return BankAccount.createUserForBank({
       name: 'Bob',
       email: 'bob@brd.com',
       iban: 'BA391290079401028494'
