@@ -15,6 +15,6 @@ angular.module('riwebApp')
           orderRequestId: orderRequestResp.orderRequestId
         });
       });
-    }
- 
+    };
+
   });

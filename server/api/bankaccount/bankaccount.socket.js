@@ -8,6 +8,8 @@ var Bankaccount = require('./bankaccount.model');
 var Wallet = require('../wallet/wallet.model');
 var CreateBank = require('../create_bank/create_bank.socket');
 var CreateAdminUserForBank = require('../create_admin_user_for_bank/create_admin_user_for_bank.socket');
+var CreateWallet = require('./../create_wallet/create_wallet.socket');
+var User = require('./../user/user.model');
 
 function createAdminInfo(bankInfo) {
     return {
