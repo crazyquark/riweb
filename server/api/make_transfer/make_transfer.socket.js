@@ -19,10 +19,10 @@ var debug = require('debug')('MakeTransfer');
 function saveOrderToDB(orderInfo) {
     OrderRequests.findOneQ({ _id: orderInfo.orderRequestId }).then(function (orderRequest) {
         debug('found order request: ', orderRequest);
-        Order.save(orderInfo).then(function (savedOrder) {
+        Order.createQ(orderInfo).then(function (savedOrder) {
             debug('Saved order: ', savedOrder);
         }, function (err) {
-
+            debug('error', err);
         });
     }, function (err) {
         debug('failed to find order request with ID: ', orderInfo.orderRequestId);
@@ -115,7 +115,7 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
             var orderInfo = null;
             if (orderRequestId) {
                 orderInfo = {
-                    requestId: orderRequestId,
+                    orderRequestId: orderRequestId,
                     senderEmail: fromEmail,
                     receiverEmail: toEmail,
                     amount: amount,
