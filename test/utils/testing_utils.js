@@ -47,10 +47,12 @@ function buildRemoteStub() {
 function buildEmptyTransactionStub() {
     var transaction = {
         submit: sinon.stub(),
-        setTrust: sinon.stub()
+        setTrust: sinon.stub(),
+        on: sinon.stub()
     };
     transaction.submit.yields(null, {});
     transaction.setTrust.yields(null, {});
+
     return transaction;
 }
 
