@@ -2,6 +2,7 @@ var sinon = require('sinon');
 var Q = require('q');
 var Wallet = require('./../../server/api/wallet/wallet.model');
 var BankAccount = require('./../../server/api/bankaccount/bankaccount.model');
+var RealBankAccount = require('../../server/api/RealBankAccount/RealBankAccount.model');
 var User = require('../../server/api/user/user.model');
 var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
@@ -258,6 +259,14 @@ function restoreAll() {
     restoreRippleWalletGenerate();
 }
 
+function createRealBankUser(bankName, iban, balance) {
+    return RealBankAccount.create({
+        name: bankName,
+        iban: iban,
+        balance: balance
+    });
+}
+
 function seedBankAndUser(callback) {
     var bank = {
         name: 'ing',
@@ -267,8 +276,8 @@ function seedBankAndUser(callback) {
             address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
         },
         hotWallet: {
-          address : 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
-          secret  : 'masterpassphrase'
+            address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+            secret: 'masterpassphrase'
         }
     };
     BankAccount.create(
@@ -279,15 +288,19 @@ function seedBankAndUser(callback) {
         });
 
     function seedUsers(createdBank) {
+        var iban = 'CH9300762011623852957';
         var newUser = {
             provider: 'local',
             name: 'James Bond',
             email: 'james.bond@mi6.com',
+            iban: iban,
             password: '1234',
             bank: createdBank._id
         };
         User.create(newUser, function () {
-            callback(newUser, bank);
+            createRealBankUser(createdBank.name, iban, 100).then(function () {
+                callback(newUser, bank);
+            });
         });
     }
 }
