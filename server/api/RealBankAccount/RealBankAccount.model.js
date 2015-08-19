@@ -7,7 +7,7 @@ var Q = require('q');
 var RealBankAccountSchema = new Schema({
     name: String,
     iban: String,
-    ballance: String
+    balance: String
   });
 
 RealBankAccountSchema.statics.findByIban = function(accountIban){
@@ -15,11 +15,11 @@ RealBankAccountSchema.statics.findByIban = function(accountIban){
 };
 
 RealBankAccountSchema.methods.canDeposit = function(depositAmount) {
-  return (parseInt(this.ballance) >= parseInt(depositAmount));
+  return (parseInt(this.balance) >= parseInt(depositAmount));
 };
 
 RealBankAccountSchema.methods.deposit = function(depositAmount) {
-  var newBalance = parseInt(this.ballance) - parseInt(depositAmount);
+  var newBalance = parseInt(this.balance) - parseInt(depositAmount);
   
   var deferred = Q.defer();
   
@@ -28,7 +28,7 @@ RealBankAccountSchema.methods.deposit = function(depositAmount) {
     return deferred.promise;
   }    
   
-  this.ballance = newBalance;
+  this.balance = newBalance;
   this.save(function(err) {
     if (err) deferred.resolve({status: 'error', message: err});
     else deferred.resolve({status: 'success'});
@@ -39,11 +39,11 @@ RealBankAccountSchema.methods.deposit = function(depositAmount) {
 
 
 RealBankAccountSchema.methods.withdraw = function(withdrawAmount) {
-  var newBalance = parseInt(this.ballance) + parseInt(withdrawAmount);
+  var newBalance = parseInt(this.balance) + parseInt(withdrawAmount);
   
   var deferred = Q.defer();
     
-  this.ballance = newBalance;
+  this.balance = newBalance;
   
   this.save(function(err) {
     if (err) deferred.resolve({status: 'error', message: err});

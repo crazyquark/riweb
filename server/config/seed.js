@@ -54,17 +54,17 @@ function createRealbankUsers() {
   return RealBankAccount.create([{
     name: 'alpha',
     iban: 'AL47212110090000000235698741',
-    ballance: '100'
+    balance: '100'
   },
     {
       name: 'alpha',
       iban: 'AZ21NABZ00000000137010001944',
-      ballance: '101'
+      balance: '101'
     },
     {
       name: 'brd',
       iban: 'BA391290079401028494',
-      ballance: '102'
+      balance: '102'
     }]);
 
 }
