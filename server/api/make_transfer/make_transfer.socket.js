@@ -154,7 +154,7 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
                 
                 if (depositResult.status === 'success') {
                     
-                    makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount).then(function(transaction){
+                    makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount, srcIssuer).then(function(transaction){
                         
                        if (orderInfo) {
                           orderInfo.status = 'rippleSuccess';
