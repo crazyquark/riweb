@@ -46,6 +46,7 @@ function buildRemoteStub() {
 
 function buildEmptyTransactionStub() {
     var transaction = {
+        on: sinon.stub(),
         submit: sinon.stub(),
         setTrust: sinon.stub()
     };

@@ -16,121 +16,145 @@ var Utils = require('./../../utils/utils');
 var debug = require('debug')('MakeTransfer');
 
 function saveOrderToDB(orderInfo) {
-    OrderRequests.findOneQ({ _id: orderInfo.orderRequestId }).then(function (orderRequest) {
-        debug('found order request: ', orderRequest);
-        Order.save(orderInfo).then(function (savedOrder) {
-            debug('Saved order: ', savedOrder);
-        }, function (err) {
-
-        });
+  OrderRequests.findOneQ({ _id: orderInfo.orderRequestId }).then(function (orderRequest) {
+    debug('found order request: ', orderRequest);
+    Order.save(orderInfo).then(function (savedOrder) {
+      debug('Saved order: ', savedOrder);
     }, function (err) {
-        debug('failed to find order request with ID: ', orderInfo.orderRequestId);
+
     });
+  }, function (err) {
+    debug('failed to find order request with ID: ', orderInfo.orderRequestId);
+  });
 }
 
 function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
-    var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
-    var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
+  debug('--3');
+  var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
+  var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
 
-    var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
-    var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank
+  var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
+  var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank
 
-    var promiseFindSenderBankAccount = BankAccount.findOneQ({ email: fromEmail });
+  var promiseFindSenderBankAccount = BankAccount.findOneQ({ email: fromEmail });
 
-    return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindSenderBankAccount, promiseFindDestUserBank])
-        .spread(function (senderWalletPromise, recvWalletPromise, findIssuingBankPromise, senderBankPromise, destUserBankPromise) {
-            var deferred = Q.defer();
+  return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindSenderBankAccount, promiseFindDestUserBank])
+    .spread(function (senderWalletPromise, recvWalletPromise, findIssuingBankPromise, senderBankPromise, destUserBankPromise) {
+      var deferred = Q.defer();
 
-            var senderWallet = senderWalletPromise.value;
-            var recvWallet = recvWalletPromise.value;
-            var senderBank = senderBankPromise.value;
-            var findIssuingBank = findIssuingBankPromise.value;
-            var destUserBank = destUserBankPromise.value ? destUserBankPromise.value.bank : null;
+      var senderWallet = senderWalletPromise.value;
+      var recvWallet = recvWalletPromise.value;
+      var senderBank = senderBankPromise.value;
+      var findIssuingBank = findIssuingBankPromise.value;
+      var destUserBank = destUserBankPromise.value ? destUserBankPromise.value.bank : null;
 
-            function buildMissingError(errorMessage) {
-                errorMessage = errorMessage || 'missing account';
-                var result = {
-                    fromEmail: fromEmail,
-                    toEmail: toEmail,
-                    amount: amount,
-                    issuer: issuingAddress,
-                    status: 'error',
-                    message: errorMessage
-                };
+      function buildMissingError(errorMessage) {
+        errorMessage = errorMessage || 'missing account';
+        var result = {
+          fromEmail: fromEmail,
+          toEmail: toEmail,
+          amount: amount,
+          issuer: issuingAddress,
+          status: 'error',
+          message: errorMessage
+        };
 
-                Utils.getEventEmitter().emit('post:make_transfer', result);
-                deferred.resolve(result);
-            }
+        Utils.getEventEmitter().emit('post:make_transfer', result);
+        deferred.resolve(result);
+      }
 
-            var issuingAddress, srcIssuer;
+      var issuingAddress, srcIssuer;
 
-            // If the sender was a bank admin, get its wallet from bankaccounts
-            if (!senderWallet && senderBank) {
-                senderWallet = senderBank.hotWallet;
-            }
+      // If the sender was a bank admin, get its wallet from bankaccounts
+      if (!senderWallet && senderBank) {
+        senderWallet = senderBank.hotWallet;
+      }
 
-            // Not sure why these are arrays sometimes
-            if (senderWallet && senderWallet.constructor === Array) {
-                senderWallet = senderWallet[0];
-            }
-            if (recvWallet && recvWallet.constructor === Array) {
-                recvWallet = recvWallet[0];
-            }
+      // Not sure why these are arrays sometimes
+      if (senderWallet && senderWallet.constructor === Array) {
+        senderWallet = senderWallet[0];
+      }
+      if (recvWallet && recvWallet.constructor === Array) {
+        recvWallet = recvWallet[0];
+      }
 
-            if (!senderWallet || !recvWallet) {
-                // At least a wallet is missing, it's a bust
-                buildMissingError();
-                return deferred.promise;
-            }
+      if (!senderWallet || !recvWallet) {
+        // At least a wallet is missing, it's a bust
+        buildMissingError();
+        return deferred.promise;
+      }
 
-            if (!senderBank) {
-                if (!findIssuingBank || findIssuingBank.status === 'error' || !findIssuingBank.bank ||
-                    !findIssuingBank.bank.hotWallet || !findIssuingBank.bank.hotWallet.address) {
+      if (!senderBank) {
+        if (!findIssuingBank || findIssuingBank.status === 'error' || !findIssuingBank.bank ||
+          !findIssuingBank.bank.hotWallet || !findIssuingBank.bank.hotWallet.address) {
 
-                    buildMissingError('issuing bank not resolved');
+          buildMissingError('issuing bank not resolved');
 
-                    return deferred.promise;
-                } else {
-                    issuingAddress = findIssuingBank.bank.hotWallet.address;
-                }
-            } else {
-                // Sender is a bank
-                issuingAddress = senderBank.hotWallet.address;
-            }
+          return deferred.promise;
+        } else {
+          issuingAddress = findIssuingBank.bank.hotWallet.address;
+        }
+      } else {
+        // Sender is a bank
+        issuingAddress = senderBank.hotWallet.address;
+      }
 
-            if (destUserBank && destUserBank.hotWallet.address !== issuingAddress) {
-                // Is the destination user from another bank?
-                srcIssuer = issuingAddress;
-                issuingAddress = destUserBank.hotWallet.address;
-                // XXX fix non-intuive var names
-            }
+      if (destUserBank && destUserBank.hotWallet.address !== issuingAddress) {
+        // Is the destination user from another bank?
+        srcIssuer = issuingAddress;
+        issuingAddress = destUserBank.hotWallet.address;
+        // XXX fix non-intuive var names
+      }
 
-            makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount, srcIssuer).then(function(transaction){
-              Utils.getEventEmitter().emit('post:make_transfer', {
-                fromEmail: fromEmail,
-                toEmail: toEmail,
-                amount: amount,
-                issuer: issuingAddress,
-                status: 'success',
-                successUrl: '/myaccount'
-              });
-              deferred.resolve({ status: 'success', transaction: transaction });
-            }, function(err){
-              var errorMessage = 'Ripple error. Cannot transfer from ' + fromEmail + ' to ' + toEmail + ' ' + amount + ' €!';
-                Utils.getEventEmitter().emit('post:make_transfer', {
-                fromEmail: fromEmail,
-                toEmail: toEmail,
-                amount: amount,
-                issuer: issuingAddress,
-                message: errorMessage,
-                  status: 'ripple error',
-                  successUrl: '/myaccount'
-              });
-              deferred.reject(err);
-            });
+      var orderInfo = null;
+      if (orderRequestId) {
+        orderInfo = {
+          requestId: orderRequestId,
+          senderEmail: fromEmail,
+          receiverEmail: toEmail,
+          amount: amount,
+          status: '',
+        };
+      }
 
-            return deferred.promise;
+      makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount, srcIssuer).then(function (transaction) {
+        Utils.getEventEmitter().emit('post:make_transfer', {
+          fromEmail: fromEmail,
+          toEmail: toEmail,
+          amount: amount,
+          issuer: issuingAddress,
+          status: 'success',
+          successUrl: '/myaccount'
         });
+
+        if (orderInfo) {
+          orderInfo.status = 'rippleSuccess';
+          saveOrderToDB(orderInfo);
+        }
+
+        deferred.resolve({ status: 'success', transaction: transaction });
+      }, function (err) {
+        var errorMessage = 'Ripple error. Cannot transfer from ' + fromEmail + ' to ' + toEmail + ' ' + amount + ' €!';
+        Utils.getEventEmitter().emit('post:make_transfer', {
+          fromEmail: fromEmail,
+          toEmail: toEmail,
+          amount: amount,
+          issuer: issuingAddress,
+          message: errorMessage,
+          status: 'ripple error',
+          successUrl: '/myaccount'
+        });
+
+        if (orderInfo) {
+          orderInfo.status = 'rippleError';
+          saveOrderToDB(orderInfo);
+        }
+
+        deferred.reject(err);
+      });
+
+      return deferred.promise;
+    });
 }
 
 function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, srcIssuer) {
