@@ -17,7 +17,8 @@ function setRootFlags(account) {
             account: account.address,
             set: 'DefaultRipple'
         });
-
+        transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
+        
         transaction.submit(function(err){
             if (err) {
                 debug(err);

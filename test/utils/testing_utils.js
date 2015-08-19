@@ -32,6 +32,7 @@ function buildRemoteStub() {
         createTransaction: sinon.stub(),
         requestAccountLines: sinon.stub(),
         requestAccountTransactions: sinon.stub(),
+        getLedgerSequence: sinon.stub(),
         _stub_transaction: {}
     };
 
@@ -49,7 +50,8 @@ function buildEmptyTransactionStub() {
     var transaction = {
         submit: sinon.stub(),
         setTrust: sinon.stub(),
-        on: sinon.stub()
+        on: sinon.stub(),
+        lastLedger: sinon.stub()
     };
     transaction.submit.yields(null, {});
     transaction.setTrust.yields(null, {});

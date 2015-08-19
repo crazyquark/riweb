@@ -43,6 +43,8 @@ function fundWallet(wallet, sourceWallet, amount) {
    }
           
   var transaction = remote.createTransaction('Payment', options);
+  transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
+  
   debug('fundWallet remote.createTransaction', options);
   transaction.submit(function (err) {
       debug('fundWallet transaction.submit', err);

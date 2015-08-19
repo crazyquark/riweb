@@ -231,6 +231,7 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
         };
         
         var transaction = remote.createTransaction('Payment', paymentData);
+        transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
 
         // Append it if you got it
         if (srcIssuer) {

@@ -36,7 +36,8 @@ function setTrust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, l
       limit: limit + '/' + currency + '/' + rippleDestinationAddr
     };
     var transaction = remote.createTransaction('TrustSet', transactionOptions);
-
+    transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
+    
     transaction.submit(function (err) {
       debug('transaction.submit', transactionOptions, err);
       if (!err) {
