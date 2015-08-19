@@ -1,2 +1,22 @@
-<div class="col-md-12">
+<div ng-include="'components/navbar/navbar.html'"></div>
+<div class="container">
+	<div class="row">
+		<table class="table" ng-show="realBankAccounts.accounts">
+			<thead>
+				<tr>
+					<th>Bank</th>
+					<th>IBAN</th>
+					<th>Balance</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="account in realBankAccounts.accounts">
+					<td>{{account.name}}</td>
+					<td>{{account.iban}}</td>
+					<td>{{account.balance}}</td>
+				</tr>
+			</tbody>
+		</table>
+
+	</div>
 </div>
