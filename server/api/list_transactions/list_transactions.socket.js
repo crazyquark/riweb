@@ -56,7 +56,7 @@ function listTransactions(ownerEmail, socket) {
 			ownerEmail: ownerEmail,
 			status: 'error',
 			message: 'missing account'
-		}
+		};
 
 		socket.emit('post:list_transactions', result);
 		deferred.resolve(result);

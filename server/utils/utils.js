@@ -54,9 +54,18 @@ function getNewConnectedAdminRemote() {
   return getNewConnectedRemote(ROOT_RIPPLE_ACCOUNT.address, ROOT_RIPPLE_ACCOUNT.secret);
 }
 
+function getEventEmitter() {
+    return LoggedEmitterService;
+}
+
+function forwardFromEventEmitterToSocket(eventName, socket) {
+    getEventEmitter().on(eventName, function (event) {
+        socket.emit(eventName, event);
+    });
+}
+
 module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewConnectedAdminRemote = getNewConnectedAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
-module.exports.getEventEmitter = function(){
-    return LoggedEmitterService;
-};
+module.exports.forwardFromEventEmitterToSocket = forwardFromEventEmitterToSocket;
+module.exports.getEventEmitter = getEventEmitter;

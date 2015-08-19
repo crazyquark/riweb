@@ -174,11 +174,11 @@ function createWalletForEmail(ownerEmail, role) {
     }
   }).then(function(foundWallet){
     deferred.resolve(foundWallet);
-    socket.emit('post:create_wallet', foundWallet.address);
+    Utils.getEventEmitter().emit('post:create_wallet', foundWallet.address);
   }, 
   function(errorMessage){
     deferred.reject(errorMessage);
-    socket.emit('post:create_wallet', {error : errorMessage});    
+    Utils.getEventEmitter().emit('post:create_wallet', {error : errorMessage});
   });
 
   return deferred.promise;
@@ -191,6 +191,9 @@ exports.getBankForUser = getBankForUser;
 
 exports.register = function(newSocket) {
   socket = newSocket;
+
+  Utils.forwardFromEventEmitterToSocket('post:create_wallet', socket);
+
   socket.on('create_wallet', function(data) {
       createWalletForEmail(data.ownerEmail, data.role);
   });

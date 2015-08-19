@@ -45,11 +45,10 @@ exports.createAdminUserForBank = createAdminUserForBank;
 exports.register = function (newSocket) {
     socket = newSocket;
 
+    Utils.forwardFromEventEmitterToSocket('post:create_admin_user_for_bank', socket);
+
     Utils.getEventEmitter().on('create_admin_user_for_bank', function (adminUserInfo) {
         createAdminUserForBank(adminUserInfo);
     });
 
-    Utils.getEventEmitter().on('post:create_admin_user_for_bank', function (event) {
-      socket.emit('post:create_admin_user_for_bank', event);
-    });
 };

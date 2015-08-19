@@ -266,9 +266,8 @@ exports.makeTransfer = makeTransfer;
 exports.makeTransferWithRipple = makeTransferWithRipple;
 
 exports.register = function (socket) {
-    Utils.getEventEmitter().on('post:make_transfer', function (data) {
-        socket.emit('post:make_transfer', data);
-    });
+
+    Utils.forwardFromEventEmitterToSocket('post:make_transfer', socket);
 
     Utils.getEventEmitter().on('make_transfer', function (data) {
         makeTransfer(data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
