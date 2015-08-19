@@ -249,8 +249,8 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
         
         transaction.submit(function (err, res) {
             if (err) {
-                //deferred.reject(err);
                 debug('transaction seems to have failed: ', err);
+                deferred.reject(err);
             }
             if (res) {
                 deferred.resolve({ status: 'success', transaction: transaction });
