@@ -7,18 +7,4 @@
 var Order = require('./Order.model');
 
 exports.register = function(socket) {
-//  Order.schema.post('save', function (doc) {
-//    onSave(socket, doc);
-//  });
-//  Order.schema.post('remove', function (doc) {
-//    onRemove(socket, doc);
-//  });
 };
-
-//function onSave(socket, doc, cb) {
-//  socket.emit('Order:save', doc);
-//}
-//
-//function onRemove(socket, doc, cb) {
-//  socket.emit('Order:remove', doc);
-//}

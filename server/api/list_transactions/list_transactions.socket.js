@@ -139,4 +139,4 @@ exports.register = function (socket) {
 	socket.on('list_transactions', function (ownerEmail) {
 		listTransactions(ownerEmail, socket);
 	});
-}
+};
