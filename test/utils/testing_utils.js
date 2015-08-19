@@ -51,7 +51,8 @@ function buildEmptyTransactionStub() {
         submit: sinon.stub(),
         setTrust: sinon.stub(),
         on: sinon.stub(),
-        lastLedger: sinon.stub()
+        lastLedger: sinon.stub(),
+        tx_json: { Memos: [] }
     };
     transaction.submit.yields(null, {});
     transaction.setTrust.yields(null, {});
