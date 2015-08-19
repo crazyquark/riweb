@@ -64,7 +64,7 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
                 };
 
                 Utils.getEventEmitter().emit('post:make_transfer', result);
-                deferred.resolve(result);
+                deferred.reject(result);
             }
 
             var issuingAddress, srcIssuer;

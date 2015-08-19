@@ -100,7 +100,7 @@ TestingUtils.dropMongodbDatabase().then(function () {
           iban: 'AZ21NABZ00000000137010001944'
         }, bankAdmin);
       });
-  })
+  });
 
   var createBankB = createBank(bankB).then(function (bankAdmin) {
     return createUserForBank({
@@ -110,20 +110,20 @@ TestingUtils.dropMongodbDatabase().then(function () {
     }, bankAdmin);
   });
 
-  Q.all([createBankA, createBankB]).spread(function (alanWallet, bobWallet) {
+  var createRealbankUsersPromise = createRealbankUsers();
+
+  Q.all([createBankA, createBankB, createRealbankUsersPromise]).spread(function (alanWallet, bobWallet) {
     SetTrust.setBanksTrust(bankA.bankInfo.hotWallet, bankB.bankInfo.hotWallet, alanWallet, bobWallet).then(function () {
       debug('Set trust alan -> bankA <-> bankB <- bob');
       SetTrust.setTrust(bankA.bankInfo.hotWallet.address, aliceWallet.address, aliceWallet.secret).then(function () {
         debug('Set trust alice -> bankA');
         MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
           debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
-          createRealbankUsers().then(function(){
-            debug('\n\n' +
-              '=======================================\n' +
-              '===========SERVER IS STARTED===========\n' +
-              '=======================================\n'
-            );
-          });
+          debug('\n\n' +
+            '=======================================\n' +
+            '===========SERVER IS STARTED===========\n' +
+            '=======================================\n'
+          );
         });
       });
     });

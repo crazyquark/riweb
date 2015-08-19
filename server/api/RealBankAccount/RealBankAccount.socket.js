@@ -6,6 +6,7 @@
 
 var RealBankAccount = require('./RealBankAccount.model');
 var User = require('./../user/user.model');
+var debug = require('debug')('RealBankAccountSocket');
 
 function getBankAccountForEmail(ownerEmail) {
   var promise = User.findByEmail(ownerEmail).then(function(foundUser) {
