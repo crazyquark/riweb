@@ -162,7 +162,7 @@ describe('Test make_transfer', function () {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
                 amount: amount,
-                issuer: null,
+                issuer: undefined,
                 status: 'error',
                 message: 'issuing bank not resolved'
             });
@@ -190,7 +190,7 @@ describe('Test make_transfer', function () {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
                 amount: amount,
-                issuer: null,
+                issuer: undefined,
                 status: 'error',
                 message: 'issuing bank not resolved'
             });
