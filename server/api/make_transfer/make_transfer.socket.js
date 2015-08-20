@@ -30,23 +30,8 @@ function saveOrderToDB(orderInfo) {
     });
 }
 
-function isIssuingBankInvalid(issuingBank) {
-    return !issuingBank || issuingBank.status === 'error' || !issuingBank.bank || !issuingBank.bank.hotWallet || !issuingBank.bank.hotWallet.address;
-}
-
-function computeIssuingAddress(senderBank, issuingBank){
-    var issuingAddress;
-    if (!senderBank) {
-        if (isIssuingBankInvalid(issuingBank)) {
-            return null;
-        } else {
-            issuingAddress = issuingBank.bank.hotWallet.address;
-        }
-    } else {
-        // Sender is a bank
-        issuingAddress = senderBank.hotWallet.address;
-    }
-    return issuingAddress;
+function isIssuingBankValid(issuingBank) {
+    return issuingBank && !issuingBank.error && issuingBank.bankWallet && issuingBank.bankWallet.address;
 }
 
 function buildThrowMissingError(fromEmail, toEmail, amount){
@@ -69,11 +54,15 @@ function buildThrowMissingError(fromEmail, toEmail, amount){
     return throwMissingError;
 }
 
+function isDestinationOnDifferentBank(destUserBank, issuingAddress) {
+    return destUserBank && destUserBank.hotWallet.address !== issuingAddress;
+}
+
 function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderRequestId) {
 
     var throwMissingError = buildThrowMissingError(fromEmail, toEmail, amount);
 
-    function makeTransferWithRippleWallets(senderWallet, recvWallet, issuingBank, senderBank, destUserBankParam, realBankAccount) {
+    function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBankAddress, destUserBankParam, realBankAccount) {
         var deferred = Q.defer();
 
         var destUserBank = destUserBankParam? destUserBankParam.bank : null;
@@ -81,8 +70,8 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
         var issuingAddress, srcIssuer;
 
         // If the sender was a bank admin, get its wallet from bankaccounts
-        if (!senderWallet && senderBank) {
-            senderWallet = senderBank.hotWallet;
+        if (!senderWallet && !sourceBankAddress.error && !sourceBankAddress.isFromUser) {
+            senderWallet = sourceBankAddress.bankWallet;
         }
 
         // Not sure why these are arrays sometimes
@@ -99,24 +88,16 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
             return deferred.promise;
         }
 
-        var isTransferedByBank = false;
-
-        if (senderBank) {
-            // Sender is a bank
-            isTransferedByBank = true;
-        }
-
-        issuingAddress = computeIssuingAddress(senderBank, issuingBank);
-        if (!issuingAddress) {
+        if (!isIssuingBankValid(sourceBankAddress)) {
             deferred.reject(throwMissingError('issuing bank not resolved', issuingAddress));
             return deferred.promise;
         }
 
-        if (destUserBank && destUserBank.hotWallet.address !== issuingAddress) {
-            // Is the destination user from another bank?
+        issuingAddress = sourceBankAddress.bankWallet.address;
+
+        if (isDestinationOnDifferentBank(destUserBank, issuingAddress)) {
             srcIssuer = issuingAddress;
             issuingAddress = destUserBank.hotWallet.address;
-            // XXX fix non-intuive var names
         }
 
         var orderInfo = null;
@@ -130,7 +111,7 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
             };
         }
 
-        if (isTransferedByBank) {
+        if (!sourceBankAddress.isFromUser) {
             //we need to check if the user really does have the necessary funds
 
             if (!realBankAccount || realBankAccount.status === 'error') {
@@ -146,10 +127,9 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
             }
         }
 
-
         var initialPromise;
 
-        if (isTransferedByBank) {
+        if (!sourceBankAddress.isFromUser) {
             initialPromise = realBankAccount.account.deposit(amount);
         } else {
             //in case it's an internal ripple transaction, just fake the external DB interaction
@@ -180,7 +160,7 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
                     //undo the deposit action (if needed)
                     var rollbackDepositPromise;
 
-                    if (isTransferedByBank) {
+                    if (!sourceBankAddress.isFromUser) {
                         rollbackDepositPromise = realBankAccount.account.withdraw(amount);
                     } else {
                         rollbackDepositPromise = Q({ status: 'success' });
@@ -229,16 +209,27 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
 
-    var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
+    var promiseFindIssuingBankForUser = CreateWallet.getBankForUser(fromEmail);
     var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank
 
     var promiseFindSenderBankAccount = BankAccount.findOneQ({ email: fromEmail });
-
     var promiseFindSenderRealBankAccount = RealBankAccount.getBankAccountForEmail(toEmail);
 
     var currentMakeTransferWithRippleWallets = buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderRequestId);
 
-    return Q.all([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindSenderBankAccount, promiseFindDestUserBank, promiseFindSenderRealBankAccount])
+    var promiseFindSenderBankOrUserBank = Q.all([promiseFindIssuingBankForUser, promiseFindSenderBankAccount]).spread(function(issuingBankForUser, senderBankAccount) {
+        debug('promiseFindSenderBankOrUserBank ', issuingBankForUser, senderBankAccount);
+        if (issuingBankForUser && issuingBankForUser.status === 'success') {
+            return {bankWallet: issuingBankForUser.bank.hotWallet, isFromUser: true };
+        } else if (senderBankAccount) {
+            // Sender is a bank
+            return {bankWallet: senderBankAccount.hotWallet, isFromUser: false };
+        } else {            
+            return {error : 'Cannot find source bank account!'};
+        }
+    });
+
+    return Q.all([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindSenderBankOrUserBank, promiseFindDestUserBank, promiseFindSenderRealBankAccount])
         .spread(currentMakeTransferWithRippleWallets);
 }
 
