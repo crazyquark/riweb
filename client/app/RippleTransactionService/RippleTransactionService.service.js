@@ -24,15 +24,18 @@ angular.module('riwebApp')
                 });
         }
 
-        function transferMoneyFromCurrentAccount(amountToTransfer, destinationEmailAddress, currentUser, orderRequestId) {
+        function transferMoneyFromCurrentAccount(amountToTransfer, destinationEmailAddress, currentUser, orderRequestId, returnUrl, cancelUrl) {
           if(!currentUser){
             currentUser = Auth.getCurrentUser();
           }
           RiwebSocketService.on('post:make_transfer', function (result) {
               if (result.status === 'success') {
-                $location.path('/myaccount');
+                $location.path(returnUrl ? returnUrl : '/myaccount');
                 swal('Transfer success!', 'Congratulations ' + currentUser.name + '! You transfered ' + amountToTransfer + ' to ' + destinationEmailAddress, 'success');
               } else {
+                  if (cancelUrl) {
+                      $location(cancelUrl);
+                  }
                   swal('Error', 'Sorry there was a problem processing your request! ' + result.message, 'error');
               }
           });
