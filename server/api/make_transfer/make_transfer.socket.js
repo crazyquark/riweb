@@ -25,7 +25,7 @@ function saveOrderToDB(orderInfo) {
         }, function (err) {
             debug('error', err);
         });
-    }, function (err) {
+    }, function () {
         debug('failed to find order request with ID: ', orderInfo.orderRequestId);
     });
 }
@@ -34,28 +34,49 @@ function isIssuingBankInvalid(issuingBank) {
     return !issuingBank || issuingBank.status === 'error' || !issuingBank.bank || !issuingBank.bank.hotWallet || !issuingBank.bank.hotWallet.address;
 }
 
+function computeIssuingAddress(senderBank, issuingBank){
+    var issuingAddress;
+    if (!senderBank) {
+        if (isIssuingBankInvalid(issuingBank)) {
+            return null;
+        } else {
+            issuingAddress = issuingBank.bank.hotWallet.address;
+        }
+    } else {
+        // Sender is a bank
+        issuingAddress = senderBank.hotWallet.address;
+    }
+    return issuingAddress;
+}
+
+function buildThrowMissingError(fromEmail, toEmail, amount){
+
+    function throwMissingError(errorMessage, issuingAddress, status) {
+        status = status || 'error';
+        errorMessage = errorMessage || 'missing account';
+        var result = {
+            fromEmail: fromEmail,
+            toEmail: toEmail,
+            amount: amount,
+            issuer: issuingAddress,
+            status: status,
+            message: errorMessage
+        };
+
+        Utils.getEventEmitter().emit('post:make_transfer', result);
+        return result;
+    }
+    return throwMissingError;
+}
+
 function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderRequestId) {
+
+    var throwMissingError = buildThrowMissingError(fromEmail, toEmail, amount);
 
     function makeTransferWithRippleWallets(senderWallet, recvWallet, issuingBank, senderBank, destUserBankParam, realBankAccount) {
         var deferred = Q.defer();
 
         var destUserBank = destUserBankParam? destUserBankParam.bank : null;
-
-        function buildMissingError(errorMessage, status) {
-            status = status || 'error';
-            errorMessage = errorMessage || 'missing account';
-            var result = {
-                fromEmail: fromEmail,
-                toEmail: toEmail,
-                amount: amount,
-                issuer: issuingAddress,
-                status: status,
-                message: errorMessage
-            };
-
-            Utils.getEventEmitter().emit('post:make_transfer', result);
-            deferred.reject(result);
-        }
 
         var issuingAddress, srcIssuer;
 
@@ -74,25 +95,21 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
 
         if (!senderWallet || !recvWallet) {
             // At least a wallet is missing, it's a bust
-            buildMissingError();
+            deferred.reject(throwMissingError());
             return deferred.promise;
         }
 
         var isTransferedByBank = false;
 
-        if (!senderBank) {
-            if (isIssuingBankInvalid(issuingBank)) {
-
-                buildMissingError('issuing bank not resolved');
-
-                return deferred.promise;
-            } else {
-                issuingAddress = issuingBank.bank.hotWallet.address;
-            }
-        } else {
+        if (senderBank) {
             // Sender is a bank
-            issuingAddress = senderBank.hotWallet.address;
             isTransferedByBank = true;
+        }
+
+        issuingAddress = computeIssuingAddress(senderBank, issuingBank);
+        if (!issuingAddress) {
+            deferred.reject(throwMissingError('issuing bank not resolved', issuingAddress));
+            return deferred.promise;
         }
 
         if (destUserBank && destUserBank.hotWallet.address !== issuingAddress) {
@@ -109,7 +126,7 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
                 senderEmail: fromEmail,
                 receiverEmail: toEmail,
                 amount: amount,
-                status: '',
+                status: ''
             };
         }
 
@@ -118,13 +135,13 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
 
             if (!realBankAccount || realBankAccount.status === 'error') {
 
-                buildMissingError('external IBAN not found');
+                deferred.reject(throwMissingError('external IBAN not found', issuingAddress));
                 return deferred.promise;
             }
 
             if (!realBankAccount.account.canDeposit(amount)) {
 
-                buildMissingError('Not enough funds for bank deposit');
+                deferred.reject(throwMissingError('Not enough funds for bank deposit', issuingAddress));
                 return deferred.promise;
             }
         }
@@ -198,7 +215,7 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
                 deferred.resolve({ status: 'success', transaction: transferResult.transaction });
             } else {
 
-                buildMissingError(transferResult.message, transferResult.status);
+                deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
             }
         });
 
@@ -248,7 +265,7 @@ function createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer
         transaction.sendMax({
             value: maxValue,
             currency: 'EUR',      // EUR foreveeer
-            issuer: srcIssuer,    // Gotcha!
+            issuer: srcIssuer    // Gotcha!
         });
     }
 
@@ -271,7 +288,7 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
         var paymentData = {
             account: senderWallet.address,
             destination: recvWallet.address,
-            amount: amount + '/EUR/' + dstIssuer,
+            amount: amount + '/EUR/' + dstIssuer
         };
 
         var orderRequestId = orderInfo?orderInfo.orderRequestId:null;
