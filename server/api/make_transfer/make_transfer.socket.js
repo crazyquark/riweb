@@ -220,6 +220,41 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
         .spread(currentMakeTransferWithRippleWallets);
 }
 
+function createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount){
+    var transaction = remote.createTransaction('Payment', paymentData);
+    transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
+
+    // Save order info on the blockchain
+    if (orderRequestId) {
+        transaction.tx_json.Memos = [
+            {
+                Memo: {
+                    MemoType: RippleUtils.stringToHex('OrderRequestId'),
+                    MemoData: RippleUtils.stringToHex(orderRequestId)
+                }
+            }
+        ];
+    }
+
+    // Append it if you got it
+    if (srcIssuer) {
+        var maxValue = amount.toString(); // Send all; original code from ripple-rest is:
+        // new BigNumber(payment.source_amount.value).plus(payment.source_slippage || 0).toString();
+        transaction.sendMax({
+            value: maxValue,
+            currency: 'EUR',      // EUR foreveeer
+            issuer: srcIssuer,    // Gotcha!
+        });
+    }
+
+
+    transaction.on('resubmit', function () {
+        debug('resubmitting ', transaction);
+    });
+
+    return transaction;
+}
+
 function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo) {
     debug('makeTransferWithRipple', senderWallet, recvWallet, dstIssuer, amount, srcIssuer);
     var deferred = Q.defer();
@@ -234,35 +269,9 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
             amount: amount + '/EUR/' + dstIssuer,
         };
 
-        var transaction = remote.createTransaction('Payment', paymentData);
-        transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
+        var orderRequestId = orderInfo?orderInfo.orderRequestId:null;
 
-        // Save order info on the blockchain
-        if (orderInfo) {
-            transaction.tx_json.Memos = [
-                {
-                    Memo: {
-                        MemoType: RippleUtils.stringToHex('OrderRequestId'),
-                        MemoData: RippleUtils.stringToHex(orderInfo.orderRequestId)
-                    }
-                }
-            ];
-        }
-
-        // Append it if you got it
-        if (srcIssuer) {
-            var maxValue = amount.toString(); // Send all; original code from ripple-rest is:
-            // new BigNumber(payment.source_amount.value).plus(payment.source_slippage || 0).toString();
-            transaction.sendMax({
-                value: maxValue,
-                currency: 'EUR',      // EUR foreveeer
-                issuer: srcIssuer,    // Gotcha!
-            });
-        }
-
-        transaction.on('resubmit', function () {
-            debug('resubmitting ', transaction);
-        });
+        var transaction = createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount);
 
         transaction.submit(function (err, res) {
             if (err) {
