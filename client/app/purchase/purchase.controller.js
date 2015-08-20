@@ -22,7 +22,8 @@ angular.module('riwebApp')
 
     function purchaseProduct(){
       makeSureIsLoggedIn().then(function(currentUser){
-        RippleTransactionService.transferMoneyFromCurrentAccount($scope.purchase.price, $scope.purchase.merchantEmail, currentUser, $routeParams.orderRequestId);
+        RippleTransactionService.transferMoneyFromCurrentAccount($scope.purchase.price, $scope.purchase.merchantEmail, currentUser, 
+                                                                  $routeParams.orderRequestId, $scope.returnUrl, $scope.cancelUrl);
       });
     }
 
@@ -34,6 +35,9 @@ angular.module('riwebApp')
       OrderRequestService.get({id: orderRequestId}).$promise.then(function(orderRequest){
         $scope.purchase.merchantEmail = orderRequest.receiverEmail;
         $scope.purchase.price = orderRequest.amount;
+        
+        $scope.returnUrl = orderRequest.returnUrl;
+        $scope.cancelUrl = orderRequest.cancelUrl;
       });
     }
     loadOrderRequest($routeParams.orderRequestId);
