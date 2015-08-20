@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-    .service('RippleTransactionService', function ($location, RippleWalletService, Wallet, Auth, RiwebSocketService) {
+    .service('RippleTransactionService', function ($location, $window, RippleWalletService, Wallet, Auth, RiwebSocketService) {
         function transferMoney(amountToTransfer) {
             swal({
                 title: 'Transfer money!',
@@ -25,21 +25,40 @@ angular.module('riwebApp')
         }
 
         function transferMoneyFromCurrentAccount(amountToTransfer, destinationEmailAddress, currentUser, orderRequestId, returnUrl, cancelUrl) {
-          if(!currentUser){
-            currentUser = Auth.getCurrentUser();
-          }
-          RiwebSocketService.on('post:make_transfer', function (result) {
-              if (result.status === 'success') {
-                $location.path(returnUrl ? returnUrl : '/myaccount');
-                swal('Transfer success!', 'Congratulations ' + currentUser.name + '! You transfered ' + amountToTransfer + ' to ' + destinationEmailAddress, 'success');
-              } else {
-                  if (cancelUrl) {
-                      $location(cancelUrl);
-                  }
-                  swal('Error', 'Sorry there was a problem processing your request! ' + result.message, 'error');
-              }
-          });
-          RiwebSocketService.emit('make_transfer', { fromEmail: currentUser.email, toEmail: destinationEmailAddress, amount: amountToTransfer, orderRequestId: orderRequestId });
+            if (!currentUser) {
+                currentUser = Auth.getCurrentUser();
+            }
+            RiwebSocketService.on('post:make_transfer', function (result) {
+                if (result.status === 'success') {
+                    swal({  title: 'Transfer success!', 
+                            text: 'Congratulations ' + currentUser.name + '! You transfered ' + amountToTransfer + ' to ' + destinationEmailAddress, 
+                            type: 'success'
+                        },
+                        function () {
+                            setTimeout(function() {
+                                if (returnUrl) {
+                                    $window.location.href = returnUrl;
+                                } else {
+                                    $location.path('/myaccount');
+                                }
+                            }, 500);
+                        });
+                } else {
+                    swal({title: 'Error', 
+                          text: 'Sorry there was a problem processing your request! ' + result.message, 
+                          type: 'error'
+                          },
+                          function() {
+                              setTimeout(function() {
+                                if (cancelUrl) {
+                                    $location(cancelUrl);
+                                }
+                              }, 500);
+                          }
+                        );
+                }
+            });
+            RiwebSocketService.emit('make_transfer', { fromEmail: currentUser.email, toEmail: destinationEmailAddress, amount: amountToTransfer, orderRequestId: orderRequestId });
         }
 
         return {
