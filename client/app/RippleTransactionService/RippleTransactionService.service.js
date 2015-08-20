@@ -44,9 +44,9 @@ angular.module('riwebApp')
                             }, 500);
                         });
                 } else {
-                    swal({title: 'Error', 
-                          text: 'Sorry there was a problem processing your request! ' + result.message, 
-                          type: 'error'
+                    swal({  title: 'Error', 
+                            text: 'Sorry there was a problem processing your request! ' + result.message, 
+                            type: 'error'
                           },
                           function() {
                               setTimeout(function() {
