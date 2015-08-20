@@ -13,6 +13,7 @@ var Order = require('../Order/Order.model');
 var OrderRequests = require('../order_request/order_request.model');
 var RealBankAccount = require('../RealBankAccount/RealBankAccount.socket');
 var Utils = require('./../../utils/utils');
+var RippleUtils = require('ripple-lib').utils;
 
 var debug = require('debug')('MakeTransfer');
 
@@ -37,7 +38,7 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
     var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank
     
     var promiseFindSenderBankAccount = BankAccount.findOneQ({ email: fromEmail });
-    
+
     var promiseFindSenderRealBankAccount = RealBankAccount.getBankAccountForEmail(toEmail);
 
     return Q.allSettled([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindSenderBankAccount, promiseFindDestUserBank, promiseFindSenderRealBankAccount])
@@ -105,7 +106,7 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
                 isTransferedByBank = true;
             }
 
-	    if (destUserBank && destUserBank.hotWallet.address !== issuingAddress) {
+            if (destUserBank && destUserBank.hotWallet.address !== issuingAddress) {
                 // Is the destination user from another bank?
                 srcIssuer = issuingAddress;
                 issuingAddress = destUserBank.hotWallet.address;
@@ -122,18 +123,18 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
                     status: '',
                 };
             }
-            
+
             if (isTransferedByBank) {
                 //we need to check if the user really does have the necessary funds
                 
                 if (!realBankAccount || realBankAccount.status === 'error') {
-                    
+
                     buildMissingError('external IBAN not found');
                     return deferred.promise;
                 }
-                
+
                 if (!realBankAccount.account.canDeposit(amount)) {
-                    
+
                     buildMissingError('Not enough funds for bank deposit');
                     return deferred.promise;
                 }
@@ -141,62 +142,62 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
 
 
             var initialPromise;
-            
+
             if (isTransferedByBank) {
                 initialPromise = realBankAccount.account.deposit(amount)
             } else {
                 //in case it's an internal ripple transaction, just fake the external DB interaction
-                initialPromise = Q({status : 'success'});
+                initialPromise = Q({ status: 'success' });
             }
-            
-            initialPromise.then(function(depositResult) {
-                var deposit = Q.defer();
-                
-                if (depositResult.status === 'success') {
-                    
-                    makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount, srcIssuer).then(function(transaction){
-                        
-                       if (orderInfo) {
-                          orderInfo.status = 'rippleSuccess';
-                          saveOrderToDB(orderInfo);
-                        }
-                        
-                        deposit.resolve({status: 'success', transaction: transaction});                        
-           
-                      }, function(err){
-    
-                    	  if (orderInfo) {
-    	                    orderInfo.status = 'rippleError';
-            	            saveOrderToDB(orderInfo);
-                    	  }
 
-                          //undo the deposit action (if needed)
-                          var rollbackDepositPromise;
-                        
-                          if (isTransferedByBank) {
+            initialPromise.then(function (depositResult) {
+                var deposit = Q.defer();
+
+                if (depositResult.status === 'success') {
+
+                    makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount, srcIssuer, orderInfo).then(function (transaction) {
+
+                        if (orderInfo) {
+                            orderInfo.status = 'rippleSuccess';
+                            saveOrderToDB(orderInfo);
+                        }
+
+                        deposit.resolve({ status: 'success', transaction: transaction });
+
+                    }, function (err) {
+
+                        if (orderInfo) {
+                            orderInfo.status = 'rippleError';
+                            saveOrderToDB(orderInfo);
+                        }
+
+                        //undo the deposit action (if needed)
+                        var rollbackDepositPromise;
+
+                        if (isTransferedByBank) {
                             rollbackDepositPromise = realBankAccount.account.withdraw(amount);
-                          } else {
-                            rollbackDepositPromise = Q({status : 'success'});
-                          }
-                          
-                          debug('makeTransferWithRipple - ripple error', err);
-                          
-                          rollbackDepositPromise.then(function(withdrawResult) {                              
-                              if (withdrawResult.status === 'success') {
-                                  deposit.resolve({status: 'ripple error', message: 'Ripple error'});
-                              } else {
-                                  debug('makeTransferWithRipple - unrecoverable transfer error', amount);
-                                  deposit.resolve({status: 'ripple error', message: 'Ripple error & Critical error - money lost!! '});
-                              }                     
-                          });                                                   
+                        } else {
+                            rollbackDepositPromise = Q({ status: 'success' });
+                        }
+
+                        debug('makeTransferWithRipple - ripple error', err);
+
+                        rollbackDepositPromise.then(function (withdrawResult) {
+                            if (withdrawResult.status === 'success') {
+                                deposit.resolve({ status: 'ripple error', message: 'Ripple error' });
+                            } else {
+                                debug('makeTransferWithRipple - unrecoverable transfer error', amount);
+                                deposit.resolve({ status: 'ripple error', message: 'Ripple error & Critical error - money lost!! ' });
+                            }
                         });
+                    });
                 } else {
-                    deposit.resolve({status: 'error', message: depositResult.message});
+                    deposit.resolve({ status: 'error', message: depositResult.message });
                 }
-                
+
                 return deposit.promise;
-            }).then(function(transferResult) {
-                
+            }).then(function (transferResult) {
+
                 if (transferResult.status === 'success') {
                     Utils.getEventEmitter().emit('post:make_transfer', {
                         fromEmail: fromEmail,
@@ -204,11 +205,11 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
                         amount: amount,
                         issuer: issuingAddress,
                         status: 'success'
-                      });
+                    });
                     deferred.resolve({ status: 'success', transaction: transferResult.transaction });
                 } else {
-                    
-                    buildMissingError(transferResult.message, transferResult.status);                  
+
+                    buildMissingError(transferResult.message, transferResult.status);
                 }
             });
 
@@ -216,7 +217,7 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
         });
 }
 
-function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, srcIssuer) {
+function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo) {
     debug('makeTransferWithRipple', senderWallet, recvWallet, dstIssuer, amount, srcIssuer);
     var deferred = Q.defer();
 
@@ -229,10 +230,22 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
             destination: recvWallet.address,
             amount: amount + '/EUR/' + dstIssuer,
         };
-        
+
         var transaction = remote.createTransaction('Payment', paymentData);
         transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
-
+        
+        // Save order info on the blockchain
+        if (orderInfo) {
+            transaction.tx_json.Memos = [
+                {
+                    Memo: {
+                        MemoType: RippleUtils.stringToHex('OrderRequestId'),
+                        MemoData: RippleUtils.stringToHex(orderInfo.orderRequestId)
+                    }
+                }
+            ];
+        }
+        
         // Append it if you got it
         if (srcIssuer) {
             var maxValue = amount.toString(); // Send all; original code from ripple-rest is:
@@ -243,11 +256,11 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
                 issuer: srcIssuer,    // Gotcha!
             });
         }
-        
-        transaction.on('resubmit', function(){
-           debug('resubmitting ', transaction); 
+
+        transaction.on('resubmit', function () {
+            debug('resubmitting ', transaction);
         });
-        
+
         transaction.submit(function (err, res) {
             if (err) {
                 debug('transaction seems to have failed: ', err);
