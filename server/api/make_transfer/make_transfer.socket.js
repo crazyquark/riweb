@@ -30,9 +30,13 @@ function saveOrderToDB(orderInfo) {
     });
 }
 
+function isIssuingBankInvalid(issuingBank) {
+    return !issuingBank || issuingBank.status === 'error' || !issuingBank.bank || !issuingBank.bank.hotWallet || !issuingBank.bank.hotWallet.address;
+}
+
 function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderRequestId) {
 
-    function makeTransferWithRippleWallets(senderWallet, recvWallet, findIssuingBank, senderBank, destUserBankParam, realBankAccount) {
+    function makeTransferWithRippleWallets(senderWallet, recvWallet, issuingBank, senderBank, destUserBankParam, realBankAccount) {
         var deferred = Q.defer();
 
         var destUserBank = destUserBankParam? destUserBankParam.bank : null;
@@ -75,14 +79,15 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
         }
 
         var isTransferedByBank = false;
+
         if (!senderBank) {
-            if (!findIssuingBank || findIssuingBank.status === 'error' || !findIssuingBank.bank || !findIssuingBank.bank.hotWallet || !findIssuingBank.bank.hotWallet.address) {
+            if (isIssuingBankInvalid(issuingBank)) {
 
                 buildMissingError('issuing bank not resolved');
 
                 return deferred.promise;
             } else {
-                issuingAddress = findIssuingBank.bank.hotWallet.address;
+                issuingAddress = issuingBank.bank.hotWallet.address;
             }
         } else {
             // Sender is a bank
@@ -128,7 +133,7 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
         var initialPromise;
 
         if (isTransferedByBank) {
-            initialPromise = realBankAccount.account.deposit(amount)
+            initialPromise = realBankAccount.account.deposit(amount);
         } else {
             //in case it's an internal ripple transaction, just fake the external DB interaction
             initialPromise = Q({ status: 'success' });

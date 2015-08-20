@@ -70,64 +70,64 @@ function createRealbankUsers() {
 }
 
 TestingUtils.dropMongodbDatabase().then(function () {
-  var bankA = {
-    name: 'alpha',
-    info: 'Alpha Bank',
-    email: 'admin@alpha.com',
-    password: 'admin@alpha.com'
-  };
+    var bankA = {
+        name: 'alpha',
+        info: 'Alpha Bank',
+        email: 'admin@alpha.com',
+        password: 'admin@alpha.com'
+    };
 
-  var bankB = {
-    name: 'brd',
-    info: 'BRD Societe Generale',
-    email: 'admin@brd.com',
-    password: 'admin@brd.com'
-  };
+    var bankB = {
+        name: 'brd',
+        info: 'BRD Societe Generale',
+        email: 'admin@brd.com',
+        password: 'admin@brd.com'
+    };
 
-  var aliceWallet;
-  var createBankA = createBank(bankA).then(function (bankAdmin) {
-    return createUserForBank({
-      name: 'Alice',
-      email: 'alice@alpha.com',
-      iban: 'AL47212110090000000235698741'
-    }, bankAdmin)
-      .then(function (wallet) {
-        aliceWallet = { address: wallet.address, secret: wallet.secret };
-
+    var aliceWallet;
+    var createBankA = createBank(bankA).then(function (bankAdmin) {
         return createUserForBank({
-          name: 'Alan',
-          email: 'alan@alpha.com',
-          iban: 'AZ21NABZ00000000137010001944'
-        }, bankAdmin);
-      });
-  });
+            name: 'Alice',
+            email: 'alice@alpha.com',
+            iban: 'AL47212110090000000235698741'
+        }, bankAdmin)
+            .then(function (wallet) {
+                aliceWallet = { address: wallet.address, secret: wallet.secret };
 
-  var createBankB = createBank(bankB).then(function (bankAdmin) {
-    return createUserForBank({
-      name: 'Bob',
-      email: 'bob@brd.com',
-      iban: 'BA391290079401028494'
-    }, bankAdmin);
-  });
-
-  var createRealbankUsersPromise = createRealbankUsers();
-
-  Q.all([createBankA, createBankB, createRealbankUsersPromise]).spread(function (alanWallet, bobWallet) {
-    SetTrust.setBanksTrust(bankA.bankInfo.hotWallet, bankB.bankInfo.hotWallet, alanWallet, bobWallet).then(function () {
-      debug('Set trust alan -> bankA <-> bankB <- bob');
-      SetTrust.setTrust(bankA.bankInfo.hotWallet.address, aliceWallet.address, aliceWallet.secret).then(function () {
-        debug('Set trust alice -> bankA');
-        MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
-          debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
-          debug('\n\n' +
-            '=======================================\n' +
-            '===========SERVER IS STARTED===========\n' +
-            '=======================================\n'
-          );
-        });
-      });
+                return createUserForBank({
+                    name: 'Alan',
+                    email: 'alan@alpha.com',
+                    iban: 'AZ21NABZ00000000137010001944'
+                }, bankAdmin);
+            });
     });
-  });
+
+    var createBankB = createBank(bankB).then(function (bankAdmin) {
+        return createUserForBank({
+            name: 'Bob',
+            email: 'bob@brd.com',
+            iban: 'BA391290079401028494'
+        }, bankAdmin);
+    });
+
+    var createRealbankUsersPromise = createRealbankUsers();
+
+    Q.all([createBankA, createBankB, createRealbankUsersPromise]).spread(function (alanWallet, bobWallet) {
+        SetTrust.setBanksTrust(bankA.bankInfo.hotWallet, bankB.bankInfo.hotWallet, alanWallet, bobWallet).then(function () {
+            debug('Set trust alan -> bankA <-> bankB <- bob');
+            SetTrust.setTrust(bankA.bankInfo.hotWallet.address, aliceWallet.address, aliceWallet.secret).then(function () {
+                debug('Set trust alice -> bankA');
+                MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
+                    debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
+                    debug('\n\n' +
+                            '=======================================\n' +
+                            '===========SERVER IS STARTED===========\n' +
+                            '=======================================\n'
+                    );
+                });
+            });
+        });
+    });
 
 });
 
