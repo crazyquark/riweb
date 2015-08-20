@@ -216,11 +216,12 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
       
 function findSenderBankOrUserBank(issuingBankForUser, senderBankAccount) {
 
-    if (issuingBankForUser && issuingBankForUser.status === 'success') {
-        return {bankWallet: issuingBankForUser.bank.hotWallet, isFromUser: true };
-    } else if (senderBankAccount) {
-        // Sender is a bank
+    if (senderBankAccount) {        
         return {bankWallet: senderBankAccount.hotWallet, isFromUser: false };
+               
+    } else if (issuingBankForUser && issuingBankForUser.status === 'success') {        
+        return {bankWallet: issuingBankForUser.bank.hotWallet, isFromUser: true };
+                        
     } else {            
         return {error : 'Cannot find source bank account!'};
     }
