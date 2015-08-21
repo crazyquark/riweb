@@ -249,7 +249,7 @@ function restoreRippleWalletGenerate() {
 
 function restoreEventEmitter() {
     //ripple.Wallet.generate = originalRippleWalletGenerate;
-    restoreGenericSpy(Utils.getEventEmitter(), ['on', 'emit']);
+    restoreGenericSpy(Utils, ['emitEvent', 'onEvent']);
 }
 
 function restoreAll() {

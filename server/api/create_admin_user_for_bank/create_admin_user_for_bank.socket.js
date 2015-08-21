@@ -29,11 +29,11 @@ function createAdminUserForBank(adminUserInfo) {
 
         var newUserStripped = { email: newUser.email, name: newUser.name };
 
-        Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'success', user:  newUserStripped});
+        Utils.emitEvent('post:create_admin_user_for_bank', { status: 'success', user:  newUserStripped});
         deferred.resolve(newUser);
     }, function (err) {
         debug('createAdminUserForBank error ', err);
-        Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'error', error: err });
+        Utils.emitEvent('post:create_admin_user_for_bank', { status: 'error', error: err });
         deferred.reject(err);
     });
 
@@ -47,7 +47,7 @@ exports.register = function (newSocket) {
 
     Utils.forwardFromEventEmitterToSocket('post:create_admin_user_for_bank', socket);
 
-    Utils.getEventEmitter().on('create_admin_user_for_bank', function (adminUserInfo) {
+    Utils.onEvent('create_admin_user_for_bank', function (adminUserInfo) {
         createAdminUserForBank(adminUserInfo);
     });
 

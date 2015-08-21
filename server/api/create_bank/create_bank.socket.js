@@ -46,19 +46,19 @@ function createBank(newBank) {
         CreateWallet.fundWallet(createdBank.hotWallet, ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
           debug('funded bank wallet');
           // XXX should the funding be chained or should we return to user immediately? I'd rather not wait for the costly ripple operation
-          // Utils.getEventEmitter().emit('post:fund_wallet', createdBank.hotWallet);
-          Utils.getEventEmitter().emit('post:fund_wallet', createdBank.hotWallet.address);
+          // Utils.emitEvent('post:fund_wallet', createdBank.hotWallet);
+          Utils.emitEvent('post:fund_wallet', {address: createdBank.hotWallet.address});
           
           // Establish trust lines with the other banks. Account must be funded.
           // XXX this is also made async after returning to the client so not to block the create bank page too long;
           // The client should listen for the emitted event
           SetTrust.setMutualBanksTrust(createdBank).then(function () {
             debug('setMutualBanksTrust done');
-            Utils.getEventEmitter().emit('post:set_mutual_banks_trust', { status: 'success' });
+            Utils.emitEvent('post:set_mutual_banks_trust', { status: 'success' });
           });
         });
 
-        Utils.getEventEmitter().emit('create_admin_user_for_bank', {
+        Utils.emitEvent('create_admin_user_for_bank', {
           bankId: createdBank._id,
           info: createdBank.info,
           email: newBank.email,
@@ -87,10 +87,10 @@ exports.register = function (newSocket) {
   socket.on('create_bank', function (data) {
     createBank(data)
       .then(function (bank) {
-         Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });
+         Utils.emitEvent('post:create_admin_user_for_bank', { status: 'success', bank: bank });
       })
       .fail(function (error) {
-         Utils.getEventEmitter().emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
+         Utils.emitEvent('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
       });
   });
 };

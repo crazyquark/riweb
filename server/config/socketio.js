@@ -7,6 +7,8 @@
 var config = require('./environment');
 var debug = require('debug')('ConfigSocketio');
 
+var Utils = require('../utils/utils');
+
 // When the user disconnects.. perform this
 function onDisconnect(socket) {
 }
@@ -24,7 +26,6 @@ function onConnect(socket) {
   require('../api/RealBankAccount/RealBankAccount.socket').register(socket);
   require('../api/create_admin_user_for_bank/create_admin_user_for_bank.socket').register(socket);
   require('../api/create_bank/create_bank.socket').register(socket);
-  debug('------Registering all the things');
   require('../api/list_transactions/list_transactions.socket').register(socket);
   require('../api/set_root_flags/set_root_flags.socket').register(socket);
   require('../api/make_transfer/make_transfer.socket').register(socket);
@@ -52,6 +53,7 @@ module.exports = function (socketio) {
   // }));
 
   socketio.on('connection', function (socket) {
+    Utils.setSocketId(socket.id);
     socket.address = socket.handshake.address !== null ?
             socket.handshake.address.address + ':' + socket.handshake.address.port :
             process.env.DOMAIN;

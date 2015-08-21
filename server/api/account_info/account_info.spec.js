@@ -16,7 +16,7 @@ var AccountInfo = require('./account_info.socket');
 var TestingUtils = require('./../../../test/utils/testing_utils');
 
 describe('Test account_info', function () {
-    var socket;
+    var socket, emitSpy;
     beforeEach(function (done) {
         socket = TestingUtils.buildSocketSpy();
 
@@ -27,6 +27,12 @@ describe('Test account_info', function () {
         TestingUtils.buildNewConnectedRemoteStub();
         TestingUtils.buildWalletSpy();
         TestingUtils.dropMongodbDatabase().then(function () { done(); });
+        
+        emitSpy = sinon.spy(Utils, 'emitEvent');
+        
+        socket.id = 'fooBarSocketId';
+        Utils.putSocket(socket);
+        Utils.setSocketId(socket.id);
     });
     afterEach(function () {
         TestingUtils.restoreAll();
@@ -36,20 +42,20 @@ describe('Test account_info', function () {
         TestingUtils.buildFindByOwnerEmailForUnexisting(Wallet);
 
         AccountInfo.getAccountInfo('not_exist@example.com', socket).then(function () {
-            expect(socket.emit).to.have.been.calledWith('post:account_info', {info: 'User does not exist!'});
-            expect(socket.emit).to.have.callCount(1);
+            expect(emitSpy).to.have.been.calledWith('post:account_info', { info: 'User does not exist!', socketId: 'fooBarSocketId' });
+            expect(emitSpy).to.have.callCount(1);
             done();
-        }).done(null, function(error){done(error);});
+        }).done(null, function (error) { done(error); });
     });
 
     it('should get account_info for admin email', function (done) {
         TestingUtils.buildFindByOwnerEmailForAdmin(Wallet);
 
         AccountInfo.getAccountInfo('admin@admin.com', socket).then(function () {
-            expect(socket.emit).to.have.callCount(1);
-            expect(socket.emit).to.have.been.calledWith('post:account_info', {balance: 0});
+            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.been.calledWith('post:account_info', { balance: 0, socketId: 'fooBarSocketId' });
             done();
-        }).done(null, function(error){done(error);});
+        }).done(null, function (error) { done(error); });
     });
 
 });

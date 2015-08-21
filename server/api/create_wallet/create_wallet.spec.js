@@ -19,17 +19,18 @@ var Bankaccount = require('./../bankaccount/bankaccount.model');
 
 describe('Test create_wallet', function () {
 
-    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy;
+    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy;
     var bank1, bank2, nonAdminUser, nonAdminUserWithNoBank;
 
     beforeEach(function (done) {
+        var socket = TestingUtils.buildSocketSpy();
+        
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
-        socketSpy = TestingUtils.buildSocketSpy();
-        CreateWallet.register(socketSpy);
-        emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
+        CreateWallet.register(TestingUtils.buildSocketSpy());
+        emitSpy = sinon.spy(Utils, 'emitEvent');
         
         bank1 = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
         bank2 = TestingUtils.getMongooseBankAccount('_bank2', 'Test foreing bank', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK_FOREIGN'));
@@ -40,7 +41,10 @@ describe('Test create_wallet', function () {
         TestingUtils.buildBankaccountFindById(Bankaccount, [bank1, bank2]);         
           
         TestingUtils.buildWalletSpy();
-        TestingUtils.buildNewConnectedRemoteStub();                
+        TestingUtils.buildNewConnectedRemoteStub();
+        socket.id = 'fooBarSocketId';         
+        Utils.setSocketId(socket.id);
+        Utils.putSocket(socket);
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
@@ -87,9 +91,13 @@ describe('Test create_wallet', function () {
             expect(emitSpy).to.have.been.calledWith('set_trust', {
                 rippleDestinationAddr: bank1.hotWallet.address,
                 rippleSourceAddr: nonAdminRippleGeneratedWallet.address,
-                rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
+                rippleSourceSecret: nonAdminRippleGeneratedWallet.secret,
+                socketId: 'fooBarSocketId'
             });
-            expect(emitSpy).to.have.been.calledWith('post:create_wallet', nonAdminRippleGeneratedWallet.address);
+            expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
+                address: nonAdminRippleGeneratedWallet.address,
+                socketId: 'fooBarSocketId'
+            });
             done();
         }).done(null, function (error) { done(error); });
     });
@@ -107,8 +115,17 @@ describe('Test create_wallet', function () {
 
     it('should emit post:create_wallet flag when create new wallet', function (done) {
         CreateWallet.createWalletForEmail('a5@example.com').then(function () {
-            expect(socketSpy.emit).to.have.callCount(1);
-            expect(socketSpy.emit).to.have.been.calledWith('post:create_wallet', sinon.match.string);
+            expect(emitSpy).to.have.callCount(2);
+            expect(emitSpy).to.have.been.calledWith('set_trust', {
+                rippleDestinationAddr: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
+                rippleSourceAddr: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh',
+                rippleSourceSecret: 'NONADMINssphrase',
+                socketId: 'fooBarSocketId'
+            });
+            expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
+                address: sinon.match.string,
+                socketId: 'fooBarSocketId'
+            });
             done();
         }).done(null, function (error) { done(error); });        
     });
@@ -120,8 +137,11 @@ describe('Test create_wallet', function () {
         
         CreateWallet.createWalletForEmail(nonAdminUserWithNoBank.email).then(function () { done(); }, 
             function () {
-                expect(socketSpy.emit).to.have.callCount(1);
-                expect(socketSpy.emit).to.have.been.calledWith('post:create_wallet', { error: "bank not found"});
+                expect(emitSpy).to.have.callCount(1);
+                expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
+                    error: "bank not found",
+                    socketId: 'fooBarSocketId'
+                });
                 done();
             }        
         ).done(null, function (error) { done(error); });
@@ -130,8 +150,11 @@ describe('Test create_wallet', function () {
     it('should fail when user is not found', function (done) {
         CreateWallet.createWalletForEmail('userDoesNotExist@nobody.com').then(function () { done(); }, 
             function () {
-                expect(socketSpy.emit).to.have.callCount(1);
-                expect(socketSpy.emit).to.have.been.calledWith('post:create_wallet', { error: "user not found"});
+                expect(emitSpy).to.have.callCount(1);
+                expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
+                    error: "user not found",
+                    socketId: 'fooBarSocketId'
+                });
                 done();
             }        
         ).done(null, function (error) { done(error); });

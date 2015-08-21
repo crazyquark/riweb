@@ -35,7 +35,7 @@ function fundWallet(wallet, sourceWallet, amount) {
   
   function setTrustEmit() {
     deferred.resolve(wallet);
-    Utils.getEventEmitter().emit('set_trust', {
+    Utils.emitEvent('set_trust', {
       rippleDestinationAddr: sourceWallet.address,
       rippleSourceAddr: wallet.address,
       rippleSourceSecret: wallet.secret
@@ -174,11 +174,11 @@ function createWalletForEmail(ownerEmail, role) {
     }
   }).then(function(foundWallet){
     deferred.resolve(foundWallet);
-    Utils.getEventEmitter().emit('post:create_wallet', foundWallet.address);
+    Utils.emitEvent('post:create_wallet', {address: foundWallet.address});
   }, 
   function(errorMessage){
     deferred.reject(errorMessage);
-    Utils.getEventEmitter().emit('post:create_wallet', {error : errorMessage});
+    Utils.emitEvent('post:create_wallet', {error : errorMessage});
   });
 
   return deferred.promise;

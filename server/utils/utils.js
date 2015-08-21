@@ -54,18 +54,50 @@ function getNewConnectedAdminRemote() {
   return getNewConnectedRemote(ROOT_RIPPLE_ACCOUNT.address, ROOT_RIPPLE_ACCOUNT.secret);
 }
 
-function getEventEmitter() {
-    return LoggedEmitterService;
+var socketId;
+
+function onEvent(eventName, listenerFunction) {
+    LoggedEmitterService.on(eventName, wrappedListenerFunction);
+
+    function wrappedListenerFunction() {
+        var eventObject = arguments[0];
+        setSocketId(eventObject.socketId);
+        listenerFunction.call(null, eventObject);
+    }
+
+    return wrappedListenerFunction;
+}
+
+function emitEvent(eventName, event) {
+    event.socketId = socketId;
+    LoggedEmitterService.emit(eventName, event);
+}
+
+function setSocketId(theSocketId){
+  // if(theSocketId === undefined){
+  //   throw new Error("must set a socket id");
+  // }
+  socketId = theSocketId;  
+}
+
+var sockets = [];
+
+function putSocket(socket){
+  sockets[socket.id] = socket;
 }
 
 function forwardFromEventEmitterToSocket(eventName, socket) {
-    getEventEmitter().on(eventName, function (event) {
-        socket.emit(eventName, event);
+    putSocket(socket);
+    onEvent(eventName, function (event) {
+        sockets[socketId].emit(eventName, event);
     });
 }
 
+module.exports.putSocket = putSocket;
+module.exports.emitEvent = emitEvent;
+module.exports.onEvent = onEvent;
+module.exports.setSocketId = setSocketId;
 module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewConnectedAdminRemote = getNewConnectedAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
 module.exports.forwardFromEventEmitterToSocket = forwardFromEventEmitterToSocket;
-module.exports.getEventEmitter = getEventEmitter;

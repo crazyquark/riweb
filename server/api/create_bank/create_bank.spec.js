@@ -23,13 +23,20 @@ describe('Test create_bank', function () {
     var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy;
 
     beforeEach(function (done) {
+        var socket = TestingUtils.buildSocketSpy();
+        
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
         socketSpy = TestingUtils.buildSocketSpy();
         CreateBank.register(socketSpy);
-        emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
+        emitSpy = sinon.spy(Utils, 'emitEvent');
+        
+        socket.id = 'fooBarSocketId';
+        Utils.setSocketId(socket.id);
+        Utils.putSocket(socket);
+        
         TestingUtils.buildBankaccountSpy();
         TestingUtils.buildNewConnectedRemoteStub();
         TestingUtils.dropMongodbDatabase().then(function () { done(); });
@@ -62,6 +69,7 @@ describe('Test create_bank', function () {
             info: 'The french one',
             email: 'admin@brd.com',
             password: 'secret',
+            socketId: 'fooBarSocketId',
         };
         CreateBank.createBank(newBank).then(function (createdBank) {
             expect(emitSpy).to.have.been.calledWith('create_admin_user_for_bank', {
@@ -69,6 +77,7 @@ describe('Test create_bank', function () {
                 info: createdBank.info,
                 email: 'admin@brd.com',
                 password: 'secret',
+                socketId: 'fooBarSocketId',
             });
             done();
         }).done(null, function (error) { done(error); });

@@ -25,7 +25,7 @@ describe('Test list_transactions', function() {
     beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
-        emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
+        emitSpy = sinon.spy(Utils, 'emitEvent');
         socketSpy = TestingUtils.buildSocketSpy();
 
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');

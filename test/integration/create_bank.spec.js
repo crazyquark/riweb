@@ -33,7 +33,7 @@ describe('ITest Create Bank', function () {
 			password: '1234',
 		};
 
-		Utils.getEventEmitter().on('post:create_admin_user_for_bank', function (result) {
+		Utils.onEvent('post:create_admin_user_for_bank', function (result) {
 			expect(result.status).to.eql('success');
 			if (result.status === 'success') {
 				expect(result.user.email).to.eql(bankInfo.email);

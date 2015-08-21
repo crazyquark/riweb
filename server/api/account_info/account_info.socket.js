@@ -52,14 +52,14 @@ function getAccountInfo(ownerEmail, socket) {
             balance: rippleAccountInfo.lines.length > 0 ? rippleAccountInfo.lines[0].balance : 0
           };
 
-          Utils.getEventEmitter().emit('post:account_info', accountLines);
+          Utils.emitEvent('post:account_info', accountLines);
           deferred.resolve(accountLines);
         }).catch(function(err){
           console.error(err);
           deferred.reject(err);
         });
       } else {
-        Utils.getEventEmitter().emit('post:account_info', {info: 'User does not exist!'});
+        Utils.emitEvent('post:account_info', {info: 'User does not exist!'});
         deferred.resolve({info: 'User does not exist!'});
       }
       return deferred.promise;

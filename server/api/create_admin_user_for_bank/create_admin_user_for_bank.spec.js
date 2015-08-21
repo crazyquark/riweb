@@ -26,9 +26,11 @@ describe('Test create admin user for bank', function () {
 
 
   beforeEach(function (done) {
-    emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
+    emitSpy = sinon.spy(Utils, 'emitEvent');
     socketSpy = TestingUtils.buildSocketSpy();
+    socketSpy.id = 'fooBarSocketId';
     CreateAdminUserForBank.register(socketSpy);
+    Utils.setSocketId('fooBarSocketId');
     TestingUtils.dropMongodbDatabase().then(function () { done(); });
   });
 
@@ -38,7 +40,7 @@ describe('Test create admin user for bank', function () {
   })
 
   it('should create an admin user for the given bank ID', function (done) {
-    Utils.getEventEmitter().on('post:create_admin_user_for_bank', function (result) {
+    Utils.onEvent('post:create_admin_user_for_bank', function (result) {
       expect(result.status).to.eql('success');
       if (result.status === 'success') {
         expect(result.user.email).to.eql(adminInfo.email);
@@ -50,7 +52,10 @@ describe('Test create admin user for bank', function () {
       expect(user.email).to.eql(adminInfo.email);
       expect(user.name).to.eql(adminInfo.info);
       expect(emitSpy).to.have.callCount(1);
-      expect(emitSpy).to.have.been.calledWith('post:create_admin_user_for_bank', { status: 'success', user: { email: user.email, name: user.name } });
+      expect(emitSpy).to.have.been.calledWith('post:create_admin_user_for_bank', { 
+        status: 'success',
+        user: { email: user.email, name: user.name },
+        socketId: 'fooBarSocketId' });
       done();
     }).fail(function (error) { done(error); });
   });

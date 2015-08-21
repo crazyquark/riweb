@@ -28,7 +28,7 @@ describe('Test make_transfer', function () {
     beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
-        emitSpy = sinon.spy(Utils.getEventEmitter(), 'emit');
+        emitSpy = sinon.spy(Utils, 'emitEvent');
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
 
@@ -50,6 +50,8 @@ describe('Test make_transfer', function () {
         TestingUtils.buildBankaccountFindById(Bankaccount, [bank1]);
 
         sinon.mock(remote, 'createTransaction');
+
+        Utils.setSocketId('fooBarSocketId');
 
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
@@ -77,10 +79,11 @@ describe('Test make_transfer', function () {
             expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
                 fromEmail: 'alice@example.com',
                 toEmail: 'bob@example.com',
-                amount: amount,
-                issuer: bank1.hotWallet.address,
-                status: 'success'
-            });
+                amount: 50,
+                issuer: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
+                status: 'success',
+                socketId: 'fooBarSocketId' } 
+            );
 
             done();
         }).done(null, function (error) {
@@ -104,7 +107,8 @@ describe('Test make_transfer', function () {
                 amount: amount,
                 issuer: undefined,
                 status: 'error',
-                message: 'missing account'
+                message: 'missing account',
+                socketId: 'fooBarSocketId'
             });
 
             done();
@@ -136,7 +140,8 @@ describe('Test make_transfer', function () {
                 issuer: bank1.hotWallet.address,
                 message: 'Ripple error',
                 // message: 'Ripple error. Cannot transfer from alice@example.com to bob@example.com 50 €!',
-                status: 'ripple error'
+                status: 'ripple error',
+                socketId: 'fooBarSocketId'
             });
 
             done();
@@ -164,7 +169,8 @@ describe('Test make_transfer', function () {
                 amount: amount,
                 issuer: undefined,
                 status: 'error',
-                message: 'issuing bank not resolved'
+                message: 'issuing bank not resolved',
+                socketId: 'fooBarSocketId'
             });
 
             done();
@@ -192,7 +198,8 @@ describe('Test make_transfer', function () {
                 amount: amount,
                 issuer: undefined,
                 status: 'error',
-                message: 'issuing bank not resolved'
+                message: 'issuing bank not resolved',
+                socketId: 'fooBarSocketId'
             });
 
             done();

@@ -48,7 +48,7 @@ function buildThrowMissingError(fromEmail, toEmail, amount){
             message: errorMessage
         };
 
-        Utils.getEventEmitter().emit('post:make_transfer', result);
+        Utils.emitEvent('post:make_transfer', result);
         return result;
     }
     return throwMissingError;
@@ -193,7 +193,7 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
         }).then(function (transferResult) {
 
             if (transferResult.status === 'success') {
-                Utils.getEventEmitter().emit('post:make_transfer', {
+                Utils.emitEvent('post:make_transfer', {
                     fromEmail: fromEmail,
                     toEmail: toEmail,
                     amount: amount,
@@ -319,7 +319,7 @@ exports.register = function (socket) {
 
     Utils.forwardFromEventEmitterToSocket('post:make_transfer', socket);
 
-    Utils.getEventEmitter().on('make_transfer', function (data) {
+    Utils.onEvent('make_transfer', function (data) {
         makeTransfer(data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 
