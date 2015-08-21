@@ -23,6 +23,8 @@ describe('ITest Create Bank', function () {
 		TestingUtils.dropMongodbDatabase().then(function () {
 			done();
 		});
+		
+		Utils.getEventEmitter().eventEmitter.removeAllListeners('post:create_admin_user_for_bank');
 	});
 
 	it('should create a bank and an admin user for it', function (done) {

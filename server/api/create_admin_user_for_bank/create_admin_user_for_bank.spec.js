@@ -35,6 +35,8 @@ describe('Test create admin user for bank', function () {
   afterEach(function () {
     emitSpy.restore();
     TestingUtils.restoreAll();
+    
+    Utils.getEventEmitter().eventEmitter.removeAllListeners('post:create_admin_user_for_bank');
   })
 
   it('should create an admin user for the given bank ID', function (done) {
@@ -44,7 +46,7 @@ describe('Test create admin user for bank', function () {
         expect(result.user.email).to.eql(adminInfo.email);
         expect(result.user.name).to.eql(adminInfo.info);
       }
-    });
+   });
 
     CreateAdminUserForBank.createAdminUserForBank(adminInfo).then(function (user) {
       expect(user.email).to.eql(adminInfo.email);
