@@ -18,11 +18,11 @@ function getNewRemote(){
         servers: [ RIPPLED_WS_SERVER ]
         //fee_cushion: 0.0
     });
-    
+
   newRemote.on('disconect', function(){
     console.log('remote disconect');
   });
-    
+
   newRemote.on('disconected', function(){
     console.log('remote disconected');
   });
@@ -40,7 +40,7 @@ function getNewConnectedRemote(rippleAddress, rippleSecret){
   }
 
   remote.connect(function(err){
-    debug('getNewConnectedRemote remote.connect', err);
+    debug('getNewConnectedRemote remote.connect err=', err);
     if(!err){
       deferred.resolve(remote);
     } else {
@@ -54,9 +54,18 @@ function getNewConnectedAdminRemote() {
   return getNewConnectedRemote(ROOT_RIPPLE_ACCOUNT.address, ROOT_RIPPLE_ACCOUNT.secret);
 }
 
+function getEventEmitter() {
+    return LoggedEmitterService;
+}
+
+function forwardFromEventEmitterToSocket(eventName, socket) {
+    getEventEmitter().on(eventName, function (event) {
+        socket.emit(eventName, event);
+    });
+}
+
 module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewConnectedAdminRemote = getNewConnectedAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
-module.exports.getEventEmitter = function(){
-    return LoggedEmitterService;
-};
+module.exports.forwardFromEventEmitterToSocket = forwardFromEventEmitterToSocket;
+module.exports.getEventEmitter = getEventEmitter;

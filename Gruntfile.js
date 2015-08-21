@@ -535,6 +535,7 @@ module.exports = function (grunt) {
     }
 
     grunt.task.run([
+      'jshint',
       'clean:server',
       'env:all',
       'concurrent:server',
@@ -626,9 +627,8 @@ module.exports = function (grunt) {
   ]);
 
   grunt.registerTask('default', [
-    'newer:jshint',
-    'test',
-    'build'
+    'jshint',
+    'test'
   ]);
 
 };

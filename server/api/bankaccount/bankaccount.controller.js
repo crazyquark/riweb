@@ -7,7 +7,7 @@ var Bankaccount = require('./bankaccount.model');
 exports.index = function(req, res) {
   Bankaccount.find(function (err, bankaccounts) {
     if(err) { return handleError(res, err); }
-    return res.json(200, bankaccounts);
+    return res.status(200).json(bankaccounts);
   });
 };
 

@@ -2,6 +2,7 @@ var sinon = require('sinon');
 var Q = require('q');
 var Wallet = require('./../../server/api/wallet/wallet.model');
 var BankAccount = require('./../../server/api/bankaccount/bankaccount.model');
+var RealBankAccount = require('../../server/api/RealBankAccount/RealBankAccount.model');
 var User = require('../../server/api/user/user.model');
 var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
@@ -31,6 +32,7 @@ function buildRemoteStub() {
         createTransaction: sinon.stub(),
         requestAccountLines: sinon.stub(),
         requestAccountTransactions: sinon.stub(),
+        getLedgerSequence: sinon.stub(),
         _stub_transaction: {}
     };
 
@@ -47,10 +49,14 @@ function buildRemoteStub() {
 function buildEmptyTransactionStub() {
     var transaction = {
         submit: sinon.stub(),
-        setTrust: sinon.stub()
+        setTrust: sinon.stub(),
+        on: sinon.stub(),
+        lastLedger: sinon.stub(),
+        tx_json: { Memos: [] }
     };
     transaction.submit.yields(null, {});
     transaction.setTrust.yields(null, {});
+
     return transaction;
 }
 
@@ -132,7 +138,7 @@ function restoreWalletSpy() {
 }
 
 function restoreBankaccountSpy() {
-    restoreGenericSpy(BankAccount, ['create']);
+    restoreGenericSpy(BankAccount, ['create', 'findByRippleAddress']);
 }
 
 function buildNewConnectedRemoteStub() {
@@ -147,12 +153,12 @@ function restoreNewConnectedRemoteStub() {
 function getNonAdminMongooseUser(name, email_address, bankId) {
     name = name || 'testJoe@danger.io';
     email_address = email_address || 'joe@danger.io';
-    bankId = bankId || 'id_bank_ING';    
+    bankId = bankId || 'id_bank_ING';
     return {
         name: name,
         email: email_address,
-        bank: bankId,  
-        role: 'user'        
+        bank: bankId,
+        role: 'user'
     };
 }
 
@@ -161,7 +167,7 @@ function getMongooseBankAccount(bankId, bankName, wallet) {
         _id: bankId,
         name: bankName,
         info: bankName,
-        hotWallet: wallet  
+        hotWallet: wallet
     };
 }
 
@@ -171,7 +177,7 @@ function buildUserFindEmailStub(user, nonAdminGeneratedUser) {
             return Q(nonAdminGeneratedUser);
         }
         return Q();
-    });    
+    });
 }
 
 
@@ -181,7 +187,7 @@ function buildBankaccountFindById(bankaccount, banksList) {
         for (index = 0; index < banksList.length; ++index) {
             if (banksList[index]._id === bankId)
                 return Q(banksList[index]);
-        }        
+        }
         return Q();
     });
 }
@@ -256,6 +262,14 @@ function restoreAll() {
     restoreRippleWalletGenerate();
 }
 
+function createRealBankUser(bankName, iban, balance) {
+    return RealBankAccount.create({
+        name: bankName,
+        iban: iban,
+        balance: balance
+    });
+}
+
 function seedBankAndUser(callback) {
     var bank = {
         name: 'ing',
@@ -265,9 +279,8 @@ function seedBankAndUser(callback) {
             address: 'r4gzWvzzJS2xLuga9bBc3XmzRMPH3VvxXg'
         },
         hotWallet: {
-            address: 'rJXw6AVcwWifu2Cvhg8CLkBWbqUjYbaceu',
-            secret: 'ssVbYUbUYUH8Yi9xLHceSUQo6XGm4'
-
+            address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh',
+            secret: 'masterpassphrase'
         }
     };
     BankAccount.create(
@@ -278,15 +291,19 @@ function seedBankAndUser(callback) {
         });
 
     function seedUsers(createdBank) {
+        var iban = 'CH9300762011623852957';
         var newUser = {
             provider: 'local',
             name: 'James Bond',
             email: 'james.bond@mi6.com',
+            iban: iban,
             password: '1234',
             bank: createdBank._id
         };
         User.create(newUser, function () {
-            callback(newUser, bank);
+            createRealBankUser(createdBank.name, iban, 100).then(function () {
+                callback(newUser, bank);
+            });
         });
     }
 }

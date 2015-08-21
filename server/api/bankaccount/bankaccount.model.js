@@ -21,4 +21,11 @@ BankaccountSchema.statics.findById = function(bankId){
   return this.findOneQ({_id: bankId});
 };
 
+BankaccountSchema.statics.findByRippleAddress = function(rippleAddress){
+  var promise = this.findOneQ({'hotWallet.address' : rippleAddress});
+  promise.rippleAddress = rippleAddress; // let's remember why we're here
+  return promise;
+};
+
+
 module.exports = mongoose.model('Bankaccount', BankaccountSchema);

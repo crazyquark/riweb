@@ -1,0 +1,10 @@
+user1 { address: 'rN1zVC4KQsFJbQ2WANBB79gGippD3V5Cez', secret: 'sndtXVKYciroTtw7ebh9gc1r1Wx37' }
+user2 { address: 'rPPJo7vmmRhu9Um3hzBh623GZD8uYrmBfN',
+  secret: 'snQcauWoti84Ju4zheFSr1h62gJe3' }
+bank1 { address: 'rKCNQ3MxG7tPfhi8adiXxHtu6z31a497DB',
+  secret: 'sstipxsmMokg3rvb345SF183fy7Xn' }
+bank2 { address: 'r4spegDYKta7KFb5XTNfEjyauEhFFb7ymw',
+  secret: 'shSfJ4oBkus6QnWyZWt2g33Vm57zN' }
+
+
+rippled ripple_path_find '{"source_account": "rN1zVC4KQsFJbQ2WANBB79gGippD3V5Cez", "source_currencies": [ { "currency": "XRP" },{ "currency": "EUR" } ], "destination_account": "rKCNQ3MxG7tPfhi8adiXxHtu6z31a497DB", "destination_amount": { "value": "10.000", "currency": "EUR", "issuer": "rKCNQ3MxG7tPfhi8adiXxHtu6z31a497DB" } }'

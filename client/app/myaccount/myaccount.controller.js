@@ -1,16 +1,15 @@
 'use strict';
 
 angular.module('riwebApp')
-    .controller('MyaccountCtrl', function ($scope, $rootScope, Auth, User, Wallet, RIPPLE_ROOT_ACCOUNT,
+    .controller('MyaccountCtrl', function ($scope, $rootScope, Auth, User, Wallet,
         RippleRemoteService, FormattingService, RipplePeersService,
         RippleAccountService, RippleWalletService, RippleTransactionService) {
-        
+
         // Dismiss user message
         if ($rootScope.message) {
-
-            delete $rootScope.message
+            delete $rootScope.message;
         }
-        
+
         $scope.amountToTransfer = 100;
 
         $scope.getMyAccountUser = Auth.getCurrentUser;
@@ -40,6 +39,9 @@ angular.module('riwebApp')
             });
         }
 
+        RippleAccountService.resetAccount();
+        refreshAngular();
+
         $scope.$on('currentUser', function () {
             refreshCurrentUserWallet();
         });
@@ -56,4 +58,5 @@ angular.module('riwebApp')
                 loadCurrentUserBalance(refreshAngular);
             });
         });
+        
     });

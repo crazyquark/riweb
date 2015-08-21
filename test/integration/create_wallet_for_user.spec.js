@@ -34,8 +34,9 @@ describe('ITest signup', function () {
   });
 
   it('should create an wallet for the user', function (done) {
-    this.timeout(20000); // Wait around a bunch for Ripple
+    this.timeout(40000); // Wait around a bunch for Ripple
     //TODO: should first send rippled credits to the bank (create bank wallet)
+    //try to use what is in seed.js and extract it into a separate service
     debug('should create a wallet');
     TestingUtils.seedBankAndUser(function (theUser, theBank) {
       debug('seedBankAndUser');
@@ -61,7 +62,7 @@ describe('ITest signup', function () {
                 debug('requestAccountInfo');
                 expect(err).to.eql(null);
                 expect(info).to.have.deep.property('account_data.Account', wallet.address);
-                expect(info).to.have.deep.property('account_data.Balance', '60000000');
+                expect(info).to.have.deep.property('account_data.Balance', '59999988');
                 done();
               })
             })

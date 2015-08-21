@@ -1,41 +1,55 @@
 'use strict';
 
-var app    = require('../../server/app');
+var app = require('../../server/app');
 var config = require('../../server/config/environment');
+var local = require('../../server/config/local.env');
 
-var chai   = require('chai');
+var chai = require('chai');
 var expect = chai.expect;
 
 var ripple = require('ripple-lib');
-var debug  = require('debug')('ITRipple');
-var Q 	   = require('q');
-var Utils 		 = require('../../server/utils/utils');
+var debug = require('debug')('ITRipple');
+var Q = require('q');
+var Utils = require('../../server/utils/utils');
 var CreateWallet = require('../../server/api/create_wallet/create_wallet.socket');
 var SetRootFlags = require('../../server/api/set_root_flags/set_root_flags.socket');
+var SetTrust = require('../../server/api/set_trust/set_trust.socket');
+var MakeTransfer = require('../../server/api/make_transfer/make_transfer.socket');
 
 function fundBanks(bank1, bank2) {
 	var deferred = Q.defer();
 	Utils.getNewConnectedRemote().then(function (remote) {
 		debug('Fund the banks');
-		CreateWallet.fundWallet(bank1, Utils.ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
+		CreateWallet.fundWallet(bank1, Utils.ROOT_RIPPLE_ACCOUNT, 10000).then(function () {
 			debug('Funded bank1');
-			CreateWallet.fundWallet(bank2, Utils.ROOT_RIPPLE_ACCOUNT).then(function () {
+			CreateWallet.fundWallet(bank2, Utils.ROOT_RIPPLE_ACCOUNT, 10000).then(function () {
 				debug('Funded bank2');
-				
-				deferred.resolve();
+
+				deferred.resolve({ status: 'success' });
 			});
 		});
 	});
-	
+
 	return deferred.promise;
 }
 
-function setBankFlags(bank1, bank2) {
-	
+function fundUsers(bank1, bank2, user1, user2) {
+	var deferred = Q.defer();
+	debug('fundUsers');
+	CreateWallet.fundWallet(user1, bank1, 100).then(function () {
+		debug('fundUsers user1');
+		CreateWallet.fundWallet(user2, bank2, 100).then(function () {
+			debug('fundUsers user2');
+			deferred.resolve({ status: 'success' });
+		})
+	});
+
+	return deferred.promise;
 }
 
 describe('ITest rippled', function () {
-	it('Create this scenario on Ripple: user1 -> bank -> bank2 <- user2', function () {
+	this.timeout(90000);
+	it('Create this scenario on Ripple: user1 -> bank1 -> bank2 -> user2', function (done) {
 		debug('Create 4 Ripple accounts');
 
 		var user1 = ripple.Wallet.generate();
@@ -43,8 +57,32 @@ describe('ITest rippled', function () {
 		var bank1 = ripple.Wallet.generate();
 		var bank2 = ripple.Wallet.generate();
 
-		fundBanks(bank1, bank2).then(function(){
-			
+		debug('user1 ', user1);
+		debug('bank1 ', bank1);
+
+		debug('user2 ', user2);
+		debug('bank2 ', bank2);
+
+		fundBanks(bank1, bank2).then(function () {
+			debug('funded banks');
+			fundUsers(bank1, bank2, user1, user2).then(function () {
+				SetTrust.setBanksTrust(bank1, bank2, user1, user2).then(function () {
+					debug('makeTransferWithRipple');
+                    MakeTransfer.makeTransferWithRipple(bank1, user1, bank1.address, 100).then(function () {
+						debug('makeTransferWithRipple user1');
+						MakeTransfer.makeTransferWithRipple(bank2, user2, bank2.address, 100).then(function () {
+							debug('makeTransferWithRipple user2');
+							MakeTransfer.makeTransferWithRipple(user1, user2, bank2.address, 5, bank1.address).then(function () {
+								debug('makeTransferWithRipple user1, user2');
+								done();
+							}).fail(function (err) {
+								debug('error: ', err);
+								done(err);
+							})
+						})
+					})
+				})
+			});
 		});
 	});
 });

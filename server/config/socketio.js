@@ -19,6 +19,9 @@ function onConnect(socket) {
   });
 
   // Insert sockets below
+  require('../api/Order/Order.socket').register(socket);
+  require('../api/order_request/order_request.socket').register(socket);
+  require('../api/RealBankAccount/RealBankAccount.socket').register(socket);
   require('../api/create_admin_user_for_bank/create_admin_user_for_bank.socket').register(socket);
   require('../api/create_bank/create_bank.socket').register(socket);
   debug('------Registering all the things');
