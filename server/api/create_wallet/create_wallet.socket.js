@@ -100,19 +100,19 @@ function getBankForUser(ownerEmail) {
       return BankAccount.findById(foundUser.bank).then(function(foundBank) {
         if (foundBank) {
           if (foundBank.hotWallet && foundBank.hotWallet.address && foundBank.hotWallet.secret) {
-            return { status: 'success', bank: foundBank };
+            return { status: 'success', bank: foundBank, sourceRole: foundUser.role };
           } else {
-            return { status: 'error', message: 'bank wallet not correct' };
+            return { status: 'error', message: 'bank wallet not correct', sourceRole: foundUser.role};
           }
         } else {
           debug('cannot find bank ', foundUser.bankId)
-          return { status: 'error', message: 'bank not found' };
+          return { status: 'error', message: 'bank not found', sourceRole: foundUser.role };
         }
       });
     }
     else {
       debug('cannot find user for email ', ownerEmail)
-      return { status: 'error', message: 'user not found' };
+      return { status: 'error', message: 'user not found', sourceRole: undefined };
     }
   });
 

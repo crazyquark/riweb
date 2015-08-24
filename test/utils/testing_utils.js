@@ -4,6 +4,7 @@ var Wallet = require('./../../server/api/wallet/wallet.model');
 var BankAccount = require('./../../server/api/bankaccount/bankaccount.model');
 var RealBankAccount = require('../../server/api/RealBankAccount/RealBankAccount.model');
 var User = require('../../server/api/user/user.model');
+var CreateAdminUserForBank = require('../../server/api/create_admin_user_for_bank/create_admin_user_for_bank.socket');
 var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
 var mongoose = require('mongoose-q')(require('mongoose'));
@@ -286,7 +287,7 @@ function seedBankAndUser(callback) {
     BankAccount.create(
         bank, function () {
             BankAccount.findOne(function (err, firstBank) {
-                seedUsers(firstBank);
+                seedUsers(firstBank);                
             });
         });
 
@@ -302,10 +303,22 @@ function seedBankAndUser(callback) {
         };
         User.create(newUser, function () {
             createRealBankUser(createdBank.name, iban, 100).then(function () {
-                callback(newUser, bank);
+                seedAdminBankUser(createdBank).then(function() {
+                    callback(newUser, bank);
+                });
             });
         });
     }
+    
+    function seedAdminBankUser(createdBank) {
+        var adminUserInfo = {            
+            info: createdBank.info + ' Admin',
+            email: createdBank.email,
+            bankId: createdBank._id,
+            password: createdBank.email,            
+        };
+        return CreateAdminUserForBank.createAdminUserForBank(adminUserInfo);
+    }    
 }
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
