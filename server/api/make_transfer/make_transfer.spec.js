@@ -51,7 +51,7 @@ describe('Test make_transfer', function () {
 
         sinon.mock(remote, 'createTransaction');
 
-        Utils.setSocketId('fooBarSocketId');
+        // Utils.setSocketId('fooBarSocketId');
 
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
@@ -81,8 +81,7 @@ describe('Test make_transfer', function () {
                 toEmail: 'bob@example.com',
                 amount: 50,
                 issuer: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
-                status: 'success',
-                socketId: 'fooBarSocketId' } 
+                status: 'success'} 
             );
 
             done();
@@ -107,8 +106,7 @@ describe('Test make_transfer', function () {
                 amount: amount,
                 issuer: undefined,
                 status: 'error',
-                message: 'missing account',
-                socketId: 'fooBarSocketId'
+                message: 'missing account'
             });
 
             done();
@@ -140,8 +138,7 @@ describe('Test make_transfer', function () {
                 issuer: bank1.hotWallet.address,
                 message: 'Ripple error',
                 // message: 'Ripple error. Cannot transfer from alice@example.com to bob@example.com 50 €!',
-                status: 'ripple error',
-                socketId: 'fooBarSocketId'
+                status: 'ripple error'
             });
 
             done();
@@ -169,8 +166,7 @@ describe('Test make_transfer', function () {
                 amount: amount,
                 issuer: undefined,
                 status: 'error',
-                message: 'issuing bank not resolved',
-                socketId: 'fooBarSocketId'
+                message: 'issuing bank not resolved'
             });
 
             done();
@@ -198,8 +194,7 @@ describe('Test make_transfer', function () {
                 amount: amount,
                 issuer: undefined,
                 status: 'error',
-                message: 'issuing bank not resolved',
-                socketId: 'fooBarSocketId'
+                message: 'issuing bank not resolved'
             });
 
             done();

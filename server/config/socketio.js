@@ -53,7 +53,7 @@ module.exports = function (socketio) {
   // }));
 
   socketio.on('connection', function (socket) {
-    Utils.setSocketId(socket.id);
+    // Utils.setSocketId(socket.id);
     socket.address = socket.handshake.address !== null ?
             socket.handshake.address.address + ':' + socket.handshake.address.port :
             process.env.DOMAIN;

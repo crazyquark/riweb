@@ -33,7 +33,7 @@ describe('ITest signup', function () {
     });
   });
 
-  it('should create an wallet for the user', function (done) {
+  xit('should create an wallet for the user', function (done) {
     this.timeout(40000); // Wait around a bunch for Ripple
     //TODO: should first send rippled credits to the bank (create bank wallet)
     //try to use what is in seed.js and extract it into a separate service

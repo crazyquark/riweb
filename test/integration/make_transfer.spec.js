@@ -14,7 +14,7 @@ var Utils = require('../../server/utils/utils');
 
 var debug = require('debug')('=======TMakeTransfer');
 
-describe('ITest transfers', function () {
+xdescribe('ITest transfers', function () {
 	var socketSpy, user, bank, userWallet;
 
 	beforeEach(function (done) {

@@ -42,9 +42,9 @@ describe('Test create_wallet', function () {
           
         TestingUtils.buildWalletSpy();
         TestingUtils.buildNewConnectedRemoteStub();
-        socket.id = 'fooBarSocketId';         
-        Utils.setSocketId(socket.id);
-        Utils.putSocket(socket);
+        // socket.id = 'fooBarSocketId';         
+        // Utils.setSocketId(socket.id);
+        // Utils.putSocket(socket);
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
@@ -91,12 +91,10 @@ describe('Test create_wallet', function () {
             expect(emitSpy).to.have.been.calledWith('set_trust', {
                 rippleDestinationAddr: bank1.hotWallet.address,
                 rippleSourceAddr: nonAdminRippleGeneratedWallet.address,
-                rippleSourceSecret: nonAdminRippleGeneratedWallet.secret,
-                socketId: 'fooBarSocketId'
+                rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
             });
             expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
-                address: nonAdminRippleGeneratedWallet.address,
-                socketId: 'fooBarSocketId'
+                address: nonAdminRippleGeneratedWallet.address
             });
             done();
         }).done(null, function (error) { done(error); });
@@ -119,12 +117,10 @@ describe('Test create_wallet', function () {
             expect(emitSpy).to.have.been.calledWith('set_trust', {
                 rippleDestinationAddr: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
                 rippleSourceAddr: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh',
-                rippleSourceSecret: 'NONADMINssphrase',
-                socketId: 'fooBarSocketId'
+                rippleSourceSecret: 'NONADMINssphrase'
             });
             expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
-                address: sinon.match.string,
-                socketId: 'fooBarSocketId'
+                address: sinon.match.string
             });
             done();
         }).done(null, function (error) { done(error); });        
@@ -139,8 +135,7 @@ describe('Test create_wallet', function () {
             function () {
                 expect(emitSpy).to.have.callCount(1);
                 expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
-                    error: "bank not found",
-                    socketId: 'fooBarSocketId'
+                    error: "bank not found"
                 });
                 done();
             }        
@@ -152,8 +147,7 @@ describe('Test create_wallet', function () {
             function () {
                 expect(emitSpy).to.have.callCount(1);
                 expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
-                    error: "user not found",
-                    socketId: 'fooBarSocketId'
+                    error: "user not found"
                 });
                 done();
             }        

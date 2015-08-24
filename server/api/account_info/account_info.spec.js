@@ -30,9 +30,9 @@ describe('Test account_info', function () {
         
         emitSpy = sinon.spy(Utils, 'emitEvent');
         
-        socket.id = 'fooBarSocketId';
-        Utils.putSocket(socket);
-        Utils.setSocketId(socket.id);
+        // socket.id = 'fooBarSocketId';
+        // Utils.putSocket(socket);
+        // Utils.setSocketId(socket.id);
     });
     afterEach(function () {
         TestingUtils.restoreAll();
@@ -42,7 +42,7 @@ describe('Test account_info', function () {
         TestingUtils.buildFindByOwnerEmailForUnexisting(Wallet);
 
         AccountInfo.getAccountInfo('not_exist@example.com', socket).then(function () {
-            expect(emitSpy).to.have.been.calledWith('post:account_info', { info: 'User does not exist!', socketId: 'fooBarSocketId' });
+            expect(emitSpy).to.have.been.calledWith('post:account_info', { info: 'User does not exist!'});
             expect(emitSpy).to.have.callCount(1);
             done();
         }).done(null, function (error) { done(error); });
@@ -53,7 +53,7 @@ describe('Test account_info', function () {
 
         AccountInfo.getAccountInfo('admin@admin.com', socket).then(function () {
             expect(emitSpy).to.have.callCount(1);
-            expect(emitSpy).to.have.been.calledWith('post:account_info', { balance: 0, socketId: 'fooBarSocketId' });
+            expect(emitSpy).to.have.been.calledWith('post:account_info', { balance: 0});
             done();
         }).done(null, function (error) { done(error); });
     });

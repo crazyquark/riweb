@@ -54,14 +54,11 @@ function getNewConnectedAdminRemote() {
   return getNewConnectedRemote(ROOT_RIPPLE_ACCOUNT.address, ROOT_RIPPLE_ACCOUNT.secret);
 }
 
-var socketId;
-
 function onEvent(eventName, listenerFunction) {
     LoggedEmitterService.on(eventName, wrappedListenerFunction);
 
     function wrappedListenerFunction() {
         var eventObject = arguments[0];
-        setSocketId(eventObject.socketId);
         listenerFunction.call(null, eventObject);
     }
 
@@ -69,15 +66,7 @@ function onEvent(eventName, listenerFunction) {
 }
 
 function emitEvent(eventName, event) {
-    event.socketId = socketId;
     LoggedEmitterService.emit(eventName, event);
-}
-
-function setSocketId(theSocketId){
-  // if(theSocketId === undefined){
-  //   throw new Error("must set a socket id");
-  // }
-  socketId = theSocketId;  
 }
 
 var sockets = [];
@@ -87,16 +76,14 @@ function putSocket(socket){
 }
 
 function forwardFromEventEmitterToSocket(eventName, socket) {
-    putSocket(socket);
     onEvent(eventName, function (event) {
-        sockets[socketId].emit(eventName, event);
+        socket.emit(eventName, event);
     });
 }
 
 module.exports.putSocket = putSocket;
 module.exports.emitEvent = emitEvent;
 module.exports.onEvent = onEvent;
-module.exports.setSocketId = setSocketId;
 module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewConnectedAdminRemote = getNewConnectedAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
