@@ -55,7 +55,7 @@ function getNewConnectedAdminRemote() {
 }
 
 function onEvent(eventName, listenerFunction) {
-    LoggedEmitterService.on(eventName, wrappedListenerFunction);
+    LoggedEmitterService.once(eventName, wrappedListenerFunction);
 
     function wrappedListenerFunction() {
         var eventObject = arguments[0];

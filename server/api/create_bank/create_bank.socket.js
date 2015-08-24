@@ -65,7 +65,6 @@ function createBank(newBank) {
           password: newBank.password,
         });
 
-
         debug('resolve create', createdBank.info);
         deferred.resolve(createdBank);
 

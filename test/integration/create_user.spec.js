@@ -16,6 +16,8 @@ var CreateWallet = require('../../server/api/create_wallet/create_wallet.socket'
 
 var Utils = require('./../../server/utils/utils');
 
+var debug = require('debug')('TCreateUser');
+
 
 function seedBankAndUser(callback){
   BankAccount.create({
@@ -48,7 +50,7 @@ function seedBankAndUser(callback){
   }
 }
 
-describe('ITest signup', function () {
+describe('ITest create user', function () {
 
   beforeEach(function(done){
     TestingUtils.dropMongodbDatabase().then(function(){

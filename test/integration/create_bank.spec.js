@@ -36,21 +36,23 @@ describe('ITest Create Bank', function () {
 		};
 
 		Utils.onEvent('post:create_admin_user_for_bank', function (result) {
-			expect(result.status).to.eql('success');
-			if (result.status === 'success') {
-				expect(result.user.email).to.eql(bankInfo.email);
-				expect(result.user.name).to.eql(bankInfo.info);
-			}
+ 			expect(result.status).to.eql('success');
+			expect(result.user.email).to.eql(bankInfo.email);
+			expect(result.user.name).to.eql(bankInfo.info);
+			done();
 		});
 
-		CreateBank.createBank(bankInfo).then(function (bank) {
-			expect(bank.email).to.eql(bankInfo.email);
-			expect(bank.info).to.eql(bankInfo.info);
-			expect(bank.name).to.eql(bankInfo.name);
-			done();
-		},
-			function (error) {
-				done(error);
-			});
+		CreateBank.createBank(bankInfo).fail(function(err) {
+			done(err);
+		});
+		// function (bank) {
+		// 	expect(bank.email).to.eql(bankInfo.email);
+		// 	expect(bank.info).to.eql(bankInfo.info);
+		// 	expect(bank.name).to.eql(bankInfo.name);
+		// 	done();
+		// },
+		// 	function (error) {
+		// 		done(error);
+		// });
 	});
 });

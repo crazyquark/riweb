@@ -17,7 +17,7 @@ var Utils = require('./../../server/utils/utils');
 
 var debug = require('debug')('CreateWalletForUserSpec');
 
-describe('ITest signup', function () {
+describe('ITest create wallet for user', function () {
 
   beforeEach(function (done) {
     this.timeout(10000);
@@ -33,7 +33,7 @@ describe('ITest signup', function () {
     });
   });
 
-  xit('should create an wallet for the user', function (done) {
+  it('should create an wallet for the user', function (done) {
     this.timeout(40000); // Wait around a bunch for Ripple
     //TODO: should first send rippled credits to the bank (create bank wallet)
     //try to use what is in seed.js and extract it into a separate service
