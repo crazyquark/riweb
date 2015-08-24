@@ -1,6 +1,11 @@
 
 var ripple = require('ripple-lib');
 var Q = require('q');
+var session = require('express-session');
+var passport = require('passport');
+var cookieParser = require('cookie-parser');
+var express = require('express');
+var cookie = require('cookie');
 
 var LoggedEmitterService = require('./LoggedEmitter/LoggedEmitter.service');
 
@@ -54,14 +59,14 @@ function getNewConnectedAdminRemote() {
   return getNewConnectedRemote(ROOT_RIPPLE_ACCOUNT.address, ROOT_RIPPLE_ACCOUNT.secret);
 }
 
-var socketId;
+var token;
 
 function onEvent(eventName, listenerFunction) {
     LoggedEmitterService.on(eventName, wrappedListenerFunction);
 
     function wrappedListenerFunction() {
         var eventObject = arguments[0];
-        setSocketId(eventObject.socketId);
+        eventObject.token = token; 
         listenerFunction.call(null, eventObject);
     }
 
@@ -69,7 +74,7 @@ function onEvent(eventName, listenerFunction) {
 }
 
 function emitEvent(eventName, event) {
-    event.socketId = socketId;
+    event.token = token;
     LoggedEmitterService.emit(eventName, event);
 }
 
@@ -77,22 +82,46 @@ function setSocketId(theSocketId){
   // if(theSocketId === undefined){
   //   throw new Error("must set a socket id");
   // }
-  socketId = theSocketId;  
+  // socketId = theSocketId;  
 }
 
 var sockets = [];
 
+function getToken(socket){
+  var cookies = cookie.parse(socket.handshake.headers.cookie);
+  return cookies.token;
+}
+
 function putSocket(socket){
-  sockets[socket.id] = socket;
+  var token = getToken(socket);
+  sockets[token] = socket;
+  debug('putSocket', socket.id, token);
 }
 
 function forwardFromEventEmitterToSocket(eventName, socket) {
+    debug('forwardFromEventEmitterToSocket', socket.id);
     putSocket(socket);
     onEvent(eventName, function (event) {
-        sockets[socketId].emit(eventName, event);
+        debug('onEvent', event.token, token, eventName, event);
+        sockets[event.token].emit(eventName, event);
     });
 }
 
+function onSocketEvent(socket, eventName, listenerFunction){
+  var token = getToken(socket);
+  
+  function wrappedListenerFunction() {
+      var eventObject = arguments[0];
+      eventObject.token = token;
+      listenerFunction.call(null, eventObject);
+  }
+  
+  socket.on(eventName, wrappedListenerFunction);
+
+  return wrappedListenerFunction;
+}
+
+module.exports.onSocketEvent = onSocketEvent;
 module.exports.putSocket = putSocket;
 module.exports.emitEvent = emitEvent;
 module.exports.onEvent = onEvent;

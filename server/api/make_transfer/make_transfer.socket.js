@@ -323,7 +323,7 @@ exports.register = function (socket) {
         makeTransfer(data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 
-    socket.on('make_transfer', function (data) {
+    Utils.onSocketEvent(socket, 'make_transfer', function (data) {
         makeTransfer(data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 };

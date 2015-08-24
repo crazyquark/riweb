@@ -57,14 +57,13 @@ function createBank(newBank) {
             Utils.emitEvent('post:set_mutual_banks_trust', { status: 'success' });
           });
         });
-
-        Utils.emitEvent('create_admin_user_for_bank', {
-          bankId: createdBank._id,
-          info: createdBank.info,
-          email: newBank.email,
-          password: newBank.password,
-        });
-
+        
+        newBank.bankId = createdBank._id;
+        newBank.info = createdBank.info;
+        newBank.email = newBank.email;
+        newBank.password = newBank.password;
+        
+        Utils.emitEvent('create_admin_user_for_bank', newBank);
 
         debug('resolve create', createdBank.info);
         deferred.resolve(createdBank);
@@ -84,7 +83,7 @@ exports.register = function (newSocket) {
   Utils.forwardFromEventEmitterToSocket('post:fund_wallet', socket);
   Utils.forwardFromEventEmitterToSocket('post:set_mutual_banks_trust', socket);
 
-  socket.on('create_bank', function (data) {
+  Utils.onSocketEvent(socket, 'create_bank', function (data) {
     createBank(data)
       .then(function (bank) {
          Utils.emitEvent('post:create_admin_user_for_bank', { status: 'success', bank: bank });
