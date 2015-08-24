@@ -21,6 +21,7 @@ function onConnect(socket) {
   });
 
   // Insert sockets below
+  require('../api/ClientEventEmitter/ClientEventEmitter.socket').register(socket);
   require('../api/Order/Order.socket').register(socket);
   require('../api/order_request/order_request.socket').register(socket);
   require('../api/RealBankAccount/RealBankAccount.socket').register(socket);
