@@ -42,7 +42,7 @@ function getRippleAccountInfo(rippleAddress) {
   return deferred.promise;
 }
 
-function getAccountInfo(ownerEmail, socket) {
+function getAccountInfo(ownerEmail, clientEventEmitter) {
   return Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet) {
       var deferred = Q.defer();
 
@@ -52,14 +52,14 @@ function getAccountInfo(ownerEmail, socket) {
             balance: rippleAccountInfo.lines.length > 0 ? rippleAccountInfo.lines[0].balance : 0
           };
 
-          Utils.emitEvent('post:account_info', accountLines);
+          clientEventEmitter.emitSocketEmit('post:account_info', accountLines);
           deferred.resolve(accountLines);
         }).catch(function(err){
           console.error(err);
           deferred.reject(err);
         });
       } else {
-        Utils.emitEvent('post:account_info', {info: 'User does not exist!'});
+        clientEventEmitter.emitSocketEmit('post:account_info', {info: 'User does not exist!'});
         deferred.resolve({info: 'User does not exist!'});
       }
       return deferred.promise;
@@ -75,6 +75,6 @@ exports.register = function(socket, clientEventEmitter) {
 
   socket.on('account_info', function(ownerEmail) {
     console.log('account_info ' + ownerEmail);
-    getAccountInfo(ownerEmail, socket);
+    getAccountInfo(ownerEmail, clientEventEmitter);
   });
 };
