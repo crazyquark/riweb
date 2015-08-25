@@ -35,11 +35,6 @@ function ClientEventEmitter(socket) {
       socket.emit(eventName, event);
     });
   }
-  
-  emitter.emitEventOnBoth = function(eventName, event) {
-    emitter.emit(eventName, event);
-    socket.emit(eventName, event);
-  }; 
 }
 
 util.inherits(ClientEventEmitter, EventEmitter);
