@@ -14,21 +14,22 @@ var Utils = require('./../../utils/utils');
 var Wallet = require('./../wallet/wallet.model');
 var AccountInfo = require('./account_info.socket');
 var TestingUtils = require('./../../../test/utils/testing_utils');
+var ClientEventEmitter = require('../../utils/ClientEventEmitter/ClientEventEmitter.service');
 
-describe('Test account_info', function () {
+describe.only('Test account_info', function () {
     var socket, emitSpy;
     beforeEach(function (done) {
         socket = TestingUtils.buildSocketSpy();
 
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
+        var emitter = new ClientEventEmitter(socket);
+        emitSpy = sinon.spy(emitter, 'emit');
 
-        AccountInfo.register(socket);
+        AccountInfo.register(socket, emitter);
 
         TestingUtils.buildNewConnectedRemoteStub();
         TestingUtils.buildWalletSpy();
         TestingUtils.dropMongodbDatabase().then(function () { done(); });
-        
-        emitSpy = sinon.spy(Utils, 'emitEvent');
         
         // socket.id = 'fooBarSocketId';
         // Utils.putSocket(socket);
