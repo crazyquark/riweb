@@ -131,7 +131,7 @@ function convertRippleToRiwebWallet(ownerEmail){
     return walletConverterFunction;
 }
 
-function createWalletForEmail(ownerEmail, role) {
+function createWalletForEmail(clientEventEmitter, ownerEmail, role) {
   debug('createWalletForEmail', ownerEmail);
 
   var deferred = Q.defer();
@@ -174,17 +174,15 @@ function createWalletForEmail(ownerEmail, role) {
     }
   }).then(function(foundWallet){
     deferred.resolve(foundWallet);
-    Utils.emitEvent('post:create_wallet', {address: foundWallet.address});
+    clientEventEmitter.emit('post:create_wallet', {address: foundWallet.address});
   }, 
   function(errorMessage){
     deferred.reject(errorMessage);
-    Utils.emitEvent('post:create_wallet', {error : errorMessage});
+    clientEventEmitter.emit('post:create_wallet', {error : errorMessage});
   });
 
   return deferred.promise;
 }
-
-var emitter;
 
 exports.createWalletForEmail = createWalletForEmail;
 exports.fundWallet = fundWallet;
@@ -192,10 +190,9 @@ exports.getBankForUser = getBankForUser;
 
 exports.register = function(newSocket, clientEventEmitter) {
   socket = newSocket;
-  emitter = clientEventEmitter;
   clientEventEmitter.forwardFromEventEmitterToSocket('post:create_wallet', socket);
 
   socket.on('create_wallet', function(data) {
-      createWalletForEmail(data.ownerEmail, data.role);
+      createWalletForEmail(clientEventEmitter, data.ownerEmail, data.role);
   });
 };

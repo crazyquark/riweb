@@ -51,7 +51,7 @@ function createUserForBank(user, bankAdmin) {
     iban: user.iban,
     bank: bankAdmin.bank
   }).then(function (newUser) {
-    return CreateWallet.createWalletForEmail(newUser.email, 'user');
+    return CreateWallet.createWalletForEmail(emitter, newUser.email, 'user');
   });
 }
 
