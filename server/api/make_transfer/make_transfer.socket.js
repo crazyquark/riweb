@@ -312,7 +312,7 @@ exports.register = function(socket, clientEventEmitter) {
 
     clientEventEmitter.forwardFromEventEmitterToSocket('post:make_transfer', socket);
     
-    Utils.onEvent('make_transfer', function (data) {
+    clientEventEmitter.on('make_transfer', function (data) {
         makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 

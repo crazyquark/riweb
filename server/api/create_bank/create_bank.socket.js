@@ -82,7 +82,7 @@ exports.register = function (newSocket, clientEventEmitter) {
           bankId: bank._id,
           info: bank.info,
           email: bank.email,
-          password: bank.password,
+          password: data.password,
         });
 
         clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });

@@ -128,7 +128,7 @@ exports.setTrust = setTrust;
 exports.setTrustBidir = setTrustBidir;
 exports.setMutualBanksTrust = setMutualBanksTrust;
 exports.register = function(socket, clientEventEmitter) {
-  Utils.onEvent('set_trust', function (data) {
+  clientEventEmitter.on('set_trust', function (data) {
     setTrust(data.rippleDestinationAddr, data.rippleSourceAddr, data.rippleSourceSecret);
   });
 };
