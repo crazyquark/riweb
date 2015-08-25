@@ -36,7 +36,7 @@ function createAdminInfo(bankInfo) {
 }
 
 function createBank(bank) {
-  return CreateBank.createBank(bank).then(function (bankInfo) {
+  return CreateBank.createBank(emitter, bank).then(function (bankInfo) {
     bank.bankInfo = bankInfo;
     return CreateAdminUserForBank.createAdminUserForBank(createAdminInfo(bankInfo), emitter);
   });

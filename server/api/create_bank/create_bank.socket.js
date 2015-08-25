@@ -31,7 +31,7 @@ function createNewBank(newBank) {
   return BankAccount.createQ(newBankAccount);
 }
 
-function createBank(newBank) {
+function createBank(clientEventEmitter, newBank) {
   var deferred = Q.defer();
 
   BankAccount.findOneQ({ name: newBank.name }).then(function (foundBank) {
@@ -43,7 +43,7 @@ function createBank(newBank) {
       createNewBank(newBank).then(function (createdBank) {
         // Need to also fund this newly minted wallet
         // XXX need lots of XRP for banks to fund wallets
-        CreateWallet.fundWallet(createdBank.hotWallet, ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
+        CreateWallet.fundWallet(clientEventEmitter, createdBank.hotWallet, ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
           debug('funded bank wallet');
           // XXX should the funding be chained or should we return to user immediately? I'd rather not wait for the costly ripple operation
           // emitter.emit('post:fund_wallet', {address: createdBank.hotWallet.address});
@@ -76,7 +76,7 @@ exports.register = function (newSocket, clientEventEmitter) {
   clientEventEmitter.forwardFromEventEmitterToSocket('post:set_mutual_banks_trust', socket);
 
   socket.on('create_bank', function (data) {
-    createBank(data)
+    createBank(clientEventEmitter, data)
       .then(function (bank) {
         clientEventEmitter.emit('create_admin_user_for_bank', {
           bankId: bank._id,

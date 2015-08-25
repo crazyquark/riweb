@@ -18,7 +18,7 @@ var socket;
 
 //var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
 
-function fundWallet(wallet, sourceWallet, amount) {
+function fundWallet(clientEventEmitter, wallet, sourceWallet, amount) {
   debug('fundWallet', wallet, amount);
   var deferred = Q.defer();
 
@@ -35,7 +35,7 @@ function fundWallet(wallet, sourceWallet, amount) {
   
   function setTrustEmit() {
     deferred.resolve(wallet);
-    Utils.emitEvent('set_trust', {
+    clientEventEmitter.emit('set_trust', {
       rippleDestinationAddr: sourceWallet.address,
       rippleSourceAddr: wallet.address,
       rippleSourceSecret: wallet.secret
@@ -157,7 +157,7 @@ function createWalletForEmail(clientEventEmitter, ownerEmail, role) {
           var promise = createWalletQ()
             .then(convertRippleToRiwebWallet(ownerEmail))
             .then(function(wallet) {
-              return fundWallet(wallet, foundBank.bank.hotWallet, 60);
+              return fundWallet(clientEventEmitter, wallet, foundBank.bank.hotWallet, 60);
             })
             .then(function (fundedWallet) {
               return saveWalletToDb(fundedWallet);
