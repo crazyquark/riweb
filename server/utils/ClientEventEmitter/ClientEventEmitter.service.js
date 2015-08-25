@@ -8,9 +8,18 @@ function ClientEventEmitter(socket) {
   EventEmitter.call(this);
   var emitter = this;
   
-  emitter.onSocketEvent = socket.on;
-  emitter.emitSocketEmit = socket.emit;
-  emitter.onceSocketEvent = socket.once;
+  emitter.onSocketEvent = function(eventName, callback) {
+    socket.on(eventName, callback);
+  };
+  
+  emitter.emitSocketEmit = function(eventName, event) {
+    socket.emit(eventName, event);
+  };
+  
+  emitter.onceSocketEvent = function(eventName, callback) {
+    socket.once(eventName, callback);
+  };
+  
   emitter.emitAndRunOnceEvent = function(eventName, event, callback){
     emitter.once('post:' + eventName, callback);
     emitter.emit(eventName, event);

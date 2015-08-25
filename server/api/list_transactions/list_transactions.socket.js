@@ -48,7 +48,7 @@ function convertRippleTxToHuman(transaction){
   });
 }
 
-function listTransactions(ownerEmail, socket) {
+function listTransactions(ownerEmail, clientEventEmitter) {
     var deferred = Q.defer();
 
 	function buildMissingError() {
@@ -58,7 +58,7 @@ function listTransactions(ownerEmail, socket) {
 			message: 'missing account'
 		};
 
-		socket.emit('post:list_transactions', result);
+		clientEventEmitter.emitSocketEmit('post:list_transactions', result);
 		deferred.resolve(result);
 	}
 
@@ -73,13 +73,13 @@ function listTransactions(ownerEmail, socket) {
 				var result;
 				if (err) {
 					result = { status: 'error', message: err.message };
-					socket.emit('post:list_transactions', result);
+					clientEventEmitter.emitSocketEmit('post:list_transactions', result);
 					deferred.resolve(result);
 				} else {
 					var transactionPromises = [];
 
 					res.transactions.forEach(function (rippleTx) {
-						debug(rippleTx);
+						debug(rippleTx); // rippleTx.tx.Memos[0].Memos
 						if (rippleTx.tx.TransactionType === 'Payment' &&
 							typeof rippleTx.tx.Amount === 'object' &&
 							rippleTx.meta.TransactionResult === 'tesSUCCESS' /* no failed transactions */) {
@@ -88,7 +88,7 @@ function listTransactions(ownerEmail, socket) {
 					});
 					Q.all(transactionPromises).then(function (transactionsHuman) {
 						result = { status: 'success', transactions: transactionsHuman };
-						socket.emit('post:list_transactions', result);
+						clientEventEmitter.emitSocketEmit('post:list_transactions', result);
 						deferred.resolve(result);
 					});
 
@@ -137,6 +137,6 @@ function listTransactions(ownerEmail, socket) {
 exports.listTransactions = listTransactions;
 exports.register = function(socket, clientEventEmitter) {
 	socket.on('list_transactions', function (ownerEmail) {
-		listTransactions(ownerEmail, socket);
+		listTransactions(ownerEmail, clientEventEmitter);
 	});
 };
