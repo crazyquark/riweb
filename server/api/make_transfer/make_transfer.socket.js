@@ -34,7 +34,7 @@ function isIssuingBankValid(issuingBank) {
     return issuingBank && issuingBank.status !== 'error' && issuingBank.bank && issuingBank.bank.hotWallet && issuingBank.bank.hotWallet.address;
 }
 
-function buildThrowMissingError(fromEmail, toEmail, amount){
+function buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount){
 
     function throwMissingError(errorMessage, issuingAddress, status) {
         status = status || 'error';
@@ -48,7 +48,7 @@ function buildThrowMissingError(fromEmail, toEmail, amount){
             message: errorMessage
         };
 
-        Utils.emitEvent('post:make_transfer', result);
+        clientEventEmitter.emitEventOnBoth('post:make_transfer', result);
         return result;
     }
     return throwMissingError;
@@ -92,7 +92,7 @@ function getRollbackTransferAction(sourceBank, realBankAccount, amount) {
     }
 }
 
-function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderRequestId) {
+function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId) {
 
     var throwMissingError = buildThrowMissingError(fromEmail, toEmail, amount);
 
@@ -201,7 +201,7 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
         }).then(function (transferResult) {
 
             if (transferResult.status === 'success') {
-                Utils.emitEvent('post:make_transfer', {
+                clientEventEmitter.emitEventOnBoth('post:make_transfer', {
                     fromEmail: fromEmail,
                     toEmail: toEmail,
                     amount: amount,
@@ -223,7 +223,7 @@ function buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderReq
 
       
 
-function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
+function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
     var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
 
@@ -232,7 +232,7 @@ function makeTransfer(fromEmail, toEmail, amount, orderRequestId) {
 
     var promiseFindSenderRealBankAccount = RealBankAccount.getRealBankAccountForEmail(toEmail);
 
-    var currentMakeTransferWithRippleWallets = buildMakeTransferWithRippleWallets(fromEmail, toEmail, amount, orderRequestId);
+    var currentMakeTransferWithRippleWallets = buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId);
 
     return Q.all([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindDestUserBank, promiseFindSenderRealBankAccount])
         .spread(currentMakeTransferWithRippleWallets);
@@ -311,12 +311,12 @@ exports.makeTransferWithRipple = makeTransferWithRipple;
 exports.register = function(socket, clientEventEmitter) {
 
     Utils.forwardFromEventEmitterToSocket('post:make_transfer', socket);
-
+    
     Utils.onEvent('make_transfer', function (data) {
-        makeTransfer(data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
+        makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 
     socket.on('make_transfer', function (data) {
-        makeTransfer(data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
+        makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 };
