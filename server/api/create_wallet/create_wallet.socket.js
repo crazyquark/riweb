@@ -184,6 +184,7 @@ function createWalletForEmail(ownerEmail, role) {
   return deferred.promise;
 }
 
+var emitter;
 
 exports.createWalletForEmail = createWalletForEmail;
 exports.fundWallet = fundWallet;
@@ -191,8 +192,8 @@ exports.getBankForUser = getBankForUser;
 
 exports.register = function(newSocket, clientEventEmitter) {
   socket = newSocket;
-
-  Utils.forwardFromEventEmitterToSocket('post:create_wallet', socket);
+  emitter = clientEventEmitter;
+  clientEventEmitter.forwardFromEventEmitterToSocket('post:create_wallet', socket);
 
   socket.on('create_wallet', function(data) {
       createWalletForEmail(data.ownerEmail, data.role);

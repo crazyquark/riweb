@@ -46,23 +46,15 @@ function createBank(newBank) {
         CreateWallet.fundWallet(createdBank.hotWallet, ROOT_RIPPLE_ACCOUNT, 1000).then(function () {
           debug('funded bank wallet');
           // XXX should the funding be chained or should we return to user immediately? I'd rather not wait for the costly ripple operation
-          // Utils.emitEvent('post:fund_wallet', createdBank.hotWallet);
-          Utils.emitEvent('post:fund_wallet', {address: createdBank.hotWallet.address});
+          // emitter.emit('post:fund_wallet', {address: createdBank.hotWallet.address});
           
           // Establish trust lines with the other banks. Account must be funded.
           // XXX this is also made async after returning to the client so not to block the create bank page too long;
           // The client should listen for the emitted event
           SetTrust.setMutualBanksTrust(createdBank).then(function () {
             debug('setMutualBanksTrust done');
-            Utils.emitEvent('post:set_mutual_banks_trust', { status: 'success' });
+            // emitter.emit('post:set_mutual_banks_trust', { status: 'success' });
           });
-        });
-
-        Utils.emitEvent('create_admin_user_for_bank', {
-          bankId: createdBank._id,
-          info: createdBank.info,
-          email: newBank.email,
-          password: newBank.password,
         });
 
         debug('resolve create', createdBank.info);
@@ -77,19 +69,26 @@ function createBank(newBank) {
 }
 
 exports.createBank = createBank;
-exports.register = function(newSocket, clientEventEmitter) {
+exports.register = function (newSocket, clientEventEmitter) {
   socket = newSocket;
 
-  Utils.forwardFromEventEmitterToSocket('post:fund_wallet', socket);
-  Utils.forwardFromEventEmitterToSocket('post:set_mutual_banks_trust', socket);
+  clientEventEmitter.forwardFromEventEmitterToSocket('post:fund_wallet', socket);
+  clientEventEmitter.forwardFromEventEmitterToSocket('post:set_mutual_banks_trust', socket);
 
   socket.on('create_bank', function (data) {
     createBank(data)
       .then(function (bank) {
-         Utils.emitEvent('post:create_admin_user_for_bank', { status: 'success', bank: bank });
+        clientEventEmitter.emit('create_admin_user_for_bank', {
+          bankId: bank._id,
+          info: bank.info,
+          email: bank.email,
+          password: bank.password,
+        });
+
+        clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });
       })
       .fail(function (error) {
-         Utils.emitEvent('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
+        clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
       });
   });
 };

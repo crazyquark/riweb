@@ -6,6 +6,7 @@
 'use strict';
 
 var User = require('../api/user/user.model');
+
 var Wallet = require('../api/wallet/wallet.model');
 var CreateBank = require('../api/create_bank/create_bank.socket');
 var CreateAdminUserForBank = require('../api/create_admin_user_for_bank/create_admin_user_for_bank.socket');
@@ -13,6 +14,9 @@ var CreateWallet = require('../api/create_wallet/create_wallet.socket');
 var MakeTransfer = require('../api/make_transfer/make_transfer.socket');
 var SetTrust = require('../api/set_trust/set_trust.socket');
 
+var ClientEventEmitter = require('../utils/ClientEventEmitter/ClientEventEmitter.service');
+var emitter = new ClientEventEmitter(null);
+                
 var RealBankAccount = require('../api/RealBankAccount/RealBankAccount.model');
 
 var TestingUtils = require('./../../test/utils/testing_utils');
@@ -20,6 +24,7 @@ var TestingUtils = require('./../../test/utils/testing_utils');
 var Q = require('q');
 
 var debug = require('debug')('Seed');
+debug('Started seed.js');
 
 function createAdminInfo(bankInfo) {
   return {
@@ -33,7 +38,7 @@ function createAdminInfo(bankInfo) {
 function createBank(bank) {
   return CreateBank.createBank(bank).then(function (bankInfo) {
     bank.bankInfo = bankInfo;
-    return CreateAdminUserForBank.createAdminUserForBank(createAdminInfo(bankInfo));
+    return CreateAdminUserForBank.createAdminUserForBank(createAdminInfo(bankInfo), emitter);
   });
 }
 
@@ -64,6 +69,7 @@ function createRealbankUsers() {
     {
       name: 'brd',
       iban: 'BA391290079401028494',
+
       balance: '102'
     }]);
 
@@ -113,11 +119,12 @@ TestingUtils.dropMongodbDatabase().then(function () {
     var createRealbankUsersPromise = createRealbankUsers();
 
     Q.all([createBankA, createBankB, createRealbankUsersPromise]).spread(function (alanWallet, bobWallet) {
+        debug('Q.all');
         SetTrust.setBanksTrust(bankA.bankInfo.hotWallet, bankB.bankInfo.hotWallet, alanWallet, bobWallet).then(function () {
             debug('Set trust alan -> bankA <-> bankB <- bob');
             SetTrust.setTrust(bankA.bankInfo.hotWallet.address, aliceWallet.address, aliceWallet.secret).then(function () {
                 debug('Set trust alice -> bankA');
-                MakeTransfer.makeTransfer('admin@alpha.com', 'alan@alpha.com', 101).then(function () {
+                MakeTransfer.makeTransfer(emitter, 'admin@alpha.com', 'alan@alpha.com', 101).then(function () {
                     debug('admin@alpha.com -> alan@alpha.com: 101 EUR');
                     debug('\n\n' +
                             '=======================================\n' +

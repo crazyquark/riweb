@@ -13,7 +13,9 @@ var debug = require('debug')('CreateAdminUserForBank');
 
 var socket;
 
-function createAdminUserForBank(adminUserInfo) {
+var emitter;
+
+function createAdminUserForBank(adminUserInfo, clientEventEmitter) {
     debug('createAdminUserForBank', adminUserInfo);
     var deferred = Q.defer();
 
@@ -29,11 +31,11 @@ function createAdminUserForBank(adminUserInfo) {
 
         var newUserStripped = { email: newUser.email, name: newUser.name };
 
-        Utils.emitEvent('post:create_admin_user_for_bank', { status: 'success', user:  newUserStripped});
+        clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'success', user:  newUserStripped});
         deferred.resolve(newUser);
     }, function (err) {
         debug('createAdminUserForBank error ', err);
-        Utils.emitEvent('post:create_admin_user_for_bank', { status: 'error', error: err });
+        clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'error', error: err });
         deferred.reject(err);
     });
 
@@ -44,11 +46,12 @@ exports.createAdminUserForBank = createAdminUserForBank;
 
 exports.register = function(newSocket, clientEventEmitter) {
     socket = newSocket;
+    emitter = clientEventEmitter;
 
-    Utils.forwardFromEventEmitterToSocket('post:create_admin_user_for_bank', socket);
+    clientEventEmitter.forwardFromEventEmitterToSocket('post:create_admin_user_for_bank', socket);
 
     Utils.onEvent('create_admin_user_for_bank', function (adminUserInfo) {
-        createAdminUserForBank(adminUserInfo);
+        createAdminUserForBank(adminUserInfo, clientEventEmitter);
     });
 
 };
