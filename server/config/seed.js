@@ -69,9 +69,20 @@ function createRealbankUsers() {
     {
       name: 'brd',
       iban: 'BA391290079401028494',
-
       balance: '102'
-    }]);
+    },
+    {
+      name: 'delta',
+      iban: 'DO28BAGR00000001212453611324',
+      balance: '1000'
+    },
+    {
+      name: 'pirreus',
+      iban: 'MK07250120000058984',
+      balance: '99'
+    },
+    
+    ]);
 
 }
 
