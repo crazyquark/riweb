@@ -48,7 +48,7 @@ function setBankFlags(bank1, bank2) {
 
 exports.setBankFlags = setBankFlags;
 exports.setRootFlags = setRootFlags;
-exports.register = function() {
+exports.register = function(socket, clientEventEmitter) {
 	Utils.onEvent('set_root_flags', function(data) {
 		setRootFlags(data.account);
 	})

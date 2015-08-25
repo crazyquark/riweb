@@ -42,7 +42,7 @@ function createAdminUserForBank(adminUserInfo) {
 
 exports.createAdminUserForBank = createAdminUserForBank;
 
-exports.register = function (newSocket) {
+exports.register = function(newSocket, clientEventEmitter) {
     socket = newSocket;
 
     Utils.forwardFromEventEmitterToSocket('post:create_admin_user_for_bank', socket);

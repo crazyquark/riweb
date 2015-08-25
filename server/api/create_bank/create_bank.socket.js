@@ -77,7 +77,7 @@ function createBank(newBank) {
 }
 
 exports.createBank = createBank;
-exports.register = function (newSocket) {
+exports.register = function(newSocket, clientEventEmitter) {
   socket = newSocket;
 
   Utils.forwardFromEventEmitterToSocket('post:fund_wallet', socket);

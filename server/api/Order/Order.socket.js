@@ -6,5 +6,5 @@
 
 var Order = require('./Order.model');
 
-exports.register = function(socket) {
+exports.register = function(socket, clientEventEmitter) {
 };

@@ -33,5 +33,5 @@ function getRealBankAccountForEmail(ownerEmail) {
 
 exports.getRealBankAccountForEmail = getRealBankAccountForEmail;
 
-exports.register = function(socket) {
+exports.register = function(socket, clientEventEmitter) {
 };

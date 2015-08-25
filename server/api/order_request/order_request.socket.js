@@ -6,5 +6,5 @@
 
 var OrderRequest = require('./order_request.model');
 
-exports.register = function(socket) {
+exports.register = function(socket, clientEventEmitter) {
 };

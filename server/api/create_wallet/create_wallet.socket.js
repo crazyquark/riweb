@@ -189,7 +189,7 @@ exports.createWalletForEmail = createWalletForEmail;
 exports.fundWallet = fundWallet;
 exports.getBankForUser = getBankForUser;
 
-exports.register = function(newSocket) {
+exports.register = function(newSocket, clientEventEmitter) {
   socket = newSocket;
 
   Utils.forwardFromEventEmitterToSocket('post:create_wallet', socket);

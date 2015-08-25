@@ -308,7 +308,7 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
 exports.makeTransfer = makeTransfer;
 exports.makeTransferWithRipple = makeTransferWithRipple;
 
-exports.register = function (socket) {
+exports.register = function(socket, clientEventEmitter) {
 
     Utils.forwardFromEventEmitterToSocket('post:make_transfer', socket);
 
