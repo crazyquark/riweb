@@ -27,29 +27,29 @@ function findBankFromAddress(rippleAddress) {
 }
 
 function convertRippleTxToHuman(transaction){
-	
+
   var sourceEmailPromise = findEmailFromAddress(transaction.tx.Account);
   var sourceBankPromise	 = findBankFromAddress(transaction.tx.Account);
   var destinationEmailPromise = findEmailFromAddress(transaction.tx.Destination);
   var destinationBankPromise  = findBankFromAddress(transaction.tx.Destination);
-  
+
   return Q.all([sourceEmailPromise, destinationEmailPromise, sourceBankPromise, destinationBankPromise]).spread(function(sourceUserEmail, destinationUserEmail, sourceBankEmail, destinationBankEmail){
-	  
+
 	  var sourceEmail = sourceUserEmail?sourceUserEmail:sourceBankEmail;
 	  var destinationEmail = destinationUserEmail?destinationUserEmail:destinationBankEmail;
-	  
+
       var transactionHuman = {
 					source: sourceEmail?sourceEmail:'<<< deleted account >>>',
 					destination: destinationEmail?destinationEmail:'<<< deleted account >>>',
 					amount: transaction.tx.Amount.value + '€',
 					fee: transaction.tx.Fee};
-					
+
 		return transactionHuman;
   });
 }
 
-function listTransactions(ownerEmail, clientEventEmitter) {
-    var deferred = Q.defer();
+function listTransactions(clientEventEmitter, ownerEmail) {
+  var deferred = Q.defer();
 
 	function buildMissingError() {
 		var result = {
@@ -111,8 +111,8 @@ function listTransactions(ownerEmail, clientEventEmitter) {
 		} else {
 				wallet = wallets;
 		}
-		
-				
+
+
 		if (wallet) {
 			listRippleTransactions();
 		} else {
@@ -120,11 +120,11 @@ function listTransactions(ownerEmail, clientEventEmitter) {
 			BankAccount.findOneQ({email: ownerEmail}).then(function(bank) {
 				if (bank) {
 					wallet = bank.hotWallet;
-					
+
 					listRippleTransactions();
 				} else {
 					buildMissingError();
-					
+
 					return deferred.promise;
 				}
 			});
