@@ -71,17 +71,17 @@ function createBank(clientEventEmitter, newBank) {
 function createBankAndUser(clientEventEmitter, data) {
   return createBank(clientEventEmitter, data)
     .then(function (bank) {
-      clientEventEmitter.emit('create_admin_user_for_bank', {
+      clientEventEmitter.emitEvent('create_admin_user_for_bank', {
         bankId: bank._id,
         info: bank.info,
         email: bank.email,
         password: data.password,
       });
 
-      clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });
+      clientEventEmitter.emitEvent('post:create_admin_user_for_bank', { status: 'success', bank: bank });
       return bank;
     }).fail(function (error) {
-      clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
+      clientEventEmitter.emitEvent('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
       return Q.reject(error);
     });
 }

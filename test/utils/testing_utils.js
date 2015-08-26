@@ -151,14 +151,14 @@ function buildNewConnectedRemoteStub() {
 function buildNewClientEventEmitterSpy(socket) {
   socket = socket || buildSocketSpy();
   var clientEventEmitter = new ClientEventEmitter(socket);
-  sinon.spy(clientEventEmitter, 'emit');
-  sinon.spy(clientEventEmitter, 'emitSocketEmit');
+  sinon.spy(clientEventEmitter, 'emitEvent');
+  sinon.spy(clientEventEmitter, 'emitSocketEvent');
   sinon.spy(clientEventEmitter, 'forwardFromEventEmitterToSocket');
   return clientEventEmitter;
 }
 
 function restoreClientEventEmitterSpy(emitter) {
-  restoreGenericSpy(emitter, ['emit', 'emitSocketEmit']);
+  restoreGenericSpy(emitter, ['emitEvent', 'emitSocketEvent']);
 }
 
 function restoreNewConnectedRemoteStub() {

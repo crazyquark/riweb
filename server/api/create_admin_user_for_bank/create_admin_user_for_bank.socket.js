@@ -31,11 +31,11 @@ function createAdminUserForBank(adminUserInfo, clientEventEmitter) {
 
         var newUserStripped = { email: newUser.email, name: newUser.name };
 
-        clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'success', user:  newUserStripped});
+        clientEventEmitter.emitEvent('post:create_admin_user_for_bank', { status: 'success', user:  newUserStripped});
         deferred.resolve(newUser);
     }, function (err) {
         debug('createAdminUserForBank error ', err);
-        clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'error', error: err });
+        clientEventEmitter.emitEvent('post:create_admin_user_for_bank', { status: 'error', error: err });
         deferred.reject(err);
     });
 

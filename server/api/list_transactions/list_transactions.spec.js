@@ -28,7 +28,7 @@ describe('Test list_transactions', function() {
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
         socketSpy = TestingUtils.buildSocketSpy();
         emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
-        emitSpy = emitter.emit;
+        emitSpy = emitter.emitEvent;
 
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
@@ -142,8 +142,8 @@ describe('Test list_transactions', function() {
             ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
-            expect(socketSpy.emit).to.have.callCount(1);
-            expect(socketSpy.emit).to.have.been.calledWith('post:list_transactions',
+            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.been.calledWith('post:list_transactions',
                 { status: 'success', transactions: expectedHumanTransactions });
           done();
         }).done(null, function (error) {
@@ -164,8 +164,8 @@ describe('Test list_transactions', function() {
             ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
-            expect(socketSpy.emit).to.have.callCount(1);
-            expect(socketSpy.emit).to.have.been.calledWith('post:list_transactions',
+            expect(emitSpy).to.have.callCount(1);
+            expect(emitSpy).to.have.been.calledWith('post:list_transactions',
                 { status: 'success', transactions: expectedHumanTransactions });
           done();
         }).done(null, function (error) {

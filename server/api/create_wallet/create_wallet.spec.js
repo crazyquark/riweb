@@ -30,7 +30,7 @@ describe('Test create_wallet', function () {
         var socketSpy = TestingUtils.buildSocketSpy();
         emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
         CreateWallet.register(socketSpy, emitter);
-        emitSpy = emitter.emit;
+        emitSpy = emitter.emitEvent;
 
         bank1 = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
         bank2 = TestingUtils.getMongooseBankAccount('_bank2', 'Test foreing bank', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK_FOREIGN'));

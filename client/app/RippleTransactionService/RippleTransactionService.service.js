@@ -30,8 +30,8 @@ angular.module('riwebApp')
             }
             RiwebSocketService.on('post:make_transfer', function (result) {
                 if (result.status === 'success') {
-                    swal({  title: 'Transfer success!', 
-                            text: 'Congratulations ' + currentUser.name + '! You transfered ' + amountToTransfer + ' to ' + destinationEmailAddress, 
+                    swal({  title: 'Transfer success!',
+                            text: 'Congratulations ' + currentUser.name + '! You transfered ' + amountToTransfer + ' to ' + destinationEmailAddress,
                             type: 'success'
                         },
                         function () {
@@ -44,8 +44,8 @@ angular.module('riwebApp')
                             }, 500);
                         });
                 } else {
-                    swal({  title: 'Error', 
-                            text: 'Sorry there was a problem processing your request! ' + result.message, 
+                    swal({  title: 'Error',
+                            text: 'Sorry there was a problem processing your request! ' + result.message,
                             type: 'error'
                           },
                           function() {
@@ -58,7 +58,7 @@ angular.module('riwebApp')
                         );
                 }
             });
-            RiwebSocketService.emit('make_transfer', { fromEmail: currentUser.email, toEmail: destinationEmailAddress, amount: amountToTransfer, orderRequestId: orderRequestId });
+            RiwebSocketService.emitEvent('make_transfer', { fromEmail: currentUser.email, toEmail: destinationEmailAddress, amount: amountToTransfer, orderRequestId: orderRequestId });
         }
 
         return {

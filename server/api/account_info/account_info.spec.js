@@ -23,7 +23,7 @@ describe('Test account_info', function () {
 
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
         emitter = new ClientEventEmitter(socket);
-        emitSpy = sinon.spy(emitter, 'emitSocketEmit');
+        emitSpy = sinon.spy(emitter, 'emitEvent');
 
         AccountInfo.register(socket, emitter);
 

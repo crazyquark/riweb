@@ -32,7 +32,7 @@ describe('Test make_transfer', function () {
         var socketSpy = TestingUtils.buildSocketSpy();
         emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
 
-        emitSpy = emitter.emit;
+        emitSpy = emitter.emitEvent;
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
 

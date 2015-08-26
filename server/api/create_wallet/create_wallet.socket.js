@@ -32,19 +32,19 @@ function fundWallet(clientEventEmitter, wallet, sourceWallet, amount) {
                   destination: ripple_address,
                   amount : amount * 1000000
                 };
-  
+
   function setTrustEmit() {
     deferred.resolve(wallet);
-    clientEventEmitter.emit('set_trust', {
+    clientEventEmitter.emitEvent('set_trust', {
       rippleDestinationAddr: sourceWallet.address,
       rippleSourceAddr: wallet.address,
       rippleSourceSecret: wallet.secret
      });
    }
-          
+
   var transaction = remote.createTransaction('Payment', options);
   transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
-  
+
   debug('fundWallet remote.createTransaction', options);
   transaction.submit(function (err) {
       debug('fundWallet transaction.submit', err);
@@ -54,11 +54,11 @@ function fundWallet(clientEventEmitter, wallet, sourceWallet, amount) {
       } else {
           debug('Successfully funded wallet ' + ripple_address + ' with ' + amount + ' XRP');
           if (sourceWallet.address === Utils.ROOT_RIPPLE_ACCOUNT.address) {
-                            
+
               SetRootFlags.setRootFlags(wallet).then(function(res) {
                 if (res.status === 'success') {
                   deferred.resolve(wallet);
-                } 
+                }
               }, function(err) {
                 deferred.reject(err);
               });
@@ -95,7 +95,7 @@ function getCreateWallet(ownerEmail){
 
 function getBankForUser(ownerEmail) {
   var promise = User.findByEmail(ownerEmail).then(function(foundUser) {
-    
+
     if (foundUser) {
       return BankAccount.findById(foundUser.bank).then(function(foundBank) {
         if (foundBank) {
@@ -143,10 +143,10 @@ function createWalletForEmail(clientEventEmitter, ownerEmail, role) {
         var existingBankWallet = BankAccount.findOneQ({ email: ownerEmail }).then(function (bank) {
           return Q(bank.hotWallet);
         });
-        
-        return existingBankWallet; 
+
+        return existingBankWallet;
       }
-      
+
       var bankWalletQ = getBankForUser(ownerEmail).then(function (foundBank) {
         if (foundBank.status === 'error') {
           return Q.reject(foundBank.message);
@@ -170,15 +170,15 @@ function createWalletForEmail(clientEventEmitter, ownerEmail, role) {
       return bankWalletQ;
 
     } else {
-      return Q(foundWallet);      
+      return Q(foundWallet);
     }
   }).then(function(foundWallet){
     deferred.resolve(foundWallet);
-    clientEventEmitter.emit('post:create_wallet', {address: foundWallet.address});
-  }, 
+    clientEventEmitter.emitEvent('post:create_wallet', {address: foundWallet.address});
+  },
   function(errorMessage){
     deferred.reject(errorMessage);
-    clientEventEmitter.emit('post:create_wallet', {error : errorMessage});
+    clientEventEmitter.emitEvent('post:create_wallet', {error : errorMessage});
   });
 
   return deferred.promise;

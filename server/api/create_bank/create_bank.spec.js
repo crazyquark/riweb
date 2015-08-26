@@ -29,7 +29,7 @@ describe('Test create_bank', function () {
 
         socketSpy = TestingUtils.buildSocketSpy();
         emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
-        emitSpy = emitter.emit;
+        emitSpy = emitter.emitEvent;
 
         TestingUtils.buildBankaccountSpy();
         TestingUtils.buildNewConnectedRemoteStub();

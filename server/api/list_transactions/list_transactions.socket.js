@@ -58,7 +58,7 @@ function listTransactions(clientEventEmitter, ownerEmail) {
 			message: 'missing account'
 		};
 
-		clientEventEmitter.emitSocketEmit('post:list_transactions', result);
+		clientEventEmitter.emitEvent('post:list_transactions', result);
 		deferred.resolve(result);
 	}
 
@@ -73,7 +73,7 @@ function listTransactions(clientEventEmitter, ownerEmail) {
 				var result;
 				if (err) {
 					result = { status: 'error', message: err.message };
-					clientEventEmitter.emitSocketEmit('post:list_transactions', result);
+					clientEventEmitter.emitEvent('post:list_transactions', result);
 					deferred.resolve(result);
 				} else {
 					var transactionPromises = [];
@@ -88,7 +88,7 @@ function listTransactions(clientEventEmitter, ownerEmail) {
 					});
 					Q.all(transactionPromises).then(function (transactionsHuman) {
 						result = { status: 'success', transactions: transactionsHuman };
-						clientEventEmitter.emitSocketEmit('post:list_transactions', result);
+						clientEventEmitter.emitEvent('post:list_transactions', result);
 						deferred.resolve(result);
 					});
 
@@ -136,6 +136,9 @@ function listTransactions(clientEventEmitter, ownerEmail) {
 
 exports.listTransactions = listTransactions;
 exports.register = function(socket, clientEventEmitter) {
+
+  clientEventEmitter.forwardFromEventEmitterToSocket('post:list_transactions', socket);
+
 	socket.on('list_transactions', function (ownerEmail) {
 		listTransactions(ownerEmail, clientEventEmitter);
 	});

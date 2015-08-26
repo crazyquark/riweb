@@ -75,6 +75,7 @@ function putSocket(socket){
   sockets[socket.id] = socket;
 }
 
+//deprecated?
 function forwardFromEventEmitterToSocket(eventName, socket) {
     onEvent(eventName, function (event) {
         socket.emit(eventName, event);
