@@ -68,27 +68,32 @@ function createBank(clientEventEmitter, newBank) {
   return deferred.promise;
 }
 
+function createBankAndUser(clientEventEmitter, data) {
+  createBank(clientEventEmitter, data)
+    .then(function (bank) {
+      clientEventEmitter.emit('create_admin_user_for_bank', {
+        bankId: bank._id,
+        info: bank.info,
+        email: bank.email,
+        password: data.password,
+      });
+
+      clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });
+    }).fail(function (error) {
+      clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
+    });
+}
+
 exports.createBank = createBank;
+exports.createBankAndUser = createBankAndUser;
 exports.register = function (newSocket, clientEventEmitter) {
   socket = newSocket;
 
   clientEventEmitter.forwardFromEventEmitterToSocket('post:fund_wallet', socket);
   clientEventEmitter.forwardFromEventEmitterToSocket('post:set_mutual_banks_trust', socket);
 
-  socket.on('create_bank', function (data) {
-    createBank(clientEventEmitter, data)
-      .then(function (bank) {
-        clientEventEmitter.emit('create_admin_user_for_bank', {
-          bankId: bank._id,
-          info: bank.info,
-          email: bank.email,
-          password: data.password,
-        });
-
-        clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });
-      })
-      .fail(function (error) {
-        clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
-      });
+  clientEventEmitter.onceSocketEvent('create_bank', function (data) {
+    createBankAndUser(clientEventEmitter, data);
   });
+
 };

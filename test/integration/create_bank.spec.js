@@ -6,16 +6,19 @@ var chai = require('chai');
 var expect = chai.expect;
 
 var TestingUtils = require('../utils/testing_utils');
-var Utils = require('../../server/utils/utils');
 var CreateBank = require('../../server/api/create_bank/create_bank.socket');
 var CreateAdminUser = require('../../server/api/create_admin_user_for_bank/create_admin_user_for_bank.socket');
+var ClientEventEmitter = require('../../server/utils/ClientEventEmitter/ClientEventEmitter.service');
 
 describe('ITest Create Bank', function () {
 	var socketSpy;
-
+	var emitter;
+	
 	beforeEach(function () {
 		socketSpy = TestingUtils.buildSocketSpy();
-		CreateAdminUser.register(socketSpy);
+		emitter = new ClientEventEmitter(socketSpy);
+		
+		CreateAdminUser.register(socketSpy, emitter);
 	});
 
 	afterEach(function (done) {
@@ -35,14 +38,16 @@ describe('ITest Create Bank', function () {
 			password: '1234',
 		};
 
-		Utils.onEvent('post:create_admin_user_for_bank', function (result) {
+		emitter.on('post:create_admin_user_for_bank', function (result) {
  			expect(result.status).to.eql('success');
 			expect(result.user.email).to.eql(bankInfo.email);
 			expect(result.user.name).to.eql(bankInfo.info);
 			done();
 		});
-
-		CreateBank.createBank(bankInfo).fail(function(err) {
+		
+		CreateBank.createBank(emitter, bankInfo).then(function(data) {
+			CreateBank.createBankAndUser(emitter, data);
+		}).fail(function(err) {
 			done(err);
 		});
 		// function (bank) {

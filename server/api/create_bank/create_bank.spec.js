@@ -52,7 +52,7 @@ describe('Test create_bank', function () {
             info: 'The french one',
             email: 'admin@brd.com',
         };
-        CreateBank.createBank(newBank).then(function () {
+        CreateBank.createBank(newBank, emitter).then(function () {
             expect(Bankaccount.create).to.have.been.calledWith({
                 name: 'brd',
                 info: 'The french one',
