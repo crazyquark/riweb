@@ -43,11 +43,7 @@ describe('ITest Create Bank', function () {
 			done();
 		});
 		
-		CreateBank.createBank(emitter, bankInfo).then(function(data) {
-			CreateBank.createBankAndUser(emitter, data);
-		}).fail(function(err) {
-			done(err);
-		});
+		CreateBank.createBankAndUser(emitter, bankInfo);
 		// function (bank) {
 		// 	expect(bank.email).to.eql(bankInfo.email);
 		// 	expect(bank.info).to.eql(bankInfo.info);
