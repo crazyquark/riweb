@@ -75,17 +75,9 @@ function putSocket(socket){
   sockets[socket.id] = socket;
 }
 
-//deprecated?
-function forwardFromEventEmitterToSocket(eventName, socket) {
-    onEvent(eventName, function (event) {
-        socket.emit(eventName, event);
-    });
-}
-
 module.exports.putSocket = putSocket;
 module.exports.emitEvent = emitEvent;
 module.exports.onEvent = onEvent;
 module.exports.getNewConnectedRemote = getNewConnectedRemote;
 module.exports.getNewConnectedAdminRemote = getNewConnectedAdminRemote;
 module.exports.ROOT_RIPPLE_ACCOUNT = ROOT_RIPPLE_ACCOUNT;
-module.exports.forwardFromEventEmitterToSocket = forwardFromEventEmitterToSocket;

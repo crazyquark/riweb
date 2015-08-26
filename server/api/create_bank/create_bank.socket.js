@@ -89,8 +89,7 @@ function createBankAndUser(clientEventEmitter, data) {
 //why are we using createBank again? we should be using createBankAndUser and deprecate createBank
 exports.createBank = createBank;
 exports.createBankAndUser = createBankAndUser;
-exports.register = function (newSocket, clientEventEmitter) {
-  socket = newSocket;
+exports.register = function (clientEventEmitter) {
 
   clientEventEmitter.forwardFromEventEmitterToSocket('post:fund_wallet');
   clientEventEmitter.forwardFromEventEmitterToSocket('post:set_mutual_banks_trust');
