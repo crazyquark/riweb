@@ -31,10 +31,6 @@ describe('Test create_bank', function () {
         emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
         emitSpy = emitter.emit;
 
-        // socket.id = 'fooBarSocketId';
-        // Utils.setSocketId(socket.id);
-        // Utils.putSocket(socket);
-
         TestingUtils.buildBankaccountSpy();
         TestingUtils.buildNewConnectedRemoteStub();
         TestingUtils.dropMongodbDatabase().then(function () { done(); });

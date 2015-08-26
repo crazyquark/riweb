@@ -21,7 +21,7 @@ function onConnect(socket) {
   socket.on('info', function (data) {
     console.info('[%s] %s', socket.address, JSON.stringify(data, null, 2));
   });
-  
+
   var clientEventEmitter = new ClientEventEmitter(socket);
 
   // Insert sockets below
@@ -57,7 +57,6 @@ module.exports = function (socketio) {
   // }));
 
   socketio.on('connection', function (socket) {
-    // Utils.setSocketId(socket.id);
     socket.address = socket.handshake.address !== null ?
             socket.handshake.address.address + ':' + socket.handshake.address.port :
             process.env.DOMAIN;

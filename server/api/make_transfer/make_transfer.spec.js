@@ -55,8 +55,6 @@ describe('Test make_transfer', function () {
 
         sinon.mock(remote, 'createTransaction');
 
-        // Utils.setSocketId('fooBarSocketId');
-
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 

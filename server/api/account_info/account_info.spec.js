@@ -30,10 +30,6 @@ describe('Test account_info', function () {
         TestingUtils.buildNewConnectedRemoteStub();
         TestingUtils.buildWalletSpy();
         TestingUtils.dropMongodbDatabase().then(function () { done(); });
-
-        // socket.id = 'fooBarSocketId';
-        // Utils.putSocket(socket);
-        // Utils.setSocketId(socket.id);
     });
     afterEach(function () {
         TestingUtils.restoreAll();

@@ -42,9 +42,6 @@ describe('Test create_wallet', function () {
 
         TestingUtils.buildWalletSpy();
         TestingUtils.buildNewConnectedRemoteStub();
-        // socket.id = 'fooBarSocketId';
-        // Utils.setSocketId(socket.id);
-        // Utils.putSocket(socket);
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
