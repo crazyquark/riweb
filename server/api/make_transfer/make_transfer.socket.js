@@ -64,7 +64,7 @@ function checkSufficientBalance(realBankAccount, amount, err) {
         return false;
     }
 
-    if (!realBankAccount.account.canDeposit(amount)) {
+    if (!realBankAccount.account.canDepositToRipple(amount)) {
         err = 'Not enough funds for bank deposit';
         return false;
     }
@@ -75,7 +75,7 @@ function checkSufficientBalance(realBankAccount, amount, err) {
 function getPreTransferAction(sourceBank, realBankAccount, amount) {
 
     if (sourceBank && sourceBank.sourceRole === 'admin') {
-        return realBankAccount.account.deposit(amount);
+        return realBankAccount.account.depositToRipple(amount);
     } else {
         //in case it's an internal ripple transaction, just fake the external DB interaction
         return Q({ status: 'success' });
@@ -85,7 +85,7 @@ function getPreTransferAction(sourceBank, realBankAccount, amount) {
 function getRollbackTransferAction(sourceBank, realBankAccount, amount) {
 
     if (sourceBank && sourceBank.sourceRole === 'admin') {
-        return realBankAccount.account.withdraw(amount);
+        return realBankAccount.account.withdrawFromRipple(amount);
     } else {
         //in case it's an internal ripple transaction, just fake the external DB interaction
         return Q({ status: 'success' });
