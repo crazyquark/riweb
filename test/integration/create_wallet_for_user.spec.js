@@ -8,23 +8,25 @@ var expect = chai.expect;
 var User = require('../../server/api/user/user.model');
 var BankAccount = require('../../server/api/bankaccount/bankaccount.model');
 var Wallet = require('../../server/api/wallet/wallet.model');
-
 var TestingUtils = require('../utils/testing_utils');
-
 var CreateWallet = require('../../server/api/create_wallet/create_wallet.socket');
-
 var Utils = require('./../../server/utils/utils');
+var ClientEventEmitter = require('../../server/utils/ClientEventEmitter/ClientEventEmitter.service');
 
 var debug = require('debug')('CreateWalletForUserSpec');
 
 describe('ITest create wallet for user', function () {
-
+  var emitter;
+  
   beforeEach(function (done) {
+    var socketSpy = TestingUtils.buildSocketSpy();
+    emitter = new ClientEventEmitter(socketSpy);
+    
     this.timeout(10000);
     TestingUtils.dropMongodbDatabase().then(function () {
 
       //ugly hack for an integration test but hope it works
-      CreateWallet.register(TestingUtils.buildSocketSpy());
+      CreateWallet.register(socketSpy, emitter);
 
       debug('dropMongodbDatabase');
       // TestingUtils.buildClientSocketIoConnection();
@@ -38,11 +40,11 @@ describe('ITest create wallet for user', function () {
     //TODO: should first send rippled credits to the bank (create bank wallet)
     //try to use what is in seed.js and extract it into a separate service
     debug('should create a wallet');
-    TestingUtils.seedBankAndUser(function (theUser, theBank) {
+    TestingUtils.seedBankAndUser(emitter, function (theUser, theBank) {
       debug('seedBankAndUser');
-      CreateWallet.fundWallet(theBank.hotWallet, Utils.ROOT_RIPPLE_ACCOUNT).then(function () {
+      CreateWallet.fundWallet(emitter, theBank.hotWallet, Utils.ROOT_RIPPLE_ACCOUNT).then(function () {
         debug('fundWallet');
-        CreateWallet.createWalletForEmail(theUser.email).then(function () {
+        CreateWallet.createWalletForEmail(emitter, theUser.email).then(function () {
           debug('createWalletForEmail');
           Wallet.findByOwnerEmail(theUser.email).then(function (wallet) {
             debug('findByOwnerEmail');

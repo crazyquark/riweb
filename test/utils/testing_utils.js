@@ -285,7 +285,7 @@ function createRealBankUser(bankName, iban, balance) {
     });
 }
 
-function seedBankAndUser(callback) {
+function seedBankAndUser(emitter, callback) {
     var bank = {
         name: 'ing',
         info: 'ING Bank',
@@ -331,7 +331,7 @@ function seedBankAndUser(callback) {
             bankId: createdBank._id,
             password: createdBank.email,
         };
-        return CreateAdminUserForBank.createAdminUserForBank(adminUserInfo, buildNewClientEventEmitterSpy());
+        return CreateAdminUserForBank.createAdminUserForBank(adminUserInfo, emitter);
     }
 }
 
