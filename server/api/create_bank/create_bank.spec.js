@@ -23,15 +23,12 @@ describe('Test create_bank', function () {
     var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy, emitter;
 
     beforeEach(function (done) {
-        var socket = TestingUtils.buildSocketSpy();
-
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
         socketSpy = TestingUtils.buildSocketSpy();
         emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
-        CreateBank.register(socketSpy, emitter);
         emitSpy = emitter.emit;
 
         // socket.id = 'fooBarSocketId';
