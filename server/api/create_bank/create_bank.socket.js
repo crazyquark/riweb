@@ -47,7 +47,7 @@ function createBank(clientEventEmitter, newBank) {
           debug('funded bank wallet');
           // XXX should the funding be chained or should we return to user immediately? I'd rather not wait for the costly ripple operation
           // emitter.emit('post:fund_wallet', {address: createdBank.hotWallet.address});
-          
+
           // Establish trust lines with the other banks. Account must be funded.
           // XXX this is also made async after returning to the client so not to block the create bank page too long;
           // The client should listen for the emitted event
@@ -69,7 +69,7 @@ function createBank(clientEventEmitter, newBank) {
 }
 
 function createBankAndUser(clientEventEmitter, data) {
-  createBank(clientEventEmitter, data)
+  return createBank(clientEventEmitter, data)
     .then(function (bank) {
       clientEventEmitter.emit('create_admin_user_for_bank', {
         bankId: bank._id,
@@ -79,11 +79,14 @@ function createBankAndUser(clientEventEmitter, data) {
       });
 
       clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'success', bank: bank });
+      return bank;
     }).fail(function (error) {
       clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
+      return error;
     });
 }
 
+//why are we using createBank again? we should be using createBankAndUser and deprecate createBank
 exports.createBank = createBank;
 exports.createBankAndUser = createBankAndUser;
 exports.register = function (newSocket, clientEventEmitter) {

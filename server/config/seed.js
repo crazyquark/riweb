@@ -16,7 +16,7 @@ var SetTrust = require('../api/set_trust/set_trust.socket');
 
 var ClientEventEmitter = require('../utils/ClientEventEmitter/ClientEventEmitter.service');
 var emitter = new ClientEventEmitter(null);
-                
+
 var RealBankAccount = require('../api/RealBankAccount/RealBankAccount.model');
 
 var TestingUtils = require('./../../test/utils/testing_utils');
@@ -37,6 +37,7 @@ function createAdminInfo(bankInfo) {
 
 function createBank(bank) {
   return CreateBank.createBank(emitter, bank).then(function (bankInfo) {
+  //return CreateBank.createBankAndUser(emitter, bank).then(function (bankInfo) {
     bank.bankInfo = bankInfo;
     return CreateAdminUserForBank.createAdminUserForBank(createAdminInfo(bankInfo), emitter);
   });
@@ -81,7 +82,7 @@ function createRealbankUsers() {
       iban: 'MK07250120000058984',
       balance: '99'
     },
-    
+
     ]);
 
 }

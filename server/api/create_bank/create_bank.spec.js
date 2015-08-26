@@ -47,7 +47,7 @@ describe('Test create_bank', function () {
             email: 'admin@brd.com',
         };
 
-        CreateBank.createBank(emitter, newBank).then(function () {
+        CreateBank.createBankAndUser(emitter, newBank).then(function () {
             expect(Bankaccount.create).to.have.been.calledWith({
                 name: 'brd',
                 info: 'The french one',
@@ -65,7 +65,7 @@ describe('Test create_bank', function () {
             email: 'admin@brd.com',
             password: 'secret',
         };
-        CreateBank.createBank(emitter, newBank).then(function (createdBank) {
+        CreateBank.createBankAndUser(emitter, newBank).then(function (createdBank) {
             expect(emitSpy).to.have.been.calledWith('create_admin_user_for_bank', {
                 bankId: createdBank._id,
                 info: createdBank.info,
@@ -88,9 +88,9 @@ describe('Test create_bank', function () {
             email: 'admin@bcr.com'
         };
 
-        CreateBank.createBank(emitter, newBank)
+        CreateBank.createBankAndUser(emitter, newBank)
             .then(function () {
-                return CreateBank.createBank(emitter, newBankAgain);
+                return CreateBank.createBankAndUser(emitter, newBankAgain);
             })
             .fail(function (bank) {
                 expect(Bankaccount.create).to.have.callCount(1);
