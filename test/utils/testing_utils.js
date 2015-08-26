@@ -149,7 +149,7 @@ function buildNewConnectedRemoteStub() {
 }
 
 function buildNewClientEventEmitterSpy(socket) {
-  socket = socket || buildSocketSpy;
+  socket = socket || buildSocketSpy();
   var clientEventEmitter = new ClientEventEmitter(socket);
   sinon.spy(clientEventEmitter, 'emit');
   sinon.spy(clientEventEmitter, 'emitSocketEmit');
@@ -331,7 +331,7 @@ function seedBankAndUser(callback) {
             bankId: createdBank._id,
             password: createdBank.email,
         };
-        return CreateAdminUserForBank.createAdminUserForBank(adminUserInfo);
+        return CreateAdminUserForBank.createAdminUserForBank(adminUserInfo, buildNewClientEventEmitterSpy());
     }
 }
 
