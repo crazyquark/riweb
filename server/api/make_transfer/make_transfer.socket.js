@@ -108,14 +108,6 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
             senderWallet = sourceBank.bank.hotWallet;
         }
 
-        // Not sure why these are arrays sometimes
-        if (senderWallet && senderWallet.constructor === Array) {
-            senderWallet = senderWallet[0];
-        }
-        if (recvWallet && recvWallet.constructor === Array) {
-            recvWallet = recvWallet[0];
-        }
-
         if (!senderWallet || !recvWallet) {
             // At least a wallet is missing, it's a bust
             deferred.reject(throwMissingError());

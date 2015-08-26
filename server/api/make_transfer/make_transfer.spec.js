@@ -37,11 +37,11 @@ describe('Test make_transfer', function () {
 
         sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
             if (email === 'alice@example.com') {
-                return Q([aliceWallet]);
+                return Q(aliceWallet);
             } else if (email === 'bob@example.com') {
-                return Q([bobWallet]);
+                return Q(bobWallet);
             }
-            return Q([]);
+            return Q(null);
         });
 
         bank1 = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
@@ -64,6 +64,7 @@ describe('Test make_transfer', function () {
         User.findByEmail.restore();
         Bankaccount.findById.restore();
     });
+
 
     it('should send 50 EURO from Alice to Bob', function (done) {
         var amount = 50;

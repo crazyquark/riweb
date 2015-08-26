@@ -106,7 +106,7 @@ function buildFindByOwnerEmailForAdmin(wallet) {
 }
 
 function buildCreateForEmailStub(wallet, email) {
-    sinon.stub(wallet, 'create').returns(Q([getNonAdminMongooseWallet(email)]));
+    sinon.stub(wallet, 'create').returns(Q(getNonAdminMongooseWallet(email)));
 }
 
 function buildFindByOwnerEmailForUnexisting(wallet) {

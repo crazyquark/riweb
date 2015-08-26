@@ -42,11 +42,11 @@ describe('Test list_transactions', function() {
 
         sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
             if (email === 'alice@example.com') {
-                return Q([aliceWallet]);
+                return Q(aliceWallet);
             } else if (email === 'bob@example.com') {
-                return Q([bobWallet]);
+                return Q(bobWallet);
             }
-            return Q([]);
+            return Q(null);
         });
 
         sinon.stub(Wallet, 'findByRippleAddress', function (address) {
