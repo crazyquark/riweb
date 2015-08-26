@@ -22,13 +22,17 @@ var debug = require('debug')('TMakeTransfer');
 
 describe('Test make_transfer', function () {
 
-    var remote, emitSpy, aliceWallet, bobWallet;
+    var remote, emitSpy, aliceWallet, bobWallet, emitter;
     var bank1, bankWithNoWallet, nonAdminUser, nonAdminUserWithNoBank;
 
     beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
-        emitSpy = sinon.spy(Utils, 'emitEvent');
+
+        var socketSpy = TestingUtils.buildSocketSpy();
+        emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+
+        emitSpy = emitter.emit;
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
 
@@ -67,7 +71,7 @@ describe('Test make_transfer', function () {
     it('should send 50 EURO from Alice to Bob', function (done) {
         var amount = 50;
 
-        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).then(function () {
+        MakeTransfer.makeTransfer(emitter, 'alice@example.com', 'bob@example.com', amount).then(function () {
             expect(remote.createTransaction).to.have.been.calledWith('Payment', {
                 account: aliceWallet.address,
                 destination: bobWallet.address,
@@ -81,7 +85,7 @@ describe('Test make_transfer', function () {
                 toEmail: 'bob@example.com',
                 amount: 50,
                 issuer: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
-                status: 'success'} 
+                status: 'success'}
             );
 
             done();
@@ -96,7 +100,7 @@ describe('Test make_transfer', function () {
 
         sinon.mock(remote, 'createTransaction');
 
-        MakeTransfer.makeTransfer('alice@example.com', 'charlie@example.com', amount).fail(function () {
+        MakeTransfer.makeTransfer(emitter, 'alice@example.com', 'charlie@example.com', amount).fail(function () {
             expect(remote.createTransaction).to.have.callCount(0);
             expect(Utils.getNewConnectedRemote).to.have.callCount(0);
 
@@ -127,7 +131,7 @@ describe('Test make_transfer', function () {
 
         remote._stub_transaction.submit.yields(rippleError, {});
 
-        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).fail(function (result) {
+        MakeTransfer.makeTransfer(emitter, 'alice@example.com', 'bob@example.com', amount).fail(function (result) {
             expect(remote.createTransaction).to.have.callCount(1);
             expect(Utils.getNewConnectedRemote).to.have.callCount(1);
 
@@ -156,7 +160,7 @@ describe('Test make_transfer', function () {
         TestingUtils.buildUserFindEmailStub(User, nonAdminUserWithNoBank);
 
 
-        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).fail(function () {
+        MakeTransfer.makeTransfer(emitter, 'alice@example.com', 'bob@example.com', amount).fail(function () {
             expect(remote.createTransaction).to.have.callCount(0);
             expect(Utils.getNewConnectedRemote).to.have.callCount(0);
 
@@ -184,7 +188,7 @@ describe('Test make_transfer', function () {
         TestingUtils.buildBankaccountFindById(Bankaccount, [bankWithNoWallet]);
 
 
-        MakeTransfer.makeTransfer('alice@example.com', 'bob@example.com', amount).fail(function () {
+        MakeTransfer.makeTransfer(emitter, 'alice@example.com', 'bob@example.com', amount).fail(function () {
             expect(remote.createTransaction).to.have.callCount(0);
             expect(Utils.getNewConnectedRemote).to.have.callCount(0);
 

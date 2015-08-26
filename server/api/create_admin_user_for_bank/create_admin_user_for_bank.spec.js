@@ -14,8 +14,8 @@ var Utils = require('../../utils/utils');
 
 var CreateAdminUserForBank = require('./create_admin_user_for_bank.socket');
 
-describe('Test create admin user for bank', function () {
-  var emitSpy, socketSpy;
+describe('`', function () {
+  var emitSpy, socketSpy, emitter;
 
   var adminInfo = {
     bankId: mongoose.Types.ObjectId('55bb2947cdfccb2c13353502'),
@@ -26,20 +26,16 @@ describe('Test create admin user for bank', function () {
 
 
   beforeEach(function (done) {
-    emitSpy = sinon.spy(Utils, 'emitEvent');
     socketSpy = TestingUtils.buildSocketSpy();
-    // socketSpy.id = 'fooBarSocketId';
-    CreateAdminUserForBank.register(socketSpy);
-    // Utils.setSocketId('fooBarSocketId');
+    emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+    emitSpy = emitter.emit;
     TestingUtils.dropMongodbDatabase().then(function () { done(); });
   });
 
   afterEach(function () {
-    emitSpy.restore();
+    TestingUtils.restoreClientEventEmitterSpy(emitter);
     TestingUtils.restoreAll();
-    
-    // Utils.getEventEmitter().eventEmitter.removeAllListeners('post:create_admin_user_for_bank');
-  })
+  });
 
   it('should create an admin user for the given bank ID', function (done) {
     Utils.onEvent('post:create_admin_user_for_bank', function (result) {
@@ -50,11 +46,11 @@ describe('Test create admin user for bank', function () {
       }
    });
 
-    CreateAdminUserForBank.createAdminUserForBank(adminInfo).then(function (user) {
+    CreateAdminUserForBank.createAdminUserForBank(adminInfo, emitter).then(function (user) {
       expect(user.email).to.eql(adminInfo.email);
       expect(user.name).to.eql(adminInfo.info);
       expect(emitSpy).to.have.callCount(1);
-      expect(emitSpy).to.have.been.calledWith('post:create_admin_user_for_bank', { 
+      expect(emitSpy).to.have.been.calledWith('post:create_admin_user_for_bank', {
         status: 'success',
         user: { email: user.email, name: user.name }});
       done();

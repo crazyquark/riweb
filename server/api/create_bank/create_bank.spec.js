@@ -20,23 +20,24 @@ var CreateBank = require('./create_bank.socket');
 
 describe('Test create_bank', function () {
 
-    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy;
+    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy, emitter;
 
     beforeEach(function (done) {
         var socket = TestingUtils.buildSocketSpy();
-        
+
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
         socketSpy = TestingUtils.buildSocketSpy();
-        CreateBank.register(socketSpy);
-        emitSpy = sinon.spy(Utils, 'emitEvent');
-        
+        emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+        CreateBank.register(socketSpy, emitter);
+        emitSpy = emitter.emit;
+
         // socket.id = 'fooBarSocketId';
         // Utils.setSocketId(socket.id);
         // Utils.putSocket(socket);
-        
+
         TestingUtils.buildBankaccountSpy();
         TestingUtils.buildNewConnectedRemoteStub();
         TestingUtils.dropMongodbDatabase().then(function () { done(); });
@@ -52,7 +53,8 @@ describe('Test create_bank', function () {
             info: 'The french one',
             email: 'admin@brd.com',
         };
-        CreateBank.createBank(newBank, emitter).then(function () {
+
+        CreateBank.createBank(emitter, newBank).then(function () {
             expect(Bankaccount.create).to.have.been.calledWith({
                 name: 'brd',
                 info: 'The french one',
@@ -70,7 +72,7 @@ describe('Test create_bank', function () {
             email: 'admin@brd.com',
             password: 'secret',
         };
-        CreateBank.createBank(newBank).then(function (createdBank) {
+        CreateBank.createBank(emitter, newBank).then(function (createdBank) {
             expect(emitSpy).to.have.been.calledWith('create_admin_user_for_bank', {
                 bankId: createdBank._id,
                 info: createdBank.info,
@@ -93,9 +95,9 @@ describe('Test create_bank', function () {
             email: 'admin@bcr.com'
         };
 
-        CreateBank.createBank(newBank)
+        CreateBank.createBank(emitter, newBank)
             .then(function () {
-                return CreateBank.createBank(newBankAgain);
+                return CreateBank.createBank(emitter, newBankAgain);
             })
             .fail(function (bank) {
                 expect(Bankaccount.create).to.have.callCount(1);

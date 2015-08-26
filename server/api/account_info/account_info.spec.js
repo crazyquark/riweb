@@ -16,21 +16,21 @@ var AccountInfo = require('./account_info.socket');
 var TestingUtils = require('./../../../test/utils/testing_utils');
 var ClientEventEmitter = require('../../utils/ClientEventEmitter/ClientEventEmitter.service');
 
-describe.only('Test account_info', function () {
-    var socket, emitSpy;
+describe('Test account_info', function () {
+    var socket, emitSpy, emitter;
     beforeEach(function (done) {
         socket = TestingUtils.buildSocketSpy();
 
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
-        var emitter = new ClientEventEmitter(socket);
-        emitSpy = sinon.spy(emitter, 'emit');
+        emitter = new ClientEventEmitter(socket);
+        emitSpy = sinon.spy(emitter, 'emitSocketEmit');
 
         AccountInfo.register(socket, emitter);
 
         TestingUtils.buildNewConnectedRemoteStub();
         TestingUtils.buildWalletSpy();
         TestingUtils.dropMongodbDatabase().then(function () { done(); });
-        
+
         // socket.id = 'fooBarSocketId';
         // Utils.putSocket(socket);
         // Utils.setSocketId(socket.id);
@@ -42,7 +42,7 @@ describe.only('Test account_info', function () {
     it('should get account_info for unexisting email', function (done) {
         TestingUtils.buildFindByOwnerEmailForUnexisting(Wallet);
 
-        AccountInfo.getAccountInfo('not_exist@example.com', socket).then(function () {
+        AccountInfo.getAccountInfo('not_exist@example.com', emitter).then(function () {
             expect(emitSpy).to.have.been.calledWith('post:account_info', { info: 'User does not exist!'});
             expect(emitSpy).to.have.callCount(1);
             done();
@@ -52,7 +52,7 @@ describe.only('Test account_info', function () {
     it('should get account_info for admin email', function (done) {
         TestingUtils.buildFindByOwnerEmailForAdmin(Wallet);
 
-        AccountInfo.getAccountInfo('admin@admin.com', socket).then(function () {
+        AccountInfo.getAccountInfo('admin@admin.com', emitter).then(function () {
             expect(emitSpy).to.have.callCount(1);
             expect(emitSpy).to.have.been.calledWith('post:account_info', { balance: 0});
             done();

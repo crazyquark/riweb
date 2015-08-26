@@ -25,12 +25,13 @@ describe('Test list_transactions', function() {
     beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
-        emitSpy = sinon.spy(Utils, 'emitEvent');
         socketSpy = TestingUtils.buildSocketSpy();
+        var emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+        emitSpy = emitter.emit;
 
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
-        
+
         bank1 = {
             'email': 'bank1@example.com',
             'hotWallet': {
@@ -38,7 +39,7 @@ describe('Test list_transactions', function() {
                 'secret': 'NONADMINssphraseBank'
             },
         };
-        
+
         sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
             if (email === 'alice@example.com') {
                 return Q([aliceWallet]);
@@ -71,7 +72,7 @@ describe('Test list_transactions', function() {
         });
 
 
-        fromAliceToBobTx = { 
+        fromAliceToBobTx = {
             meta: { TransactionResult: 'tesSUCCESS' },
             tx: {
     			Account: aliceWallet.address,
@@ -91,7 +92,7 @@ describe('Test list_transactions', function() {
                 TransactionType: 'Payment',
     			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 99 }}};
 
-        fromBank1ToAliceTx = { 
+        fromBank1ToAliceTx = {
                 meta: { TransactionResult: 'tesSUCCESS' },
                 tx: {
     			Account: bank1.address,
