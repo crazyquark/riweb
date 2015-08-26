@@ -68,11 +68,11 @@ function checkSufficientBalance(realBankAccount, amount, err) {
         err = 'Not enough funds for bank deposit';
         return false;
     }
-    
+
     return true;
 }
 
-function getPreTransferAction(sourceBank, realBankAccount, amount) { 
+function getPreTransferAction(sourceBank, realBankAccount, amount) {
 
     if (sourceBank && sourceBank.sourceRole === 'admin') {
         return realBankAccount.account.deposit(amount);
@@ -94,7 +94,7 @@ function getRollbackTransferAction(sourceBank, realBankAccount, amount) {
 
 function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId) {
 
-    var throwMissingError = buildThrowMissingError(fromEmail, toEmail, amount);
+    var throwMissingError = buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount);
 
     function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBank, destUserBankParam, realBankAccount) {
         var deferred = Q.defer();
@@ -156,7 +156,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
         }
 
         //TODO: also add the equivalent for destination
-        var preTransferPromise = getPreTransferAction(sourceBank, realBankAccount, amount);  
+        var preTransferPromise = getPreTransferAction(sourceBank, realBankAccount, amount);
 
         preTransferPromise.then(function (depositResult) {
             var deposit = Q.defer();
@@ -221,7 +221,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
     return makeTransferWithRippleWallets;
 }
 
-      
+
 
 function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId) {
     var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
@@ -311,7 +311,7 @@ exports.makeTransferWithRipple = makeTransferWithRipple;
 exports.register = function(socket, clientEventEmitter) {
 
     clientEventEmitter.forwardFromEventEmitterToSocket('post:make_transfer', socket);
-    
+
     clientEventEmitter.on('make_transfer', function (data) {
         makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
