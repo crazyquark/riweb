@@ -58,7 +58,7 @@ angular.module('riwebApp')
                         );
                 }
             });
-            RiwebSocketService.emitEvent('make_transfer', { fromEmail: currentUser.email, toEmail: destinationEmailAddress, amount: amountToTransfer, orderRequestId: orderRequestId });
+            RiwebSocketService.emit('make_transfer', { fromEmail: currentUser.email, toEmail: destinationEmailAddress, amount: amountToTransfer, orderRequestId: orderRequestId });
         }
 
         return {

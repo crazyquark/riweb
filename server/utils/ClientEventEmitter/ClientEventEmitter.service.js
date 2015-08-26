@@ -10,7 +10,7 @@ function ClientEventEmitter(socket) {
   var emitter = this;
 
   emitter.onSocketEvent = function(eventName, callback) {
-    debug('onSocketEvent', eventName, callback);
+    debug('onSocketEvent', eventName);
     socket.on(eventName, callback);
   };
 
@@ -20,29 +20,29 @@ function ClientEventEmitter(socket) {
   };
 
   emitter.onceSocketEvent = function(eventName, callback) {
-    debug('onceSocketEvent', eventName, callback);
+    debug('onceSocketEvent', eventName);
     socket.once(eventName, callback);
   };
 
   emitter.emitAndRunOnceEvent = function(eventName, event, callback){
-    debug('emitAndRunOnceEvent', eventName, event, callback);
+    debug('emitAndRunOnceEvent', eventName, event);
     emitter.once('post:' + eventName, callback);
     emitter.emit(eventName, event);
   };
 
   emitter.emitAndRunOnceSocket = function(eventName, event, callback){
-    debug('emitAndRunOnceSocket', eventName, event, callback);
+    debug('emitAndRunOnceSocket', eventName, event);
     socket.once('post:' + eventName, callback);
     socket.emit(eventName, event);
   };
 
   emitter.onEvent = function(eventName, callback) {
-    debug('onEvent', eventName, callback);
-    emitter.emit(eventName, callback);
+    debug('onEvent', eventName);
+    emitter.on(eventName, callback);
   };
 
   emitter.emitEvent = function(eventName, event) {
-    debug('emitEvent', eventName, event);
+    debug('emitEvent', eventName);
     emitter.emit(eventName, event);
   };
 

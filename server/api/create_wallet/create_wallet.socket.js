@@ -190,7 +190,7 @@ exports.getBankForUser = getBankForUser;
 
 exports.register = function(newSocket, clientEventEmitter) {
   socket = newSocket;
-  clientEventEmitter.forwardFromEventEmitterToSocket('post:create_wallet', socket);
+  clientEventEmitter.forwardFromEventEmitterToSocket('post:create_wallet');
 
   socket.on('create_wallet', function(data) {
       createWalletForEmail(clientEventEmitter, data.ownerEmail, data.role);

@@ -48,7 +48,7 @@ exports.register = function(newSocket, clientEventEmitter) {
     socket = newSocket;
     emitter = clientEventEmitter;
 
-    clientEventEmitter.forwardFromEventEmitterToSocket('post:create_admin_user_for_bank', socket);
+    clientEventEmitter.forwardFromEventEmitterToSocket('post:create_admin_user_for_bank');
 
     clientEventEmitter.on('create_admin_user_for_bank', function (adminUserInfo) {
         createAdminUserForBank(adminUserInfo, clientEventEmitter);

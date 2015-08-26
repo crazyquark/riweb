@@ -15,7 +15,7 @@ angular.module('riwebApp')
           }
         });
 
-        RiwebSocketService.emitEvent('create_bank', $scope.bank);
+        RiwebSocketService.emit('create_bank', $scope.bank);
       }
 
     };
