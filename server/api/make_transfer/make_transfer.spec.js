@@ -28,7 +28,11 @@ describe('Test make_transfer', function () {
     beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
-        emitSpy = sinon.spy(Utils, 'emitEvent');
+
+        var socketSpy = TestingUtils.buildSocketSpy();
+        var emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+
+        emitSpy = emitter.emit;
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
 
@@ -81,7 +85,7 @@ describe('Test make_transfer', function () {
                 toEmail: 'bob@example.com',
                 amount: 50,
                 issuer: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
-                status: 'success'} 
+                status: 'success'}
             );
 
             done();

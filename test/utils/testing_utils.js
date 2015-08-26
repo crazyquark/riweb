@@ -153,6 +153,7 @@ function buildNewClientEventEmitterSpy(socket) {
   var clientEventEmitter = new ClientEventEmitter(socket);
   sinon.spy(clientEventEmitter, 'emit');
   sinon.spy(clientEventEmitter, 'emitSocketEmit');
+  sinon.spy(clientEventEmitter, 'forwardFromEventEmitterToSocket');
   return clientEventEmitter;
 }
 
