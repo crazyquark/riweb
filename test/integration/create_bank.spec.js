@@ -8,7 +8,6 @@ var expect = chai.expect;
 var TestingUtils = require('../utils/testing_utils');
 var CreateBank = require('../../server/api/create_bank/create_bank.socket');
 var CreateAdminUser = require('../../server/api/create_admin_user_for_bank/create_admin_user_for_bank.socket');
-var ClientEventEmitter = require('../../server/utils/ClientEventEmitter/ClientEventEmitter.service');
 
 describe('ITest Create Bank', function () {
 	var socketSpy;
@@ -16,7 +15,7 @@ describe('ITest Create Bank', function () {
 	
 	beforeEach(function () {
 		socketSpy = TestingUtils.buildSocketSpy();
-		emitter = new ClientEventEmitter(socketSpy);
+		emitter = TestingUtils.buildNewClientEventEmitterSpy();
 		
 		CreateAdminUser.register(socketSpy, emitter);
 	});

@@ -11,7 +11,6 @@ var Wallet = require('../../server/api/wallet/wallet.model');
 var TestingUtils = require('../utils/testing_utils');
 var CreateWallet = require('../../server/api/create_wallet/create_wallet.socket');
 var Utils = require('./../../server/utils/utils');
-var ClientEventEmitter = require('../../server/utils/ClientEventEmitter/ClientEventEmitter.service');
 
 var debug = require('debug')('CreateWalletForUserSpec');
 
@@ -20,7 +19,7 @@ describe('ITest create wallet for user', function () {
   
   beforeEach(function (done) {
     var socketSpy = TestingUtils.buildSocketSpy();
-    emitter = new ClientEventEmitter(socketSpy);
+    emitter = TestingUtils.buildNewClientEventEmitterSpy();
     
     this.timeout(10000);
     TestingUtils.dropMongodbDatabase().then(function () {
