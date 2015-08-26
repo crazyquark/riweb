@@ -12,12 +12,12 @@ var CreateAdminUser = require('../../server/api/create_admin_user_for_bank/creat
 describe('ITest Create Bank', function () {
 	var socketSpy;
 	var emitter;
-	
+
 	beforeEach(function () {
 		socketSpy = TestingUtils.buildSocketSpy();
 		emitter = TestingUtils.buildNewClientEventEmitterSpy();
-		
-		CreateAdminUser.register(socketSpy, emitter);
+
+		CreateAdminUser.register(emitter);
 	});
 
 	afterEach(function (done) {
@@ -41,7 +41,7 @@ describe('ITest Create Bank', function () {
 			expect(result.user.name).to.eql(bankInfo.info);
 			done();
 		});
-		
+
 		CreateBank.createBankAndUser(emitter, bankInfo);
 		// function (bank) {
 		// 	expect(bank.email).to.eql(bankInfo.email);

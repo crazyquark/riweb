@@ -135,7 +135,7 @@ function listTransactions(clientEventEmitter, ownerEmail) {
 }
 
 exports.listTransactions = listTransactions;
-exports.register = function(socket, clientEventEmitter) {
+exports.register = function(clientEventEmitter) {
 
   clientEventEmitter.forwardFromEventEmitterToSocket('post:list_transactions');
 

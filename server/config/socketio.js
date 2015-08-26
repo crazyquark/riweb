@@ -25,19 +25,19 @@ function onConnect(socket) {
   var clientEventEmitter = new ClientEventEmitter(socket);
 
   // Insert sockets below
-  require('../api/Order/Order.socket').register(socket, clientEventEmitter);
-  require('../api/order_request/order_request.socket').register(socket, clientEventEmitter);
-  require('../api/RealBankAccount/RealBankAccount.socket').register(socket, clientEventEmitter);
-  require('../api/create_admin_user_for_bank/create_admin_user_for_bank.socket').register(socket, clientEventEmitter);
-  require('../api/create_bank/create_bank.socket').register(socket, clientEventEmitter);
-  require('../api/list_transactions/list_transactions.socket').register(socket, clientEventEmitter);
-  require('../api/set_root_flags/set_root_flags.socket').register(socket, clientEventEmitter);
-  require('../api/make_transfer/make_transfer.socket').register(socket, clientEventEmitter);
-  require('../api/set_trust/set_trust.socket').register(socket, clientEventEmitter);
-  require('../api/account_info/account_info.socket').register(socket, clientEventEmitter);
-  require('../api/create_wallet/create_wallet.socket').register(socket, clientEventEmitter);
-  require('../api/bankaccount/bankaccount.socket').register(socket, clientEventEmitter);
-  require('../api/wallet/wallet.socket').register(socket, clientEventEmitter);
+  require('../api/Order/Order.socket').register(clientEventEmitter);
+  require('../api/order_request/order_request.socket').register(clientEventEmitter);
+  require('../api/RealBankAccount/RealBankAccount.socket').register(clientEventEmitter);
+  require('../api/create_admin_user_for_bank/create_admin_user_for_bank.socket').register(clientEventEmitter);
+  require('../api/create_bank/create_bank.socket').register(clientEventEmitter);
+  require('../api/list_transactions/list_transactions.socket').register(clientEventEmitter);
+  require('../api/set_root_flags/set_root_flags.socket').register(clientEventEmitter);
+  require('../api/make_transfer/make_transfer.socket').register(clientEventEmitter);
+  require('../api/set_trust/set_trust.socket').register(clientEventEmitter);
+  require('../api/account_info/account_info.socket').register(clientEventEmitter);
+  require('../api/create_wallet/create_wallet.socket').register(clientEventEmitter);
+  require('../api/bankaccount/bankaccount.socket').register(clientEventEmitter);
+  require('../api/wallet/wallet.socket').register(clientEventEmitter);
 }
 
 module.exports = function (socketio) {

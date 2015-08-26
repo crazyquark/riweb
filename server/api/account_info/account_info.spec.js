@@ -25,7 +25,7 @@ describe('Test account_info', function () {
         emitter = new ClientEventEmitter(socket);
         emitSpy = sinon.spy(emitter, 'emitEvent');
 
-        AccountInfo.register(socket, emitter);
+        AccountInfo.register(emitter);
 
         TestingUtils.buildNewConnectedRemoteStub();
         TestingUtils.buildWalletSpy();

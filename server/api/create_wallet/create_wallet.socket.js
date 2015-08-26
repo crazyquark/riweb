@@ -14,10 +14,6 @@ var SetRootFlags = require('../set_root_flags/set_root_flags.socket');
 
 var debug = require('debug')('CreateWallet');
 
-var socket;
-
-//var ROOT_RIPPLE_ACCOUNT = Utils.ROOT_RIPPLE_ACCOUNT;
-
 function fundWallet(clientEventEmitter, wallet, sourceWallet, amount) {
   debug('fundWallet', wallet, amount);
   var deferred = Q.defer();
@@ -188,11 +184,10 @@ exports.createWalletForEmail = createWalletForEmail;
 exports.fundWallet = fundWallet;
 exports.getBankForUser = getBankForUser;
 
-exports.register = function(newSocket, clientEventEmitter) {
-  socket = newSocket;
+exports.register = function(clientEventEmitter) {
   clientEventEmitter.forwardFromEventEmitterToSocket('post:create_wallet');
 
-  socket.on('create_wallet', function(data) {
+  clientEventEmitter.onSocketEvent('create_wallet', function(data) {
       createWalletForEmail(clientEventEmitter, data.ownerEmail, data.role);
   });
 };

@@ -23,7 +23,7 @@ describe('ITest transfers', function () {
 		socketSpy = TestingUtils.buildSocketSpy();
 		emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
 
-		MakeTransfer.register(socketSpy, emitter);
+		MakeTransfer.register(emitter);
 
 		TestingUtils.dropMongodbDatabase().then(function () {
 			TestingUtils.seedBankAndUser(emitter, function (newUser, userBank) {

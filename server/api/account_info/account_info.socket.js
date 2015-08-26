@@ -69,11 +69,11 @@ function getAccountInfo(ownerEmail, clientEventEmitter) {
 
 exports.getAccountInfo = getAccountInfo;
 
-exports.register = function(socket, clientEventEmitter) {
+exports.register = function(clientEventEmitter) {
 
   clientEventEmitter.forwardFromEventEmitterToSocket('post:account_info');
 
-  socket.on('account_info', function(ownerEmail) {
+  clientEventEmitter.onSocketEvent('account_info', function(ownerEmail) {
     console.log('account_info ' + ownerEmail);
     getAccountInfo(ownerEmail, clientEventEmitter);
   });

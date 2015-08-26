@@ -37,7 +37,7 @@ function setTrust(rippleDestinationAddr, rippleSourceAddr, rippleSourceSecret, l
     };
     var transaction = remote.createTransaction('TrustSet', transactionOptions);
     transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
-    
+
     transaction.submit(function (err) {
       debug('transaction.submit', transactionOptions, err);
       if (!err) {
@@ -127,7 +127,7 @@ exports.setBanksTrust = setBanksTrust;
 exports.setTrust = setTrust;
 exports.setTrustBidir = setTrustBidir;
 exports.setMutualBanksTrust = setMutualBanksTrust;
-exports.register = function(socket, clientEventEmitter) {
+exports.register = function(clientEventEmitter) {
   clientEventEmitter.on('set_trust', function (data) {
     setTrust(data.rippleDestinationAddr, data.rippleSourceAddr, data.rippleSourceSecret);
   });

@@ -308,7 +308,7 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
 exports.makeTransfer = makeTransfer;
 exports.makeTransferWithRipple = makeTransferWithRipple;
 
-exports.register = function(socket, clientEventEmitter) {
+exports.register = function(clientEventEmitter) {
 
     clientEventEmitter.forwardFromEventEmitterToSocket('post:make_transfer');
 
@@ -316,7 +316,7 @@ exports.register = function(socket, clientEventEmitter) {
         makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 
-    socket.on('make_transfer', function (data) {
+    clientEventEmitter.onSocketEvent('make_transfer', function (data) {
         makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
     });
 };

@@ -10,7 +10,7 @@ var debug = require('debug')('RealBankAccountSocket');
 
 function getRealBankAccountForEmail(ownerEmail) {
   var promise = User.findByEmail(ownerEmail).then(function(foundUser) {
-    
+
     if (foundUser) {
       return RealBankAccount.findByIban(foundUser.iban).then(function(foundRealAccount) {
         if (foundRealAccount) {
@@ -33,5 +33,5 @@ function getRealBankAccountForEmail(ownerEmail) {
 
 exports.getRealBankAccountForEmail = getRealBankAccountForEmail;
 
-exports.register = function(socket, clientEventEmitter) {
+exports.register = function(clientEventEmitter) {
 };

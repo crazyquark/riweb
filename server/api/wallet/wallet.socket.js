@@ -6,5 +6,5 @@
 
 var Wallet = require('./wallet.model');
 
-exports.register = function(socket, clientEventEmitter) {
+exports.register = function(clientEventEmitter) {
 };

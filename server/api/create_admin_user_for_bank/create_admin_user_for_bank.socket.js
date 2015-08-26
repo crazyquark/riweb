@@ -11,10 +11,6 @@ var Utils = require('../../utils/utils');
 
 var debug = require('debug')('CreateAdminUserForBank');
 
-var socket;
-
-var emitter;
-
 function createAdminUserForBank(adminUserInfo, clientEventEmitter) {
     debug('createAdminUserForBank', adminUserInfo);
     var deferred = Q.defer();
@@ -44,9 +40,7 @@ function createAdminUserForBank(adminUserInfo, clientEventEmitter) {
 
 exports.createAdminUserForBank = createAdminUserForBank;
 
-exports.register = function(newSocket, clientEventEmitter) {
-    socket = newSocket;
-    emitter = clientEventEmitter;
+exports.register = function(clientEventEmitter) {
 
     clientEventEmitter.forwardFromEventEmitterToSocket('post:create_admin_user_for_bank');
 

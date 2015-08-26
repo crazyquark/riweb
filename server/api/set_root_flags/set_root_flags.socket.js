@@ -18,7 +18,7 @@ function setRootFlags(account) {
             set: 'DefaultRipple'
         });
         transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
-        
+
         transaction.submit(function(err){
             if (err) {
                 debug(err);
@@ -48,7 +48,7 @@ function setBankFlags(bank1, bank2) {
 
 exports.setBankFlags = setBankFlags;
 exports.setRootFlags = setRootFlags;
-exports.register = function(socket, clientEventEmitter) {
+exports.register = function(clientEventEmitter) {
 	clientEventEmitter.on('set_root_flags', function(data) {
 		setRootFlags(data.account);
 	})

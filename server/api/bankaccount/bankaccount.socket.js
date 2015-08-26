@@ -6,5 +6,5 @@
 
 var Bankaccount = require('./bankaccount.model');
 
-exports.register = function(socket, clientEventEmitter) {
+exports.register = function(clientEventEmitter) {
 };

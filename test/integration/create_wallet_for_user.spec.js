@@ -16,16 +16,16 @@ var debug = require('debug')('CreateWalletForUserSpec');
 
 describe('ITest create wallet for user', function () {
   var emitter;
-  
+
   beforeEach(function (done) {
     var socketSpy = TestingUtils.buildSocketSpy();
     emitter = TestingUtils.buildNewClientEventEmitterSpy();
-    
+
     this.timeout(10000);
     TestingUtils.dropMongodbDatabase().then(function () {
 
       //ugly hack for an integration test but hope it works
-      CreateWallet.register(socketSpy, emitter);
+      CreateWallet.register(emitter);
 
       debug('dropMongodbDatabase');
       // TestingUtils.buildClientSocketIoConnection();
