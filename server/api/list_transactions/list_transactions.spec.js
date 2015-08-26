@@ -20,13 +20,14 @@ var ListTransactions = require('./list_transactions.socket');
 var debug = require('debug')('TListTransactions');
 
 describe('Test list_transactions', function() {
-    var remote, emitSpy, aliceWallet, bobWallet, bank1, socketSpy, fromAliceToBobTx, fromBobToAliceTx, fromBank1ToAliceTx;
+    var remote, emitSpy, aliceWallet, bobWallet, bank1, socketSpy, fromAliceToBobTx, fromBobToAliceTx,
+      fromBank1ToAliceTx, emitter;
 
     beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
         socketSpy = TestingUtils.buildSocketSpy();
-        var emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+        emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
         emitSpy = emitter.emit;
 
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
@@ -119,9 +120,9 @@ describe('Test list_transactions', function() {
 					amount: 100 + '€',
 					fee: 12}];
 
-        ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
+        ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
 
-        expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
+            expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
 
             done();
         }).done(null, function (error) {
@@ -138,7 +139,7 @@ describe('Test list_transactions', function() {
 					amount: 99 + '€',
 					fee: 12}];
 
-            ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
+            ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
             expect(socketSpy.emit).to.have.callCount(1);
@@ -160,7 +161,7 @@ describe('Test list_transactions', function() {
 					amount: 98 + '€',
 					fee: 12}];
 
-            ListTransactions.listTransactions('alice@example.com', socketSpy).then(function(humanTransactions){
+            ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
             expect(socketSpy.emit).to.have.callCount(1);
