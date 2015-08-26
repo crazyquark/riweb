@@ -10,5 +10,5 @@ module.exports = {
   SESSION_SECRET:   'riweb-secret',
 
   // Control debug level for modules using visionmedia/debug
-  DEBUG: 'Seed*,http*,socket.io*,EventEmitter*,Utils*,CreateWallet*,mongodb*,CreateBank*,TestingUtils*,CreateAdminUserForBank*,Seed*'
+  DEBUG: 'Seed*,ClientEventEmitter*,Utils*,CreateWallet*,CreateBank*,TestingUtils*,CreateAdminUserForBank*'
 };

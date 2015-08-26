@@ -21,24 +21,29 @@ function ClientEventEmitter(socket) {
 
   emitter.onceSocketEvent = function(eventName, callback) {
     debug('onceSocketEvent', eventName);
-    socket.once(eventName, callback);
+    waitFor(socket, eventName, callback);
   };
 
   emitter.emitAndRunOnceEvent = function(eventName, event, callback){
     debug('emitAndRunOnceEvent', eventName, event);
-    emitter.once('post:' + eventName, callback);
+    waitFor(emitter, 'post:' + eventName, callback);
     emitter.emit(eventName, event);
   };
 
   emitter.emitAndRunOnceSocket = function(eventName, event, callback){
     debug('emitAndRunOnceSocket', eventName, event);
-    socket.once('post:' + eventName, callback);
+    waitFor(socket, 'post:' + eventName, callback);
     socket.emit(eventName, event);
   };
 
   emitter.onEvent = function(eventName, callback) {
     debug('onEvent', eventName);
     emitter.on(eventName, callback);
+  };
+
+  emitter.onceEvent = function(eventName, callback) {
+    debug('onceEvent', eventName);
+    waitFor(emitter, eventName, callback);
   };
 
   emitter.emitEvent = function(eventName, event) {
@@ -53,6 +58,28 @@ function ClientEventEmitter(socket) {
       emitter.emitSocketEvent(eventName, event);
     });
   }
+
+}
+
+function waitFor(emitter, event, callback, timeout) {
+  timeout = timeout || 5000;
+  var called = false, handler, timer;
+
+  handler = function() {
+    called = true;
+    clearTimeout(timer);
+    callback.apply(this, arguments);
+  };
+
+  timer = setTimeout(function() {
+    emitter.removeListener(handler);
+    if (! called) {
+      debug('Callback WAS NOT CALLED!!', callback);
+      return callback("TIMEOUT");
+    }
+  }, timeout);
+
+  emitter.once(event, handler);
 }
 
 util.inherits(ClientEventEmitter, EventEmitter);

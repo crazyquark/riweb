@@ -37,7 +37,7 @@ describe('Test create admin user for bank', function () {
   });
 
   it('should create an admin user for the given bank ID', function (done) {
-    Utils.onEvent('post:create_admin_user_for_bank', function (result) {
+    emitter.onEvent('post:create_admin_user_for_bank', function (result) {
       expect(result.status).to.eql('success');
       if (result.status === 'success') {
         expect(result.user.email).to.eql(adminInfo.email);

@@ -262,17 +262,11 @@ function restoreRippleWalletGenerate() {
     restoreGenericSpy(ripple.Wallet, ['generate']);
 }
 
-function restoreEventEmitter() {
-    //ripple.Wallet.generate = originalRippleWalletGenerate;
-    restoreGenericSpy(Utils, ['emitEvent', 'onEvent']);
-}
-
 function restoreAll() {
     restoreWalletSpy();
     restoreRippleWalletGenerate();
     restoreNewConnectedRemoteStub();
     restoreRippleWalletGenerate();
-    restoreEventEmitter();
     restoreBankaccountSpy();
     restoreRippleWalletGenerate();
 }
