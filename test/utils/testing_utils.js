@@ -7,8 +7,9 @@ var User = require('../../server/api/user/user.model');
 var CreateAdminUserForBank = require('../../server/api/create_admin_user_for_bank/create_admin_user_for_bank.socket');
 var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
-var mongoose = require('mongoose-q')(require('mongoose'));
+var ClientEventEmitter = require('../../server/utils/ClientEventEmitter/ClientEventEmitter.service');
 
+var mongoose = require('mongoose-q')(require('mongoose'));
 var io = require('socket.io');
 var ripple = require('ripple-lib');
 
@@ -145,6 +146,18 @@ function restoreBankaccountSpy() {
 function buildNewConnectedRemoteStub() {
     sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(buildRemoteStub()));
     sinon.stub(Utils, 'getNewConnectedAdminRemote').returns(Q(buildRemoteStub()));
+}
+
+function buildNewClientEventEmitterSpy(socket) {
+  socket = socket || buildSocketSpy;
+  var clientEventEmitter = new ClientEventEmitter(socket);
+  sinon.spy(clientEventEmitter, 'emit');
+  sinon.spy(clientEventEmitter, 'emitSocketEmit');
+  return clientEventEmitter;
+}
+
+function restoreClientEventEmitterSpy(emitter) {
+  restoreGenericSpy(emitter, ['emit', 'emitSocketEmit']);
 }
 
 function restoreNewConnectedRemoteStub() {
@@ -287,7 +300,7 @@ function seedBankAndUser(callback) {
     BankAccount.create(
         bank, function () {
             BankAccount.findOne(function (err, firstBank) {
-                seedUsers(firstBank);                
+                seedUsers(firstBank);
             });
         });
 
@@ -309,16 +322,16 @@ function seedBankAndUser(callback) {
             });
         });
     }
-    
+
     function seedAdminBankUser(createdBank) {
-        var adminUserInfo = {            
+        var adminUserInfo = {
             info: createdBank.info + ' Admin',
             email: createdBank.email,
             bankId: createdBank._id,
-            password: createdBank.email,            
+            password: createdBank.email,
         };
         return CreateAdminUserForBank.createAdminUserForBank(adminUserInfo);
-    }    
+    }
 }
 
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
@@ -331,6 +344,7 @@ exports.buildBankaccountSpy = buildBankaccountSpy;
 exports.restoreWalletSpy = restoreWalletSpy;
 exports.restoreBankaccountSpy = restoreBankaccountSpy;
 exports.buildNewConnectedRemoteStub = buildNewConnectedRemoteStub;
+exports.buildNewClientEventEmitterSpy= buildNewClientEventEmitterSpy;
 exports.buildCreateForEmailStub = buildCreateForEmailStub;
 exports.buildEmptyTransactionStub = buildEmptyTransactionStub;
 exports.getNonAdminRippleGeneratedWallet = getNonAdminRippleGeneratedWallet;
@@ -346,4 +360,5 @@ exports.buildUserFindEmailStub = buildUserFindEmailStub;
 exports.buildBankaccountFindById = buildBankaccountFindById;
 exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;
 exports.restoreAll = restoreAll;
+exports.restoreClientEventEmitterSpy = restoreClientEventEmitterSpy;
 exports.seedBankAndUser = seedBankAndUser;
