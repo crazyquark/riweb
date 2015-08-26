@@ -82,7 +82,7 @@ function createBankAndUser(clientEventEmitter, data) {
       return bank;
     }).fail(function (error) {
       clientEventEmitter.emit('post:create_admin_user_for_bank', { status: 'error', error: 'Bank already exists' });
-      return error;
+      return Q.reject(error);
     });
 }
 
