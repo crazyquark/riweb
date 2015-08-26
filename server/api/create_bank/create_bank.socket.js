@@ -95,7 +95,7 @@ exports.register = function (newSocket, clientEventEmitter) {
   clientEventEmitter.forwardFromEventEmitterToSocket('post:fund_wallet', socket);
   clientEventEmitter.forwardFromEventEmitterToSocket('post:set_mutual_banks_trust', socket);
 
-  clientEventEmitter.onceSocketEvent('create_bank', function (data) {
+  clientEventEmitter.onSocketEvent('create_bank', function (data) {
     createBankAndUser(clientEventEmitter, data);
   });
 
