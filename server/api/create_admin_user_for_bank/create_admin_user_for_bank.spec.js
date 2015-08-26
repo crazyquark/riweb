@@ -15,7 +15,7 @@ var Utils = require('../../utils/utils');
 var CreateAdminUserForBank = require('./create_admin_user_for_bank.socket');
 
 describe('Test create admin user for bank', function () {
-  var emitSpy, socketSpy, emitter;
+  var emitSpy, emitter;
 
   var adminInfo = {
     bankId: mongoose.Types.ObjectId('55bb2947cdfccb2c13353502'),
@@ -26,8 +26,7 @@ describe('Test create admin user for bank', function () {
 
 
   beforeEach(function (done) {
-    socketSpy = TestingUtils.buildSocketSpy();
-    emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+    emitter = TestingUtils.buildNewClientEventEmitterSpy();
     emitSpy = emitter.emitEvent;
     TestingUtils.dropMongodbDatabase().then(function () { done(); });
   });

@@ -18,7 +18,6 @@ describe('ITest create wallet for user', function () {
   var emitter;
 
   beforeEach(function (done) {
-    var socketSpy = TestingUtils.buildSocketSpy();
     emitter = TestingUtils.buildNewClientEventEmitterSpy();
 
     this.timeout(10000);

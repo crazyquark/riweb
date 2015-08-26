@@ -29,8 +29,7 @@ describe('Test make_transfer', function () {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
 
-        var socketSpy = TestingUtils.buildSocketSpy();
-        emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+        emitter = TestingUtils.buildNewClientEventEmitterSpy();
 
         emitSpy = emitter.emitEvent;
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');

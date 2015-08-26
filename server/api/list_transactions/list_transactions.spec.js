@@ -20,14 +20,13 @@ var ListTransactions = require('./list_transactions.socket');
 var debug = require('debug')('TListTransactions');
 
 describe('Test list_transactions', function() {
-    var remote, emitSpy, aliceWallet, bobWallet, bank1, socketSpy, fromAliceToBobTx, fromBobToAliceTx,
+    var remote, emitSpy, aliceWallet, bobWallet, bank1, fromAliceToBobTx, fromBobToAliceTx,
       fromBank1ToAliceTx, emitter;
 
     beforeEach(function (done) {
         remote = TestingUtils.buildRemoteStub();
         sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
-        socketSpy = TestingUtils.buildSocketSpy();
-        emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+        emitter = TestingUtils.buildNewClientEventEmitterSpy();
         emitSpy = emitter.emitEvent;
 
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');

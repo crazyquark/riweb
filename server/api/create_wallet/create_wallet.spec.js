@@ -27,8 +27,7 @@ describe('Test create_wallet', function () {
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
-        var socketSpy = TestingUtils.buildSocketSpy();
-        emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+        emitter = TestingUtils.buildNewClientEventEmitterSpy();
         CreateWallet.register(emitter);
         emitSpy = emitter.emitEvent;
 

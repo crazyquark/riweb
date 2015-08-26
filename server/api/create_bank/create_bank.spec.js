@@ -20,15 +20,14 @@ var CreateBank = require('./create_bank.socket');
 
 describe('Test create_bank', function () {
 
-    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, socketSpy, emitter;
+    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, emitter;
 
     beforeEach(function (done) {
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
-        socketSpy = TestingUtils.buildSocketSpy();
-        emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+        emitter = TestingUtils.buildNewClientEventEmitterSpy();
         emitSpy = emitter.emitEvent;
 
         TestingUtils.buildBankaccountSpy();

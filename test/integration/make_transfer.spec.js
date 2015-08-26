@@ -16,12 +16,11 @@ var Utils = require('../../server/utils/utils');
 var debug = require('debug')('=======TMakeTransfer');
 
 describe('ITest transfers', function () {
-	var socketSpy, emitter, user, bank, userWallet;
+	var emitter, user, bank, userWallet;
 
 	beforeEach(function (done) {
 		this.timeout(50000); // The Talented Mr. Ripple takes a long time to fund wallets
-		socketSpy = TestingUtils.buildSocketSpy();
-		emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+		emitter = TestingUtils.buildNewClientEventEmitterSpy();
 
 		MakeTransfer.register(emitter);
 

@@ -10,11 +10,9 @@ var CreateBank = require('../../server/api/create_bank/create_bank.socket');
 var CreateAdminUser = require('../../server/api/create_admin_user_for_bank/create_admin_user_for_bank.socket');
 
 describe('ITest Create Bank', function () {
-	var socketSpy;
 	var emitter;
 
 	beforeEach(function () {
-		socketSpy = TestingUtils.buildSocketSpy();
 		emitter = TestingUtils.buildNewClientEventEmitterSpy();
 
 		CreateAdminUser.register(emitter);

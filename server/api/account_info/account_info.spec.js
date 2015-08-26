@@ -17,13 +17,11 @@ var TestingUtils = require('./../../../test/utils/testing_utils');
 var ClientEventEmitter = require('../../utils/ClientEventEmitter/ClientEventEmitter.service');
 
 describe('Test account_info', function () {
-    var socket, emitSpy, emitter;
+    var emitSpy, emitter;
     beforeEach(function (done) {
-        socket = TestingUtils.buildSocketSpy();
-
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
-        emitter = new ClientEventEmitter(socket);
-        emitSpy = sinon.spy(emitter, 'emitEvent');
+        emitter = TestingUtils.buildNewClientEventEmitterSpy();
+        emitSpy = emitter.emitEvent;
 
         AccountInfo.register(emitter);
 
