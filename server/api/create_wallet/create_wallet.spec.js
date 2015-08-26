@@ -19,18 +19,16 @@ var Bankaccount = require('./../bankaccount/bankaccount.model');
 
 describe('Test create_wallet', function () {
 
-    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy;
+    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, emitter;
     var bank1, bank2, nonAdminUser, nonAdminUserWithNoBank;
 
     beforeEach(function (done) {
-        var socket = TestingUtils.buildSocketSpy();
-
         nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
         var socketSpy = TestingUtils.buildSocketSpy();
-        var emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
+        emitter = TestingUtils.buildNewClientEventEmitterSpy(socketSpy);
         CreateWallet.register(socketSpy, emitter);
         emitSpy = emitter.emit;
 
@@ -70,7 +68,7 @@ describe('Test create_wallet', function () {
 */
 
     it('should create non-root wallet for a1@example.com', function (done) {
-        CreateWallet.createWalletForEmail('a1@example.com').then(function () {
+        CreateWallet.createWalletForEmail(emitter, 'a1@example.com').then(function () {
             expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('a1@example.com'));
             expect(Wallet.create).to.have.callCount(1);
             done();
@@ -78,8 +76,8 @@ describe('Test create_wallet', function () {
     });
 
     it('should not create duplicate wallet for a2@example.com', function (done) {
-        CreateWallet.createWalletForEmail('a2@example.com').then(function () {
-            CreateWallet.createWalletForEmail('a2@example.com').then(function () {
+        CreateWallet.createWalletForEmail(emitter, 'a2@example.com').then(function () {
+            CreateWallet.createWalletForEmail(emitter, 'a2@example.com').then(function () {
                 expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('a2@example.com'));
                 expect(Wallet.create).to.have.callCount(1);
                 done();
@@ -88,7 +86,7 @@ describe('Test create_wallet', function () {
     });
 
     it('should set_trust when create new wallet', function (done) {
-        CreateWallet.createWalletForEmail('a3@example.com').then(function () {
+        CreateWallet.createWalletForEmail(emitter, 'a3@example.com').then(function () {
             expect(emitSpy).to.have.callCount(2);
             expect(emitSpy).to.have.been.calledWith('set_trust', {
                 rippleDestinationAddr: bank1.hotWallet.address,
@@ -114,7 +112,7 @@ describe('Test create_wallet', function () {
 */
 
     it('should emit post:create_wallet flag when create new wallet', function (done) {
-        CreateWallet.createWalletForEmail('a5@example.com').then(function () {
+        CreateWallet.createWalletForEmail(emitter, 'a5@example.com').then(function () {
             expect(emitSpy).to.have.callCount(2);
             expect(emitSpy).to.have.been.calledWith('set_trust', {
                 rippleDestinationAddr: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
@@ -133,7 +131,7 @@ describe('Test create_wallet', function () {
         User.findByEmail.restore();
         TestingUtils.buildUserFindEmailStub(User, nonAdminUserWithNoBank);
 
-        CreateWallet.createWalletForEmail(nonAdminUserWithNoBank.email).then(function () { done(); },
+        CreateWallet.createWalletForEmail(emitter, nonAdminUserWithNoBank.email).then(function () { done(); },
             function () {
                 expect(emitSpy).to.have.callCount(1);
                 expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
@@ -145,7 +143,7 @@ describe('Test create_wallet', function () {
     });
 
     it('should fail when user is not found', function (done) {
-        CreateWallet.createWalletForEmail('userDoesNotExist@nobody.com').then(function () { done(); },
+        CreateWallet.createWalletForEmail(emitter, 'userDoesNotExist@nobody.com').then(function () { done(); },
             function () {
                 expect(emitSpy).to.have.callCount(1);
                 expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
