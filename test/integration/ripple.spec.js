@@ -15,40 +15,47 @@ var CreateWallet = require('../../server/api/create_wallet/create_wallet.socket'
 var SetRootFlags = require('../../server/api/set_root_flags/set_root_flags.socket');
 var SetTrust = require('../../server/api/set_trust/set_trust.socket');
 var MakeTransfer = require('../../server/api/make_transfer/make_transfer.socket');
+var TestingUtils = require('../utils/testing_utils');
 
-function fundBanks(bank1, bank2) {
-	var deferred = Q.defer();
-	Utils.getNewConnectedRemote().then(function (remote) {
-		debug('Fund the banks');
-		CreateWallet.fundWallet(bank1, Utils.ROOT_RIPPLE_ACCOUNT, 10000).then(function () {
-			debug('Funded bank1');
-			CreateWallet.fundWallet(bank2, Utils.ROOT_RIPPLE_ACCOUNT, 10000).then(function () {
-				debug('Funded bank2');
-
-				deferred.resolve({ status: 'success' });
-			});
-		});
-	});
-
-	return deferred.promise;
-}
-
-function fundUsers(bank1, bank2, user1, user2) {
-	var deferred = Q.defer();
-	debug('fundUsers');
-	CreateWallet.fundWallet(user1, bank1, 100).then(function () {
-		debug('fundUsers user1');
-		CreateWallet.fundWallet(user2, bank2, 100).then(function () {
-			debug('fundUsers user2');
-			deferred.resolve({ status: 'success' });
-		})
-	});
-
-	return deferred.promise;
-}
 
 describe('ITest rippled', function () {
 	this.timeout(90000);
+	var emitter;
+	
+	beforeEach(function(){
+		emitter = TestingUtils.buildNewClientEventEmitterSpy();
+	});
+	
+	function fundBanks(bank1, bank2) {
+		var deferred = Q.defer();
+		Utils.getNewConnectedRemote().then(function (remote) {
+			debug('Fund the banks');
+			CreateWallet.fundWallet(emitter, bank1, Utils.ROOT_RIPPLE_ACCOUNT, 10000).then(function () {
+				debug('Funded bank1');
+				CreateWallet.fundWallet(emitter, bank2, Utils.ROOT_RIPPLE_ACCOUNT, 10000).then(function () {
+					debug('Funded bank2');
+
+					deferred.resolve({ status: 'success' });
+				});
+			});
+		});
+
+		return deferred.promise;
+	}
+
+	function fundUsers(bank1, bank2, user1, user2) {
+		var deferred = Q.defer();
+		debug('fundUsers');
+		CreateWallet.fundWallet(emitter, user1, bank1, 100).then(function () {
+			debug('fundUsers user1');
+			CreateWallet.fundWallet(emitter, user2, bank2, 100).then(function () {
+				debug('fundUsers user2');
+				deferred.resolve({ status: 'success' });
+			})
+		});
+
+		return deferred.promise;
+	}
 	it('Create this scenario on Ripple: user1 -> bank1 -> bank2 -> user2', function (done) {
 		debug('Create 4 Ripple accounts');
 
