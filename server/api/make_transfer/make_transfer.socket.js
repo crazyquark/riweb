@@ -97,13 +97,10 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
         }
 
         //TODO: also add the equivalent for destination
-        var preTransferPromise = MTUtils.getPreTransferAction(sourceBank, senderRealBankAccount, amount);
-
-        preTransferPromise.then(function (depositResult) {
+        MTUtils.getPreTransferAction(sourceBank, senderRealBankAccount, amount).then(function (depositResult) {
             var deposit = Q.defer();
 
             if (depositResult.status === 'success') {
-
                 makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transaction) {
 
                     if (orderInfo) {
@@ -112,9 +109,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
                     }
 
                     deposit.resolve({ status: 'success', transaction: transaction });
-
                 }, function (err) {
-
                     if (orderInfo) {
                         orderInfo.status = 'rippleError';
                         MTUtils.saveOrderToDB(orderInfo);
@@ -140,7 +135,6 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
             return deposit.promise;
         }).then(function (transferResult) {
-
             if (transferResult.status === 'success') {
                 clientEventEmitter.emitEvent('post:make_transfer', {
                     fromEmail: fromEmail,
@@ -151,7 +145,6 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
                 });
                 deferred.resolve({ status: 'success', transaction: transferResult.transaction });
             } else {
-
                 deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
             }
         });
