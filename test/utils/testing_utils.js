@@ -93,6 +93,18 @@ function getNonAdminMongooseWallet(email_address, sufix) {
     };
 }
 
+function buildAliceAlanAndBob() {
+  var aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
+  var alanWallet = TestingUtils.getNonAdminMongooseWallet('alan@example.com', 'Alan');
+  var bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
+
+  sinon.stub(Wallet, 'findByOwnerEmail', buildKeyValuePromiseFunction({
+    'alice@example.com': aliceWallet,
+    'alan@example.com': alanWallet,
+    'bob@example.com': bobWallet
+  }));
+}
+
 function getBadMongooseWallet(email_address) {
     email_address = email_address || 'joe@danger.io';
     return {
@@ -371,4 +383,5 @@ exports.buildArrayPropertyPromiseFunction = buildArrayPropertyPromiseFunction;
 exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;
 exports.restoreAll = restoreAll;
 exports.restoreClientEventEmitterSpy = restoreClientEventEmitterSpy;
+exports.buildAliceAlanAndBob = buildAliceAlanAndBob;
 exports.seedBankAndUser = seedBankAndUser;

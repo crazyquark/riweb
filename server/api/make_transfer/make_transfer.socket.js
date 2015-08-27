@@ -10,11 +10,10 @@ var Wallet = require('./../wallet/wallet.model');
 var BankAccount = require('../bankaccount/bankaccount.model');
 var CreateWallet = require('./../create_wallet/create_wallet.socket');
 var Order = require('../Order/Order.model');
-var OrderRequests = require('../order_request/order_request.model');
 var RealBankAccount = require('../RealBankAccount/RealBankAccount.socket');
 var Utils = require('./../../utils/utils');
-var RippleUtils = require('ripple-lib').utils;
 var MTUtils = require('./make_transfer.utils');
+var makeRippleTransfer = require('./../MakeRippleTransfer/MakeRippleTransfer.service');
 
 var debug = require('debug')('MakeTransfer');
 
@@ -101,7 +100,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
             var deposit = Q.defer();
 
             if (depositResult.status === 'success') {
-                makeTransferWithRipple(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transaction) {
+                makeRippleTransfer(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transaction) {
 
                     if (orderInfo) {
                         orderInfo.status = 'rippleSuccess';
@@ -173,40 +172,8 @@ function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderReque
         .spread(currentMakeTransferWithRippleWallets);
 }
 
-function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo) {
-    debug('makeTransferWithRipple', senderWallet, recvWallet, dstIssuer, amount, srcIssuer);
-    var deferred = Q.defer();
-
-    dstIssuer = dstIssuer || senderWallet.address; // Normal issuer, for single gateway transactions
-    // Can't assume anything about source issuer!
-
-    Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
-        var paymentData = {
-            account: senderWallet.address,
-            destination: recvWallet.address,
-            amount: amount + '/EUR/' + dstIssuer
-        };
-
-        var orderRequestId = orderInfo ? orderInfo.orderRequestId : null;
-
-        var transaction = MTUtils.createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount);
-
-        transaction.submit(function (err, res) {
-            if (err) {
-                debug('transaction seems to have failed: ', err);
-                deferred.reject(err);
-            }
-            if (res) {
-                deferred.resolve({ status: 'success', transaction: transaction });
-            }
-        });
-
-    });
-    return deferred.promise;
-}
-
 exports.makeTransfer = makeTransfer;
-exports.makeTransferWithRipple = makeTransferWithRipple;
+exports.makeTransferWithRipple = makeRippleTransfer;
 
 exports.register = function (clientEventEmitter) {
 
