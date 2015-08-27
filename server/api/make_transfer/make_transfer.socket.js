@@ -14,21 +14,9 @@ var OrderRequests = require('../order_request/order_request.model');
 var RealBankAccount = require('../RealBankAccount/RealBankAccount.socket');
 var Utils = require('./../../utils/utils');
 var RippleUtils = require('ripple-lib').utils;
+var MTUtils = require('./make_transfer.utils');
 
 var debug = require('debug')('MakeTransfer');
-
-function saveOrderToDB(orderInfo) {
-    OrderRequests.findOneQ({ _id: orderInfo.orderRequestId }).then(function (orderRequest) {
-        debug('found order request: ', orderRequest);
-        Order.createQ(orderInfo).then(function (savedOrder) {
-            debug('Saved order: ', savedOrder);
-        }, function (err) {
-            debug('error', err);
-        });
-    }, function () {
-        debug('failed to find order request with ID: ', orderInfo.orderRequestId);
-    });
-}
 
 function isIssuingBankValid(issuingBank) {
     return issuingBank && issuingBank.status !== 'error' && issuingBank.bank && issuingBank.bank.hotWallet && issuingBank.bank.hotWallet.address;
@@ -140,7 +128,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
         if (sourceBank.sourceRole === 'admin') {
             //we need to check if the user really does have the necessary funds
             var err;
-            if (!checkSufficientBalance(realBankAccount, amount, err))
+            if (!checkSufficientBalance(realBankAccount, amount, err)) 
             {
                 deferred.reject(throwMissingError(err, issuingAddress));
                 return deferred.promise;
@@ -159,7 +147,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
                     if (orderInfo) {
                         orderInfo.status = 'rippleSuccess';
-                        saveOrderToDB(orderInfo);
+                        MTUtils.saveOrderToDB(orderInfo);
                     }
 
                     deposit.resolve({ status: 'success', transaction: transaction });
