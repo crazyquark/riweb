@@ -69,6 +69,7 @@ describe('Test list_transactions', function() {
 					source: 'alice@example.com',
 					destination: 'bob@example.com',
 					amount: 100 + '€',
+                    orderRequestId: '',
 					fee: 12}];
 
         ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
@@ -88,6 +89,7 @@ describe('Test list_transactions', function() {
 					source: 'bob@example.com',
 					destination: 'alice@example.com',
 					amount: 99 + '€',
+                    orderRequestId: '',
 					fee: 12}];
 
             ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
@@ -110,6 +112,7 @@ describe('Test list_transactions', function() {
 					source: 'bank1@example.com',
 					destination: 'alice@example.com',
 					amount: 98 + '€',
+                    orderRequestId: '',
 					fee: 12}];
 
             ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
