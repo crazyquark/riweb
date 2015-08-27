@@ -22,7 +22,7 @@ function isIssuingBankValid(issuingBank) {
     return issuingBank && issuingBank.status !== 'error' && issuingBank.bank && issuingBank.bank.hotWallet && issuingBank.bank.hotWallet.address;
 }
 
-function buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount){
+function buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount) {
 
     function throwMissingError(errorMessage, issuingAddress, status) {
         status = status || 'error';
@@ -46,10 +46,10 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
     var throwMissingError = buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount);
 
-    function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBank, destUserBankParam, realBankAccount) {
+    function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBank, destUserBankParam, senderRealBankAccount, recvRealBankAccount) {
         var deferred = Q.defer();
 
-        var destUserBank = destUserBankParam? destUserBankParam.bank : null;
+        var destUserBank = destUserBankParam ? destUserBankParam.bank : null;
 
         var issuingAddress, sourceIssuingAddressIfDifferent;
 
@@ -89,16 +89,15 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
         if (sourceBank.sourceRole === 'admin') {
             //we need to check if the user really does have the necessary funds
-            var check = MTUtils.checkSufficientBalance(realBankAccount, amount);
-            if (check.status !== 'success') 
-            {
+            var check = MTUtils.checkSufficientBalance(senderRealBankAccount, amount);
+            if (check.status !== 'success') {
                 deferred.reject(throwMissingError(check.error, issuingAddress));
                 return deferred.promise;
             }
         }
 
         //TODO: also add the equivalent for destination
-        var preTransferPromise = MTUtils.getPreTransferAction(sourceBank, realBankAccount, amount);
+        var preTransferPromise = MTUtils.getPreTransferAction(sourceBank, senderRealBankAccount, amount);
 
         preTransferPromise.then(function (depositResult) {
             var deposit = Q.defer();
@@ -122,7 +121,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
                     }
 
                     //undo the deposit action (if needed)
-                    var rollbackTransferActionPromise = MTUtils.getRollbackTransferAction(sourceBank, realBankAccount, amount);
+                    var rollbackTransferActionPromise = MTUtils.getRollbackTransferAction(sourceBank, senderRealBankAccount, amount);
 
                     debug('makeTransferWithRipple - ripple error', err);
 
@@ -173,10 +172,11 @@ function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderReque
     var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank
 
     var promiseFindSenderRealBankAccount = RealBankAccount.getRealBankAccountForEmail(toEmail);
+    var promiseFindRecvRealBankAccount = RealBankAccount.getRealBankAccountForEmail(toEmail);
 
     var currentMakeTransferWithRippleWallets = buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId);
 
-    return Q.all([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindDestUserBank, promiseFindSenderRealBankAccount])
+    return Q.all([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindDestUserBank, promiseFindSenderRealBankAccount, promiseFindRecvRealBankAccount])
         .spread(currentMakeTransferWithRippleWallets);
 }
 
@@ -194,7 +194,7 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
             amount: amount + '/EUR/' + dstIssuer
         };
 
-        var orderRequestId = orderInfo?orderInfo.orderRequestId:null;
+        var orderRequestId = orderInfo ? orderInfo.orderRequestId : null;
 
         var transaction = MTUtils.createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount);
 
@@ -215,7 +215,7 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
 exports.makeTransfer = makeTransfer;
 exports.makeTransferWithRipple = makeTransferWithRipple;
 
-exports.register = function(clientEventEmitter) {
+exports.register = function (clientEventEmitter) {
 
     clientEventEmitter.forwardFromEventEmitterToSocket('post:make_transfer');
 
