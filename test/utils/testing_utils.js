@@ -210,6 +210,27 @@ function buildUserFindEmailStub(user, nonAdminGeneratedUser) {
 }
 
 
+function buildKeyValuePromiseFunction(keyValuePairs){
+  return function(key){
+    return Q(keyValuePairs[key]);
+  }
+}
+
+function buildArrayPropertyPromiseFunction(array, propertyName){
+  return function(key){
+    var value = null;
+
+    array.forEach(function(item){
+      if(item[propertyName] === key){
+        value = item;
+      }
+    });
+
+    return Q(value);
+  }
+}
+
+
 function buildBankaccountFindById(bankaccount, banksList) {
     sinon.stub(bankaccount, 'findById', function (bankId) {
         var index;
@@ -368,6 +389,8 @@ exports.getNonAdminMongooseUser = getNonAdminMongooseUser;
 exports.getMongooseBankAccount = getMongooseBankAccount;
 exports.buildUserFindEmailStub = buildUserFindEmailStub;
 exports.buildBankaccountFindById = buildBankaccountFindById;
+exports.buildKeyValuePromiseFunction = buildKeyValuePromiseFunction;
+exports.buildArrayPropertyPromiseFunction = buildArrayPropertyPromiseFunction;
 exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;
 exports.restoreAll = restoreAll;
 exports.restoreClientEventEmitterSpy = restoreClientEventEmitterSpy;

@@ -37,39 +37,18 @@ describe('Test list_transactions', function() {
             'hotWallet': {
                 'address': 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyThBank',
                 'secret': 'NONADMINssphraseBank'
-            },
+            }
         };
 
-        sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
-            if (email === 'alice@example.com') {
-                return Q(aliceWallet);
-            } else if (email === 'bob@example.com') {
-                return Q(bobWallet);
-            }
-            return Q(null);
-        });
+      sinon.stub(Wallet, 'findByOwnerEmail', TestingUtils.buildKeyValuePromiseFunction({
+          'alice@example.com': aliceWallet,
+          'bob@example.com': bobWallet
+      }));
 
-        sinon.stub(Wallet, 'findByRippleAddress', function (address) {
-            var thePromise = Q(null);
-            if (address === aliceWallet.address) {
-                thePromise = Q(aliceWallet);
-            } else if (address === bobWallet.address) {
-                thePromise = Q(bobWallet);
-            }
-            thePromise.rippleAddress = address;
-            return thePromise;
-        });
+      sinon.stub(Wallet, 'findByRippleAddress', TestingUtils.buildArrayPropertyPromiseFunction([
+          aliceWallet, bobWallet], 'address'));
 
-        sinon.stub(BankAccount, 'findByRippleAddress', function (address) {
-            debug('BankAccount findByRippleAddress', address);
-            var thePromise = Q(null);
-            if ( address === bank1.address) {
-                debug('BankAccount findOneQ returns ', bank1);
-                thePromise = Q(bank1);
-            }
-            thePromise.rippleAddress = address;
-            return thePromise;
-        });
+      sinon.stub(BankAccount, 'findByRippleAddress', TestingUtils.buildArrayPropertyPromiseFunction([bank1], 'address'));
 
       fromAliceToBobTx = TestingUtils.getNewPaymentTransaction(aliceWallet.address, bobWallet.address, 100);
       fromBobToAliceTx = TestingUtils.getNewPaymentTransaction(bobWallet.address, aliceWallet.address, 99);
