@@ -45,6 +45,7 @@
                     <th>To</th>
                     <th>Amount</th>
                     <th ng-hide="true">Fee</th>
+                    <th>Order ID</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -53,6 +54,7 @@
                     <td>{{transaction.destination}}</td>
                     <td>{{transaction.amount}}</td>
                     <td ng-hide="true">{{transaction.fee}}</td>
+                    <td>{{transaction.orderRequestId || 'none'}}</td>
                 </tr>
                 </tbody>
             </table>

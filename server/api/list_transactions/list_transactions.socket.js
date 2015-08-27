@@ -8,6 +8,7 @@ var ripple = require('ripple-lib');
 var Q = require('q');
 
 var Utils = require('./../../utils/utils');
+var RippleUtils = require('ripple-lib').utils;
 var Wallet = require('./../wallet/wallet.model');
 var BankAccount = require('../bankaccount/bankaccount.model');
 
@@ -37,11 +38,14 @@ function convertRippleTxToHuman(transaction){
 
 	  var sourceEmail = sourceUserEmail?sourceUserEmail:sourceBankEmail;
 	  var destinationEmail = destinationUserEmail?destinationUserEmail:destinationBankEmail;
-
+	  
+	  var orderRequestId = transaction.tx.Memos && RippleUtils.hexToString(transaction.tx.Memos[0].Memo.MemoData);
+	  
       var transactionHuman = {
-					source: sourceEmail?sourceEmail:'<<< deleted account >>>',
-					destination: destinationEmail?destinationEmail:'<<< deleted account >>>',
+					source: sourceEmail ? sourceEmail:'<<< deleted account >>>',
+					destination: destinationEmail ? destinationEmail:'<<< deleted account >>>',
 					amount: transaction.tx.Amount.value + '€',
+					orderRequestId: orderRequestId || '',
 					fee: transaction.tx.Fee};
 
 		return transactionHuman;
@@ -79,7 +83,7 @@ function listTransactions(clientEventEmitter, ownerEmail) {
 					var transactionPromises = [];
 
 					res.transactions.forEach(function (rippleTx) {
-						debug(rippleTx); // rippleTx.tx.Memos[0].Memos
+						debug(rippleTx);
 						if (rippleTx.tx.TransactionType === 'Payment' &&
 							typeof rippleTx.tx.Amount === 'object' &&
 							rippleTx.meta.TransactionResult === 'tesSUCCESS' /* no failed transactions */) {
