@@ -71,38 +71,11 @@ describe('Test list_transactions', function() {
             return thePromise;
         });
 
+      fromAliceToBobTx = TestingUtils.getNewPaymentTransaction(aliceWallet.address, bobWallet.address, 100);
+      fromBobToAliceTx = TestingUtils.getNewPaymentTransaction(bobWallet.address, aliceWallet.address, 99);
+      fromBank1ToAliceTx = TestingUtils.getNewPaymentTransaction(bank1.address, aliceWallet.address, 98);
 
-        fromAliceToBobTx = {
-            meta: { TransactionResult: 'tesSUCCESS' },
-            tx: {
-    			Account: aliceWallet.address,
-    			Destination: bobWallet.address,
-    			Fee: 12,
-                date: '123456',
-                TransactionType: 'Payment',
-    			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 100 }}};
-
-        fromBobToAliceTx = {
-                meta: { TransactionResult: 'tesSUCCESS' },
-                tx: {
-    			Account: bobWallet.address,
-    			Destination: aliceWallet.address,
-    			Fee: 12,
-                date: '123456',
-                TransactionType: 'Payment',
-    			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 99 }}};
-
-        fromBank1ToAliceTx = {
-                meta: { TransactionResult: 'tesSUCCESS' },
-                tx: {
-    			Account: bank1.address,
-    			Destination: aliceWallet.address,
-    			Fee: 12,
-                date: '123457',
-                TransactionType: 'Payment',
-    			Amount:  { currency: 'EUR', issuer: 'ROOT', value: 98 }}};
-
-        TestingUtils.dropMongodbDatabase().then(function(){done();});
+      TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     afterEach(function () {

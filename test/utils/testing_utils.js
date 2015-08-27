@@ -69,6 +69,20 @@ function getNonAdminRippleGeneratedWallet() {
     }
 }
 
+function getNewPaymentTransaction(fromAddress, toAddress, amount) {
+  return {
+    meta: { TransactionResult: 'tesSUCCESS' },
+    tx: {
+      Account: fromAddress,
+      Destination: toAddress,
+      Fee: 12,
+      date: '123456',
+      TransactionType: 'Payment',
+      Amount:  { currency: 'EUR', issuer: 'ROOT', value: amount }
+    }
+  };
+}
+
 function getNonAdminMongooseWallet(email_address, sufix) {
     email_address = email_address || 'joe@danger.io';
     sufix = sufix || '';
@@ -344,6 +358,7 @@ exports.buildCreateForEmailStub = buildCreateForEmailStub;
 exports.buildEmptyTransactionStub = buildEmptyTransactionStub;
 exports.getNonAdminRippleGeneratedWallet = getNonAdminRippleGeneratedWallet;
 exports.getNonAdminMongooseWallet = getNonAdminMongooseWallet;
+exports.getNewPaymentTransaction = getNewPaymentTransaction;
 exports.getBadMongooseWallet = getBadMongooseWallet;
 exports.getAdminMongooseWallet = getAdminMongooseWallet;
 exports.buildFindByOwnerEmailForAdmin = buildFindByOwnerEmailForAdmin;
