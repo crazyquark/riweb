@@ -35,14 +35,10 @@ describe('Test make_transfer', function () {
         aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
         bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
 
-        sinon.stub(Wallet, 'findByOwnerEmail', function (email) {
-            if (email === 'alice@example.com') {
-                return Q(aliceWallet);
-            } else if (email === 'bob@example.com') {
-                return Q(bobWallet);
-            }
-            return Q(null);
-        });
+        sinon.stub(Wallet, 'findByOwnerEmail', TestingUtils.buildKeyValuePromiseFunction({
+          'alice@example.com': aliceWallet,
+          'bob@example.com': bobWallet
+        }));
 
         bank1 = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
         bankWithNoWallet = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getBadMongooseWallet('dumy@nothing.com'));

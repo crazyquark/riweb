@@ -112,11 +112,14 @@ function getAdminMongooseWallet() {
 }
 
 function buildFindByOwnerEmailForAdmin(wallet) {
-    sinon.stub(wallet, 'findByOwnerEmail').returns(Q({
-        ownerEmail: 'admin@admin.com',
-        secret: 'masterpassphrase',
-        address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
-    }));
+  sinon.stub(Wallet, 'findByOwnerEmail', buildKeyValuePromiseFunction({
+    'admin@admin.com': {
+      ownerEmail: 'admin@admin.com',
+      secret: 'masterpassphrase',
+      address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
+    }
+  }));
+
 }
 
 function buildCreateForEmailStub(wallet, email) {
