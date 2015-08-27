@@ -10,11 +10,21 @@ var EventEmitter = require('events').EventEmitter;
 var debug = require('debug')('MakeRippleTransfer');
 var Q = require('q');
 
-function makeRippleTransfer(senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo) {
+function makeRippleTransfer(event) {
+  var senderWallet= event.senderWallet;
+  var recvWallet= event.recvWallet;
+  var sourceBank= event.sourceBank;
+  var destBank= event.destBank;
+  var senderRealBankAccount= event.senderRealBankAccount;
+  var recvRealBankAccount= event.recvRealBankAccount;
+  var amount= event.amount;
+  var orderRequestId= event.orderRequestId;
+
+  var dstIssuer = senderWallet.address; // Normal issuer, for single gateway transactions
+
   debug('makeTransferWithRipple', senderWallet, recvWallet, dstIssuer, amount, srcIssuer);
   var deferred = Q.defer();
 
-  dstIssuer = dstIssuer || senderWallet.address; // Normal issuer, for single gateway transactions
   // Can't assume anything about source issuer!
 
   Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {

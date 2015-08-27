@@ -17,6 +17,8 @@ var makeRippleTransfer = require('./../MakeRippleTransfer/MakeRippleTransfer.ser
 
 var debug = require('debug')('MakeTransfer');
 
+var emitter;
+
 function isIssuingBankValid(issuingBank) {
     return issuingBank && issuingBank.status !== 'error' && issuingBank.bank && issuingBank.bank.hotWallet && issuingBank.bank.hotWallet.address;
 }
@@ -45,10 +47,10 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
     var throwMissingError = buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount);
 
-    function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBank, destUserBankParam, senderRealBankAccount, recvRealBankAccount) {
+    function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBank, destBank, senderRealBankAccount, recvRealBankAccount) {
         var deferred = Q.defer();
 
-        var destUserBank = destUserBankParam ? destUserBankParam.bank : null;
+        var destUserBank = destBank ? destBank.bank : null;
 
         var issuingAddress, sourceIssuingAddressIfDifferent;
 
@@ -96,7 +98,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
         }
 
         //TODO: also add the equivalent for destination
-        MTUtils.getPreTransferAction(sourceBank, senderRealBankAccount, amount).then(function (depositResult) {
+        MTUtils.getPreTransferAction(senderWallet, sourceBank, senderRealBankAccount, amount).then(function (depositResult) {
             var deposit = Q.defer();
 
             if (depositResult.status === 'success') {
@@ -168,22 +170,42 @@ function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderReque
 
     var currentMakeTransferWithRippleWallets = buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId);
 
+    //return Q.all([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindDestUserBank, promiseFindSenderRealBankAccount, promiseFindRecvRealBankAccount])
+    //    .spread(currentMakeTransferWithRippleWallets);
     return Q.all([promiseFindSenderWallet, promiseFindRecvWallet, promiseFindIssuingBank, promiseFindDestUserBank, promiseFindSenderRealBankAccount, promiseFindRecvRealBankAccount])
-        .spread(currentMakeTransferWithRippleWallets);
+        .spread(function(senderWallet, recvWallet, sourceBank, destBank, senderRealBankAccount, recvRealBankAccount){
+          var event = {
+            senderWallet: senderWallet,
+            recvWallet: recvWallet,
+            sourceBank: sourceBank,
+            destBank: destBank,
+            senderRealBankAccount: senderRealBankAccount,
+            recvRealBankAccount: recvRealBankAccount,
+            amount: amount,
+            orderRequestId: orderRequestId
+          };
+          emitter.emitEvent('make_ripple_transfer', event);
+      });
 }
 
 exports.makeTransfer = makeTransfer;
 exports.makeTransferWithRipple = makeRippleTransfer;
 
 exports.register = function (clientEventEmitter) {
+  //will delete this, honest!
+  emitter = clientEventEmitter;
 
-    clientEventEmitter.forwardFromEventEmitterToSocket('post:make_transfer');
+  clientEventEmitter.forwardFromEventEmitterToSocket('post:make_transfer');
 
-    clientEventEmitter.on('make_transfer', function (data) {
-        makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
-    });
+  clientEventEmitter.on('make_transfer', function (data) {
+    makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
+  });
 
-    clientEventEmitter.onSocketEvent('make_transfer', function (data) {
-        makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
-    });
+  clientEventEmitter.onSocketEvent('make_transfer', function (data) {
+    makeTransfer(clientEventEmitter, data.fromEmail, data.toEmail, data.amount, data.orderRequestId);
+  });
+
+  clientEventEmitter.onEvent('make_ripple_transfer', function (data) {
+    makeRippleTransfer(data);
+  });
 };

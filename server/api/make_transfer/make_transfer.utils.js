@@ -9,6 +9,7 @@ var Order = require('../Order/Order.model');
 var RippleUtils = require('ripple-lib').utils;
 var Q = require('q');
 var debug = require('debug')('MakeTransfer');
+var makeRippleTransfer = require('../MakeRippleTransfer/MakeRippleTransfer.service');
 
 function saveOrderToDB(orderInfo) {
     OrderRequests.findOneQ({ _id: orderInfo.orderRequestId }).then(function (orderRequest) {
@@ -40,10 +41,20 @@ function isDestinationOnDifferentBank(destUserBank, issuingAddress) {
 }
 
 
-function getPreTransferAction(sourceAccount, realBankAccount, amount) {
+function getPreTransferAction(senderWallet, sourceBankAccount, realBankAccount, amount) {
 
-    if (sourceAccount && sourceAccount.sourceRole === 'admin') {
-        return realBankAccount.account.depositToRipple(amount);
+    if (senderWallet && sourceBankAccount && realBankAccount) {
+        return realBankAccount.account.depositToRipple(amount).then(function() {
+          makeRippleTransfer(sourceBankAccount.bank.hotWallet, senderWallet, amount).then(function(){
+            return Q({status: 'success'})
+          },
+          function(err){
+            return Q({status: 'rippleError', error: err });
+          })
+        },
+        function(err) {
+          return Q({status: 'bankApiError', error: err });
+        });
     } else {
         //in case it's an internal ripple transaction, just fake the external DB interaction
         return Q({ status: 'success' });
