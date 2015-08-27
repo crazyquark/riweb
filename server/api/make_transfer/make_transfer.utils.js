@@ -40,9 +40,9 @@ function isDestinationOnDifferentBank(destUserBank, issuingAddress) {
 }
 
 
-function getPreTransferAction(sourceBank, realBankAccount, amount) {
+function getPreTransferAction(sourceAccount, realBankAccount, amount) {
 
-    if (sourceBank && sourceBank.sourceRole === 'admin') {
+    if (sourceAccount && sourceAccount.sourceRole === 'admin') {
         return realBankAccount.account.depositToRipple(amount);
     } else {
         //in case it's an internal ripple transaction, just fake the external DB interaction
@@ -50,6 +50,9 @@ function getPreTransferAction(sourceBank, realBankAccount, amount) {
     }
 }
 
+function getPostTransferAction(destAccount, destBankAccount, realBankAccount, amount) {
+    return realBankAccount && realBankAccount.account.withdrawFromRipple(amount);
+}
 
 function getRollbackTransferAction(sourceBank, realBankAccount, amount) {
 
