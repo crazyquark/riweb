@@ -263,32 +263,7 @@ function dropMongodbDatabase() {
         });
     });
 
-    // mongoose.connection.db.dropDatabase();
-    // deferred.resolve({});
-
     return deferred.promise;
-}
-
-function buildClientSocketIoConnection() {
-    // var ioSocket = io('ws://localhost:9000', {
-    //     path: '/socket.io-client'
-    // })
-    // .then(function(){})
-    // .catch(function(error){
-    //     console.error(error);
-    // });
-
-    // debug('buildClientSocketIoConnection new ioSocket');
-
-    // var socket = socketFactory({
-    //     ioSocket: ioSocket
-    // })
-    // .then(function(){})
-    // .catch(function(error){
-    //     console.error(error);
-    // });
-
-    // debug('buildClientSocketIoConnection new socketFactory');
 }
 
 function buildRippleWalletGenerateForNonAdmin() {
@@ -370,7 +345,6 @@ function seedBankAndUser(emitter, callback) {
 exports.rootAccountAddress = 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh';
 exports.dropMongodbDatabase = dropMongodbDatabase;
 exports.buildSocketSpy = buildSocketSpy;
-exports.buildClientSocketIoConnection = buildClientSocketIoConnection;
 exports.buildRemoteStub = buildRemoteStub;
 exports.buildWalletSpy = buildWalletSpy;
 exports.buildBankaccountSpy = buildBankaccountSpy;

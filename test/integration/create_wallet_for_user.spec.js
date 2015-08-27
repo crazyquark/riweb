@@ -27,8 +27,6 @@ describe('ITest create wallet for user', function () {
       CreateWallet.register(emitter);
 
       debug('dropMongodbDatabase');
-      // TestingUtils.buildClientSocketIoConnection();
-      debug('buildClientSocketIoConnection');
       done();
     });
   });
