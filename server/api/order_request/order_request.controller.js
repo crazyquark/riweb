@@ -7,7 +7,7 @@ var OrderRequest = require('./order_request.model');
 exports.index = function(req, res) {
   OrderRequest.find(function (err, order_requests) {
     if(err) { return handleError(res, err); }
-    return res.json(200, order_requests);
+    return res.status(200).json(order_requests);
   });
 };
 
