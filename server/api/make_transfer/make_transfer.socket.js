@@ -42,44 +42,6 @@ function buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount){
     return throwMissingError;
 }
 
-function isDestinationOnDifferentBank(destUserBank, issuingAddress) {
-    return destUserBank && destUserBank.hotWallet.address !== issuingAddress;
-}
-
-function checkSufficientBalance(realBankAccount, amount, err) {
-    if (!realBankAccount || realBankAccount.status === 'error') {
-        err = 'external IBAN not found';
-        return false;
-    }
-
-    if (!realBankAccount.account.canDepositToRipple(amount)) {
-        err = 'Not enough funds for bank deposit';
-        return false;
-    }
-
-    return true;
-}
-
-function getPreTransferAction(sourceBank, realBankAccount, amount) {
-
-    if (sourceBank && sourceBank.sourceRole === 'admin') {
-        return realBankAccount.account.depositToRipple(amount);
-    } else {
-        //in case it's an internal ripple transaction, just fake the external DB interaction
-        return Q({ status: 'success' });
-    }
-}
-
-function getRollbackTransferAction(sourceBank, realBankAccount, amount) {
-
-    if (sourceBank && sourceBank.sourceRole === 'admin') {
-        return realBankAccount.account.withdrawFromRipple(amount);
-    } else {
-        //in case it's an internal ripple transaction, just fake the external DB interaction
-        return Q({ status: 'success' });
-    }
-}
-
 function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId) {
 
     var throwMissingError = buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount);
@@ -109,7 +71,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
         issuingAddress = sourceBank.bank.hotWallet.address;
 
-        if (isDestinationOnDifferentBank(destUserBank, issuingAddress)) {
+        if (MTUtils.isDestinationOnDifferentBank(destUserBank, issuingAddress)) {
             sourceIssuingAddressIfDifferent = issuingAddress;
             issuingAddress = destUserBank.hotWallet.address;
         }
@@ -128,7 +90,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
         if (sourceBank.sourceRole === 'admin') {
             //we need to check if the user really does have the necessary funds
             var err;
-            if (!checkSufficientBalance(realBankAccount, amount, err)) 
+            if (!MTUtils.checkSufficientBalance(realBankAccount, amount, err)) 
             {
                 deferred.reject(throwMissingError(err, issuingAddress));
                 return deferred.promise;
@@ -136,7 +98,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
         }
 
         //TODO: also add the equivalent for destination
-        var preTransferPromise = getPreTransferAction(sourceBank, realBankAccount, amount);
+        var preTransferPromise = MTUtils.getPreTransferAction(sourceBank, realBankAccount, amount);
 
         preTransferPromise.then(function (depositResult) {
             var deposit = Q.defer();
@@ -156,11 +118,11 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
                     if (orderInfo) {
                         orderInfo.status = 'rippleError';
-                        saveOrderToDB(orderInfo);
+                        MTUtils.saveOrderToDB(orderInfo);
                     }
 
                     //undo the deposit action (if needed)
-                    var rollbackTransferActionPromise = getRollbackTransferAction(sourceBank, realBankAccount, amount);
+                    var rollbackTransferActionPromise = MTUtils.getRollbackTransferAction(sourceBank, realBankAccount, amount);
 
                     debug('makeTransferWithRipple - ripple error', err);
 
@@ -218,41 +180,6 @@ function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderReque
         .spread(currentMakeTransferWithRippleWallets);
 }
 
-function createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount){
-    var transaction = remote.createTransaction('Payment', paymentData);
-    transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
-
-    // Save order info on the blockchain
-    if (orderRequestId) {
-        transaction.tx_json.Memos = [
-            {
-                Memo: {
-                    MemoType: RippleUtils.stringToHex('OrderRequestId'),
-                    MemoData: RippleUtils.stringToHex(orderRequestId)
-                }
-            }
-        ];
-    }
-
-    // Append it if you got it
-    if (srcIssuer) {
-        var maxValue = amount.toString(); // Send all; original code from ripple-rest is:
-        // new BigNumber(payment.source_amount.value).plus(payment.source_slippage || 0).toString();
-        transaction.sendMax({
-            value: maxValue,
-            currency: 'EUR',      // EUR foreveeer
-            issuer: srcIssuer    // Gotcha!
-        });
-    }
-
-
-    transaction.on('resubmit', function () {
-        debug('resubmitting ', transaction);
-    });
-
-    return transaction;
-}
-
 function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo) {
     debug('makeTransferWithRipple', senderWallet, recvWallet, dstIssuer, amount, srcIssuer);
     var deferred = Q.defer();
@@ -269,7 +196,7 @@ function makeTransferWithRipple(senderWallet, recvWallet, dstIssuer, amount, src
 
         var orderRequestId = orderInfo?orderInfo.orderRequestId:null;
 
-        var transaction = createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount);
+        var transaction = MTUtils.createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount);
 
         transaction.submit(function (err, res) {
             if (err) {
