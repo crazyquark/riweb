@@ -89,10 +89,10 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
         if (sourceBank.sourceRole === 'admin') {
             //we need to check if the user really does have the necessary funds
-            var err;
-            if (!MTUtils.checkSufficientBalance(realBankAccount, amount, err)) 
+            var check = MTUtils.checkSufficientBalance(realBankAccount, amount);
+            if (check.status !== 'success') 
             {
-                deferred.reject(throwMissingError(err, issuingAddress));
+                deferred.reject(throwMissingError(check.error, issuingAddress));
                 return deferred.promise;
             }
         }

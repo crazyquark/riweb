@@ -7,6 +7,7 @@
 var OrderRequests = require('../order_request/order_request.model');
 var Order = require('../Order/Order.model');
 var RippleUtils = require('ripple-lib').utils;
+var Q = require('q');
 var debug = require('debug')('MakeTransfer');
 
 function saveOrderToDB(orderInfo) {
@@ -22,18 +23,16 @@ function saveOrderToDB(orderInfo) {
     });
 }
 
-function checkSufficientBalance(realBankAccount, amount, err) {
+function checkSufficientBalance(realBankAccount, amount) {
     if (!realBankAccount || realBankAccount.status === 'error') {
-        err = 'external IBAN not found';
-        return false;
+        return { status: 'error', error: 'External IBAN not found' };
     }
 
     if (!realBankAccount.account.canDepositToRipple(amount)) {
-        err = 'Not enough funds for bank deposit';
-        return false;
+        return { status: 'error', error: 'Not enough funds for bank deposit' };
     }
 
-    return true;
+    return { status: 'success' };
 }
 
 function isDestinationOnDifferentBank(destUserBank, issuingAddress) {
@@ -63,7 +62,7 @@ function getRollbackTransferAction(sourceBank, realBankAccount, amount) {
 }
 
 
-function createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount){
+function createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount) {
     var transaction = remote.createTransaction('Payment', paymentData);
     transaction.lastLedger(remote.getLedgerSequence() + 10); // Wait at most 10 ledger sequences
 
