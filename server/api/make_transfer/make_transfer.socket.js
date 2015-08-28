@@ -45,10 +45,10 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
     var throwMissingError = buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount);
 
-    function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBank, destUserBankParam, senderRealBankAccount, recvRealBankAccount) {
+    function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBank, destBank, senderRealBankAccount, recvRealBankAccount) {
         var deferred = Q.defer();
 
-        var destUserBank = destUserBankParam ? destUserBankParam.bank : null;
+        var destUserBank = destBank ? destBank.bank : null;
 
         var issuingAddress, sourceIssuingAddressIfDifferent;
 
@@ -96,18 +96,30 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
         }
 
         //TODO: also add the equivalent for destination
-        MTUtils.getPreTransferAction(sourceBank, senderRealBankAccount, amount).then(function (depositResult) {
+        MTUtils.getPreTransferAction({
+                sourceBank : sourceBank,
+                senderWallet: senderWallet,
+                senderRealBankAccount: senderRealBankAccount,
+                amount: amount
+            }).then(function (depositResult) {
             var deposit = Q.defer();
 
             if (depositResult.status === 'success') {
-                makeRippleTransfer(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transaction) {
+                makeRippleTransfer(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transactionStatus) {
 
-                    if (orderInfo) {
-                        orderInfo.status = 'rippleSuccess';
-                        MTUtils.saveOrderToDB(orderInfo);
-                    }
+                  if (transactionStatus.status === 'success') {
+                    // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
+                      makeRippleTransfer(recvWallet, destUserBank.hotWallet, destUserBank.hotWallet.address, amount).then(function () {
+                        recvRealBankAccount.account.withdrawFromRipple(amount).then(function () {
+                          if (orderInfo) {
+                            orderInfo.status = 'rippleSuccess';
+                            MTUtils.saveOrderToDB(orderInfo);
+                          }
 
-                    deposit.resolve({ status: 'success', transaction: transaction });
+                          deposit.resolve(transactionStatus);
+                        })
+                      });
+                  }
                 }, function (err) {
                     if (orderInfo) {
                         orderInfo.status = 'rippleError';
