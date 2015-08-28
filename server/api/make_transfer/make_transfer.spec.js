@@ -26,28 +26,25 @@ describe('Test make_transfer', function () {
     var bank1, bankWithNoWallet, nonAdminUser, nonAdminUserWithNoBank;
 
     beforeEach(function (done) {
-        emitter = TestingUtils.buildNewClientEventEmitterSpy();
-
-        emitSpy = emitter.emitEvent;
-
         var stubs = TestingUtils.buildGenericSetup();
         aliceWallet = stubs.wallets.alice;
         alanWallet = stubs.wallets.alan;
         bank1 = stubs.banks.bankA;
         remote = stubs.remote;
 
-        bankWithNoWallet = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getBadMongooseWallet('dumy@nothing.com'));
-        nonAdminUser = TestingUtils.getNonAdminMongooseUser('Alice', 'alice@a.com', bank1._id);
-        nonAdminUserWithNoBank = TestingUtils.getNonAdminMongooseUser('NoBank', 'no_bank@example.com', '#_no_id#');
+        emitter = stubs.emitter;
+        emitSpy = emitter.emitEvent;
 
-        sinon.mock(remote, 'createTransaction');
+        bankWithNoWallet = stubs.banks.bankC;
+
+        nonAdminUser = stubs.users.alice;
+        nonAdminUserWithNoBank = stubs.users.johndoe;
 
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
     afterEach(function () {
         TestingUtils.restoreAll();
-        emitSpy.restore();
     });
 
 

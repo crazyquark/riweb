@@ -101,6 +101,7 @@ function buildGenericSetup() {
 
   buildWalletSpy();
   buildRippleWalletGenerateForNonAdmin();
+  var emitter = buildNewClientEventEmitterSpy();
 
   //Alice and Alan are from Bank A
   //Bob is from bank B
@@ -110,11 +111,13 @@ function buildGenericSetup() {
 
   var bankA = getMongooseBankAccount('_bank1', 'Bank A', getNonAdminMongooseWallet('admin@a.com', '_BANK1'));
   var bankB = getMongooseBankAccount('_bank2', 'Bank B', getNonAdminMongooseWallet('admin@b.com', '_BANK2'));
-  buildBankaccountFindById(Bankaccount, [bankA, bankB]);
+  var bankC = getMongooseBankAccount('_bank3', 'Bank C', getBadMongooseWallet('joedanger@c.com', '_BANK3'));
+  buildBankaccountFindById(Bankaccount, [bankA, bankB, bankC]);
 
   var aliceWallet = getNonAdminMongooseWallet('alice@a.com', 'Alice');
   var alanWallet = getNonAdminMongooseWallet('alan@example.com', 'Alan');
   var bobWallet = getNonAdminMongooseWallet('bob@b.com', 'Bob');
+
 
   var wallets = {
     'alice@a.com': aliceWallet,
@@ -142,7 +145,8 @@ function buildGenericSetup() {
   var data = {
     banks: {
       bankA: bankA,
-      bankB: bankB
+      bankB: bankB,
+      bankC: bankC,
     },
     users: {
       alice: aliceUser,
@@ -155,14 +159,14 @@ function buildGenericSetup() {
       alan: alanWallet,
       bob: bobWallet
     },
-    remote: remote
+    remote: remote,
+    emitter: emitter
   };
 
   return data;
 }
 
 function getBadMongooseWallet(email_address) {
-    email_address = email_address || 'joe@danger.io';
     return {
         ownerEmail: email_address,
         secret: undefined,
