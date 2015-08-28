@@ -42,4 +42,5 @@ angular.module('riwebApp')
     }
     loadOrderRequest($routeParams.orderRequestId);
     $scope.purchaseProduct = purchaseProduct;
+    $scope.ro = $routeParams.ro;
   });
