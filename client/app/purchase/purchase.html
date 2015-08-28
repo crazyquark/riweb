@@ -21,6 +21,13 @@
                      required ng-readonly="true"/>
             </span>
           </div>
+          <div class="row">
+            <label class="col-sm-6">Details</label>
+            <span class="col-sm-6">
+              <input type="text" name="details" class="form-control" ng-model="purchase.details"
+                     required ng-readonly="true"/>
+            </span>
+          </div>
           <div class="row" ng-hide="isLoggedIn()">
             <label class="col-sm-6">User email</label>
             <span class="col-sm-6">
@@ -46,7 +53,7 @@
 
           <div class="row">
             <span class="col-sm-6">
-              <button class="btn btn-primary btn-lg" type="submit">
+              <button class="btn btn-primary btn-lg" type="submit" ng-hide="ro">
                 Purchase
               </button>
             </span>

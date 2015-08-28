@@ -4,9 +4,12 @@
 
 'use strict';
 
+var Q = require('q');
 var OrderRequests = require('../order_request/order_request.model');
 var Order = require('../Order/Order.model');
 var RippleUtils = require('ripple-lib').utils;
+var makeRippleTransfer = require('../MakeRippleTransfer/MakeRippleTransfer.service');
+
 var Q = require('q');
 var debug = require('debug')('MakeTransfer');
 
@@ -40,14 +43,20 @@ function isDestinationOnDifferentBank(destUserBank, issuingAddress) {
 }
 
 
-function getPreTransferAction(sourceAccount, realBankAccount, amount) {
-
-    if (sourceAccount && sourceAccount.sourceRole === 'admin') {
-        return realBankAccount.account.depositToRipple(amount);
-    } else {
-        //in case it's an internal ripple transaction, just fake the external DB interaction
-        return Q({ status: 'success' });
-    }
+function getPreTransferAction(transfer) {
+/*{
+ sourceBank : sourceBank,
+ senderWallet: senderWallet,
+ senderRealBankAccount: senderRealBankAccount,
+ amount: amount
+}*/
+    return transfer.senderRealBankAccount.account.depositToRipple(transfer.amount).then(function() {
+        // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
+        return makeRippleTransfer(transfer.sourceBank.bank.hotWallet, transfer.senderWallet, transfer.sourceBank.bank.hotWallet.address, transfer.amount);
+    },
+    function(err){
+      return Q({status: 'error', error: err});
+    });
 }
 
 function getPostTransferAction(destAccount, destBankAccount, realBankAccount, amount) {

@@ -35,6 +35,7 @@ angular.module('riwebApp')
       OrderRequestService.get({id: orderRequestId}).$promise.then(function(orderRequest){
         $scope.purchase.merchantEmail = orderRequest.receiverEmail;
         $scope.purchase.price = orderRequest.amount;
+        $scope.purchase.details = orderRequest.details;
         
         $scope.returnUrl = orderRequest.returnUrl;
         $scope.cancelUrl = orderRequest.cancelUrl;
@@ -42,4 +43,5 @@ angular.module('riwebApp')
     }
     loadOrderRequest($routeParams.orderRequestId);
     $scope.purchaseProduct = purchaseProduct;
+    $scope.ro = $routeParams.ro;
   });

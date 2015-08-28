@@ -54,7 +54,7 @@
                     <td>{{transaction.destination}}</td>
                     <td>{{transaction.amount}}</td>
                     <td ng-hide="true">{{transaction.fee}}</td>
-                    <td>{{transaction.orderRequestId || 'none'}}</td>
+                    <td><a ng-show="transaction.orderRequestId" href="/purchase?orderRequestId={{transaction.orderRequestId}}&ro=1">{{transaction.orderRequestId}}</a></td>
                 </tr>
                 </tbody>
             </table>

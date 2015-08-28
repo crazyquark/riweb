@@ -45,10 +45,10 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
     var throwMissingError = buildThrowMissingError(clientEventEmitter, fromEmail, toEmail, amount);
 
-    function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBank, destUserBankParam, senderRealBankAccount, recvRealBankAccount) {
+    function makeTransferWithRippleWallets(senderWallet, recvWallet, sourceBank, destBank, senderRealBankAccount, recvRealBankAccount) {
         var deferred = Q.defer();
 
-        var destUserBank = destUserBankParam ? destUserBankParam.bank : null;
+        var destUserBank = destBank ? destBank.bank : null;
 
         var issuingAddress, sourceIssuingAddressIfDifferent;
 
@@ -86,28 +86,40 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
             };
         }
 
-        if (sourceBank.sourceRole === 'admin') {
-            //we need to check if the user really does have the necessary funds
-            var check = MTUtils.checkSufficientBalance(senderRealBankAccount, amount);
-            if (check.status !== 'success') {
-                deferred.reject(throwMissingError(check.error, issuingAddress));
-                return deferred.promise;
-            }
+        //we need to check if the user really does have the necessary funds
+        var check = MTUtils.checkSufficientBalance(senderRealBankAccount, amount);
+        if (check.status !== 'success') {
+            deferred.reject(throwMissingError(check.error, issuingAddress));
+            return deferred.promise;
         }
 
         //TODO: also add the equivalent for destination
-        MTUtils.getPreTransferAction(sourceBank, senderRealBankAccount, amount).then(function (depositResult) {
+        var preTransferPromise = MTUtils.getPreTransferAction({
+            sourceBank: sourceBank,
+            senderWallet: senderWallet,
+            senderRealBankAccount: senderRealBankAccount,
+            amount: amount
+        });
+
+        preTransferPromise.then(function (depositResult) {
             var deposit = Q.defer();
 
             if (depositResult.status === 'success') {
-                makeRippleTransfer(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transaction) {
+                makeRippleTransfer(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transactionStatus) {
 
-                    if (orderInfo) {
-                        orderInfo.status = 'rippleSuccess';
-                        MTUtils.saveOrderToDB(orderInfo);
+                    if (transactionStatus.status === 'success') {
+                        // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
+                        makeRippleTransfer(recvWallet, destUserBank.hotWallet, destUserBank.hotWallet.address, amount).then(function () {
+                            recvRealBankAccount.account.withdrawFromRipple(amount).then(function () {
+                                if (orderInfo) {
+                                    orderInfo.status = 'rippleSuccess';
+                                    MTUtils.saveOrderToDB(orderInfo);
+                                }
+
+                                deposit.resolve(transactionStatus);
+                            })
+                        });
                     }
-
-                    deposit.resolve({ status: 'success', transaction: transaction });
                 }, function (err) {
                     if (orderInfo) {
                         orderInfo.status = 'rippleError';
@@ -163,7 +175,7 @@ function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderReque
     var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
     var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank
 
-    var promiseFindSenderRealBankAccount = RealBankAccount.getRealBankAccountForEmail(toEmail);
+    var promiseFindSenderRealBankAccount = RealBankAccount.getRealBankAccountForEmail(fromEmail);
     var promiseFindRecvRealBankAccount = RealBankAccount.getRealBankAccountForEmail(toEmail);
 
     var currentMakeTransferWithRippleWallets = buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId);
