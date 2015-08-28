@@ -17,6 +17,8 @@ var Wallet = require('./../wallet/wallet.model');
 var User = require('./../user/user.model');
 var Bankaccount = require('./../bankaccount/bankaccount.model');
 
+var debug = require('debug')('CreateWallet');
+
 describe('Test create_wallet', function () {
 
     var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, emitter;
@@ -28,15 +30,17 @@ describe('Test create_wallet', function () {
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
         emitter = TestingUtils.buildNewClientEventEmitterSpy();
+        var stubs = TestingUtils.buildAliceAlanAndBob();
+
         CreateWallet.register(emitter);
         emitSpy = emitter.emitEvent;
 
         bank1 = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
         bank2 = TestingUtils.getMongooseBankAccount('_bank2', 'Test foreing bank', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK_FOREIGN'));
-        nonAdminUser = TestingUtils.getNonAdminMongooseUser('Alice', 'alice@example.com', bank1._id);
+        nonAdminUser = TestingUtils.getNonAdminMongooseUser('Alice', 'alice@a.com', bank1._id);
         nonAdminUserWithNoBank = TestingUtils.getNonAdminMongooseUser('NoBank', 'no_bank@example.com', '#_no_id#');
 
-        TestingUtils.buildUserFindEmailStub(User, nonAdminUser);
+        //TestingUtils.buildUserFindEmailStub(User, nonAdminUser);
         TestingUtils.buildBankaccountFindById(Bankaccount, [bank1, bank2]);
 
         TestingUtils.buildWalletSpy();
@@ -47,9 +51,6 @@ describe('Test create_wallet', function () {
     afterEach(function () {
       TestingUtils.restoreAll();
       emitSpy.restore();
-
-      User.findByEmail.restore();
-      Bankaccount.findById.restore();
     });
 
 /*
@@ -63,22 +64,28 @@ describe('Test create_wallet', function () {
     });
 */
 
-    it('should create non-root wallet for a1@example.com', function (done) {
-        CreateWallet.createWalletForEmail(emitter, 'a1@example.com').then(function () {
-            expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('a1@example.com'));
+    it('should create non-root wallet for adamdoe@a.com', function (done) {
+        CreateWallet.createWalletForEmail(emitter, 'adamdoe@a.com').then(function () {
+            expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('adamdoe@a.com'));
             expect(Wallet.create).to.have.callCount(1);
             done();
-        }).done(null, function (error) { done(error); });
+        }).done(null, function (error) {
+          debug(error);
+          done(error);
+        });
     });
 
-    it('should not create duplicate wallet for a2@example.com', function (done) {
-        CreateWallet.createWalletForEmail(emitter, 'a2@example.com').then(function () {
-            CreateWallet.createWalletForEmail(emitter, 'a2@example.com').then(function () {
-                expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('a2@example.com'));
+    it.only('should not create duplicate wallet for adamdoe@a.com', function (done) {
+        CreateWallet.createWalletForEmail(emitter, 'adamdoe@a.com').then(function () {
+            CreateWallet.createWalletForEmail(emitter, 'adamdoe@a.com').then(function () {
+                expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('adamdoe1@a.com'));
                 expect(Wallet.create).to.have.callCount(1);
                 done();
             });
-        }).done(null, function (error) { done(error); });
+        }).done(null, function (error) {
+          debug(error);
+          done(error);
+        });
     });
 
     it('should set_trust when create new wallet', function (done) {

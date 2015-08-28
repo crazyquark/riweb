@@ -8,6 +8,7 @@ var CreateAdminUserForBank = require('../../server/api/create_admin_user_for_ban
 var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
 var ClientEventEmitter = require('../../server/utils/ClientEventEmitter/ClientEventEmitter.service');
+var Bankaccount = require('./../../server/api/bankaccount/bankaccount.model');
 
 var mongoose = require('mongoose-q')(require('mongoose'));
 var io = require('socket.io');
@@ -93,16 +94,50 @@ function getNonAdminMongooseWallet(email_address, sufix) {
     };
 }
 
-function buildAliceAlanAndBob() {
-  var aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
-  var alanWallet = TestingUtils.getNonAdminMongooseWallet('alan@example.com', 'Alan');
-  var bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
+function buildFallbackStub(object, functionName, newFunction){
+}
 
-  sinon.stub(Wallet, 'findByOwnerEmail', buildKeyValuePromiseFunction({
-    'alice@example.com': aliceWallet,
+function buildAliceAlanAndBob() {
+
+  var bankA = getMongooseBankAccount('_bank1', 'Bank A', getNonAdminMongooseWallet('admin@a.com', '_BANK1'));
+  var bankB = getMongooseBankAccount('_bank2', 'Bank B', getNonAdminMongooseWallet('admin@b.com', '_BANK2'));
+
+  var aliceWallet = getNonAdminMongooseWallet('alice@a.com', 'Alice');
+  var alanWallet = getNonAdminMongooseWallet('alan@example.com', 'Alan');
+  var bobWallet = getNonAdminMongooseWallet('bob@b.com', 'Bob');
+
+  var aliceAlanAndBobWalelts = {
+    'alice@a.com': aliceWallet,
     'alan@example.com': alanWallet,
-    'bob@example.com': bobWallet
-  }));
+    'bob@b.com': bobWallet
+  };
+  sinon.stub(Wallet, 'findByOwnerEmail', buildKeyValuePromiseFunction(aliceAlanAndBobWalelts));
+
+  var aliceUser = getNonAdminMongooseUser('Alice', 'alice@a.com', bankA._id);
+  var alanUser = getNonAdminMongooseUser('Alan', 'alan@a.com', bankA._id);
+  var newUser = getNonAdminMongooseUser('Adam Doe', 'adamdoe@a.com', bankA._id);
+  var bobUser = getNonAdminMongooseUser('Bob', 'bob@b.com', bankB._id);
+    var aliceAlanAndBobUsers = {
+    'alice@a.com': aliceUser,
+    'alan@a.com': alanUser,
+    'adamdoe@a.com': newUser,
+    'bob@b.com': bobUser,
+  };
+  sinon.stub(User, 'findByEmail', buildKeyValuePromiseFunction(aliceAlanAndBobUsers));
+
+  var data = {
+    banks: {
+      bankA: bankA,
+      bankB: bankB,
+    },
+    users: {
+      alice: aliceUser,
+      alan: alanUser,
+      bob: bobUser,
+    }
+  }
+
+  return data;
 }
 
 function getBadMongooseWallet(email_address) {
@@ -215,16 +250,6 @@ function getMongooseBankAccount(bankId, bankName, wallet) {
     };
 }
 
-function buildUserFindEmailStub(user, nonAdminGeneratedUser) {
-    sinon.stub(user, 'findByEmail', function (email) {
-        if (email.indexOf('@example.com') > -1) {
-            return Q(nonAdminGeneratedUser);
-        }
-        return Q();
-    });
-}
-
-
 function buildKeyValuePromiseFunction(keyValuePairs){
   return function(key){
     return Q(keyValuePairs[key]);
@@ -294,6 +319,8 @@ function restoreAll() {
     restoreRippleWalletGenerate();
     restoreBankaccountSpy();
     restoreRippleWalletGenerate();
+    restoreGenericSpy(User, ['findByEmail']);
+    restoreGenericSpy(Bankaccount, ['findById']);
 }
 
 function createRealBankUser(bankName, iban, balance) {
@@ -376,7 +403,6 @@ exports.buildFindByOwnerEmailForUnexisting = buildFindByOwnerEmailForUnexisting;
 exports.buildRippleWalletGenerateForNonAdmin = buildRippleWalletGenerateForNonAdmin;
 exports.getNonAdminMongooseUser = getNonAdminMongooseUser;
 exports.getMongooseBankAccount = getMongooseBankAccount;
-exports.buildUserFindEmailStub = buildUserFindEmailStub;
 exports.buildBankaccountFindById = buildBankaccountFindById;
 exports.buildKeyValuePromiseFunction = buildKeyValuePromiseFunction;
 exports.buildArrayPropertyPromiseFunction = buildArrayPropertyPromiseFunction;

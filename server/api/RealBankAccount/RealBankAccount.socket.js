@@ -22,7 +22,7 @@ function getRealBankAccountForEmail(ownerEmail) {
       });
     }
     else {
-      debug('cannot find user for email ', ownerEmail)
+      debug('cannot find user for email ', ownerEmail);
       return { status: 'error', message: 'user not found'};
     }
   });

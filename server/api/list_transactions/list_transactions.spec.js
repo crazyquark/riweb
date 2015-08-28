@@ -29,8 +29,8 @@ describe('Test list_transactions', function() {
         emitter = TestingUtils.buildNewClientEventEmitterSpy();
         emitSpy = emitter.emitEvent;
 
-        aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@example.com', 'Alice');
-        bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@example.com', 'Bob');
+        aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@a.com', 'Alice');
+        bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@b.com', 'Bob');
 
         bank1 = {
             'email': 'bank1@example.com',
@@ -41,8 +41,8 @@ describe('Test list_transactions', function() {
         };
 
       sinon.stub(Wallet, 'findByOwnerEmail', TestingUtils.buildKeyValuePromiseFunction({
-          'alice@example.com': aliceWallet,
-          'bob@example.com': bobWallet
+          'alice@a.com': aliceWallet,
+          'bob@b.com': bobWallet
       }));
 
       sinon.stub(Wallet, 'findByRippleAddress', TestingUtils.buildArrayPropertyPromiseFunction([
@@ -66,13 +66,13 @@ describe('Test list_transactions', function() {
         remote.requestAccountTransactions.yields(null, { transactions: [fromAliceToBobTx] });
 
         var expectedHumanTransactions = [{
-					source: 'alice@example.com',
-					destination: 'bob@example.com',
+					source: 'alice@a.com',
+					destination: 'bob@b.com',
 					amount: 100 + '€',
                     orderRequestId: '',
 					fee: 12}];
 
-        ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
+        ListTransactions.listTransactions(emitter, 'alice@a.com').then(function(humanTransactions){
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
 
@@ -86,13 +86,13 @@ describe('Test list_transactions', function() {
         remote.requestAccountTransactions.yields(null, { transactions: [fromBobToAliceTx] });
 
         var expectedHumanTransactions = [{
-					source: 'bob@example.com',
-					destination: 'alice@example.com',
+					source: 'bob@b.com',
+					destination: 'alice@a.com',
 					amount: 99 + '€',
                     orderRequestId: '',
 					fee: 12}];
 
-            ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
+            ListTransactions.listTransactions(emitter, 'alice@a.com').then(function(humanTransactions){
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
             expect(emitSpy).to.have.callCount(1);
@@ -110,12 +110,12 @@ describe('Test list_transactions', function() {
 
         var expectedHumanTransactions = [{
 					source: 'bank1@example.com',
-					destination: 'alice@example.com',
+					destination: 'alice@a.com',
 					amount: 98 + '€',
                     orderRequestId: '',
 					fee: 12}];
 
-            ListTransactions.listTransactions(emitter, 'alice@example.com').then(function(humanTransactions){
+            ListTransactions.listTransactions(emitter, 'alice@a.com').then(function(humanTransactions){
 
             expect(humanTransactions.transactions).to.eql(expectedHumanTransactions);
             expect(emitSpy).to.have.callCount(1);
