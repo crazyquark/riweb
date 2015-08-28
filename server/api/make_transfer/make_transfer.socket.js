@@ -94,30 +94,32 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
         }
 
         //TODO: also add the equivalent for destination
-        MTUtils.getPreTransferAction({
-                sourceBank : sourceBank,
-                senderWallet: senderWallet,
-                senderRealBankAccount: senderRealBankAccount,
-                amount: amount
-            }).then(function (depositResult) {
+        var preTransferPromise = MTUtils.getPreTransferAction({
+            sourceBank: sourceBank,
+            senderWallet: senderWallet,
+            senderRealBankAccount: senderRealBankAccount,
+            amount: amount
+        });
+
+        preTransferPromise.then(function (depositResult) {
             var deposit = Q.defer();
 
             if (depositResult.status === 'success') {
                 makeRippleTransfer(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transactionStatus) {
 
-                  if (transactionStatus.status === 'success') {
-                    // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
-                      makeRippleTransfer(recvWallet, destUserBank.hotWallet, destUserBank.hotWallet.address, amount).then(function () {
-                        recvRealBankAccount.account.withdrawFromRipple(amount).then(function () {
-                          if (orderInfo) {
-                            orderInfo.status = 'rippleSuccess';
-                            MTUtils.saveOrderToDB(orderInfo);
-                          }
+                    if (transactionStatus.status === 'success') {
+                        // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
+                        makeRippleTransfer(recvWallet, destUserBank.hotWallet, destUserBank.hotWallet.address, amount).then(function () {
+                            recvRealBankAccount.account.withdrawFromRipple(amount).then(function () {
+                                if (orderInfo) {
+                                    orderInfo.status = 'rippleSuccess';
+                                    MTUtils.saveOrderToDB(orderInfo);
+                                }
 
-                          deposit.resolve(transactionStatus);
-                        })
-                      });
-                  }
+                                deposit.resolve(transactionStatus);
+                            })
+                        });
+                    }
                 }, function (err) {
                     if (orderInfo) {
                         orderInfo.status = 'rippleError';
