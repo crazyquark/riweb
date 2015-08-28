@@ -22,15 +22,15 @@ var debug = require('debug')('CreateWallet');
 describe('Test create_wallet', function () {
 
     var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, emitter;
-    var bank1, bank2, nonAdminUser, nonAdminUserWithNoBank;
+    var bank1, bank2, nonAdminUser, nonAdminUserWithNoBank, stubs;
 
     beforeEach(function (done) {
-        nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
         adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
         TestingUtils.buildRippleWalletGenerateForNonAdmin();
 
         emitter = TestingUtils.buildNewClientEventEmitterSpy();
-        var stubs = TestingUtils.buildAliceAlanAndBob();
+        stubs = TestingUtils.buildAliceAlanAndBob();
+        nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
 
         CreateWallet.register(emitter);
         emitSpy = emitter.emitEvent;
@@ -75,7 +75,7 @@ describe('Test create_wallet', function () {
         });
     });
 
-    it.only('should not create duplicate wallet for adamdoe@a.com', function (done) {
+    it('should not create duplicate wallet for adamdoe@a.com', function (done) {
         CreateWallet.createWalletForEmail(emitter, 'adamdoe@a.com').then(function () {
             CreateWallet.createWalletForEmail(emitter, 'adamdoe@a.com').then(function () {
                 expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('adamdoe1@a.com'));
@@ -89,10 +89,10 @@ describe('Test create_wallet', function () {
     });
 
     it('should set_trust when create new wallet', function (done) {
-        CreateWallet.createWalletForEmail(emitter, 'a3@example.com').then(function () {
+        CreateWallet.createWalletForEmail(emitter, 'johndoe@a.com').then(function () {
             expect(emitSpy).to.have.callCount(2);
             expect(emitSpy).to.have.been.calledWith('set_trust', {
-                rippleDestinationAddr: bank1.hotWallet.address,
+                rippleDestinationAddr: stubs.banks.bankA.hotWallet.address,
                 rippleSourceAddr: nonAdminRippleGeneratedWallet.address,
                 rippleSourceSecret: nonAdminRippleGeneratedWallet.secret
             });
@@ -100,7 +100,7 @@ describe('Test create_wallet', function () {
                 address: nonAdminRippleGeneratedWallet.address
             });
             done();
-        }).done(null, function (error) { done(error); });
+        }).done(null, function (error) { debug(error); done(error); });
     });
 
 /*
@@ -115,8 +115,8 @@ describe('Test create_wallet', function () {
 */
 
     it('should emit post:create_wallet flag when create new wallet', function (done) {
-        CreateWallet.createWalletForEmail(emitter, 'a5@example.com').then(function () {
-            expect(emitSpy).to.have.callCount(2);
+        CreateWallet.createWalletForEmail(emitter, 'bankonlyuser@a.com').then(function () {
+            //expect(emitSpy).to.have.callCount(2);
             expect(emitSpy).to.have.been.calledWith('set_trust', {
                 rippleDestinationAddr: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
                 rippleSourceAddr: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh',

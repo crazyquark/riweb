@@ -94,9 +94,6 @@ function getNonAdminMongooseWallet(email_address, sufix) {
     };
 }
 
-function buildFallbackStub(object, functionName, newFunction){
-}
-
 function buildAliceAlanAndBob() {
 
   var bankA = getMongooseBankAccount('_bank1', 'Bank A', getNonAdminMongooseWallet('admin@a.com', '_BANK1'));
@@ -106,36 +103,43 @@ function buildAliceAlanAndBob() {
   var alanWallet = getNonAdminMongooseWallet('alan@example.com', 'Alan');
   var bobWallet = getNonAdminMongooseWallet('bob@b.com', 'Bob');
 
-  var aliceAlanAndBobWalelts = {
+  var wallets = {
     'alice@a.com': aliceWallet,
     'alan@example.com': alanWallet,
     'bob@b.com': bobWallet
   };
-  sinon.stub(Wallet, 'findByOwnerEmail', buildKeyValuePromiseFunction(aliceAlanAndBobWalelts));
+
+  sinon.stub(Wallet, 'findByOwnerEmail', buildKeyValuePromiseFunction(wallets));
 
   var aliceUser = getNonAdminMongooseUser('Alice', 'alice@a.com', bankA._id);
   var alanUser = getNonAdminMongooseUser('Alan', 'alan@a.com', bankA._id);
-  var newUser = getNonAdminMongooseUser('Adam Doe', 'adamdoe@a.com', bankA._id);
+  var newUser = getNonAdminMongooseUser('John Doe', 'johndoe@a.com', bankA._id);
   var bobUser = getNonAdminMongooseUser('Bob', 'bob@b.com', bankB._id);
     var aliceAlanAndBobUsers = {
     'alice@a.com': aliceUser,
     'alan@a.com': alanUser,
-    'adamdoe@a.com': newUser,
+    'johndoe@a.com': newUser,
     'bob@b.com': bobUser,
   };
+
   sinon.stub(User, 'findByEmail', buildKeyValuePromiseFunction(aliceAlanAndBobUsers));
 
   var data = {
     banks: {
       bankA: bankA,
-      bankB: bankB,
+      bankB: bankB
     },
     users: {
       alice: aliceUser,
       alan: alanUser,
-      bob: bobUser,
+      bob: bobUser
+    },
+    wallets: {
+      alice: aliceWallet,
+      alan: alanWallet,
+      bob: bobWallet
     }
-  }
+  };
 
   return data;
 }

@@ -53,9 +53,6 @@ describe('Test make_transfer', function () {
     afterEach(function () {
         TestingUtils.restoreAll();
         emitSpy.restore();
-
-        User.findByEmail.restore();
-        Bankaccount.findById.restore();
     });
 
 
