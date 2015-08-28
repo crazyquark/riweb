@@ -55,6 +55,7 @@ function buildEmptyTransactionStub() {
         setTrust: sinon.stub(),
         on: sinon.stub(),
         lastLedger: sinon.stub(),
+        sendMax: sinon.stub(),
         tx_json: { Memos: [] }
     };
     transaction.submit.yields(null, {});
@@ -94,10 +95,22 @@ function getNonAdminMongooseWallet(email_address, sufix) {
     };
 }
 
-function buildAliceAlanAndBob() {
+function buildGenericSetup() {
+  var remote = buildRemoteStub();
+  buildNewConnectedRemoteStub(remote);
+
+  buildWalletSpy();
+  buildRippleWalletGenerateForNonAdmin();
+
+  //Alice and Alan are from Bank A
+  //Bob is from bank B
+  //John Doe has no ripple bank but only an IBAN from bank A, he wants to signup for a blockchain account.
+  //alice -> alan (transfer inside the same bank)
+  //alice -> bob (interbank transfer)
 
   var bankA = getMongooseBankAccount('_bank1', 'Bank A', getNonAdminMongooseWallet('admin@a.com', '_BANK1'));
   var bankB = getMongooseBankAccount('_bank2', 'Bank B', getNonAdminMongooseWallet('admin@b.com', '_BANK2'));
+  buildBankaccountFindById(Bankaccount, [bankA, bankB]);
 
   var aliceWallet = getNonAdminMongooseWallet('alice@a.com', 'Alice');
   var alanWallet = getNonAdminMongooseWallet('alan@example.com', 'Alan');
@@ -105,7 +118,7 @@ function buildAliceAlanAndBob() {
 
   var wallets = {
     'alice@a.com': aliceWallet,
-    'alan@example.com': alanWallet,
+    'alan@a.com': alanWallet,
     'bob@b.com': bobWallet
   };
 
@@ -114,8 +127,10 @@ function buildAliceAlanAndBob() {
   var aliceUser = getNonAdminMongooseUser('Alice', 'alice@a.com', bankA._id);
   var alanUser = getNonAdminMongooseUser('Alan', 'alan@a.com', bankA._id);
   var newUser = getNonAdminMongooseUser('John Doe', 'johndoe@a.com', bankA._id);
+
   var bobUser = getNonAdminMongooseUser('Bob', 'bob@b.com', bankB._id);
-    var aliceAlanAndBobUsers = {
+
+  var aliceAlanAndBobUsers = {
     'alice@a.com': aliceUser,
     'alan@a.com': alanUser,
     'johndoe@a.com': newUser,
@@ -132,13 +147,15 @@ function buildAliceAlanAndBob() {
     users: {
       alice: aliceUser,
       alan: alanUser,
-      bob: bobUser
+      bob: bobUser,
+      johndoe: newUser
     },
     wallets: {
       alice: aliceWallet,
       alan: alanWallet,
       bob: bobWallet
-    }
+    },
+    remote: remote
   };
 
   return data;
@@ -211,9 +228,10 @@ function restoreBankaccountSpy() {
     restoreGenericSpy(BankAccount, ['create', 'findByRippleAddress']);
 }
 
-function buildNewConnectedRemoteStub() {
-    sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(buildRemoteStub()));
-    sinon.stub(Utils, 'getNewConnectedAdminRemote').returns(Q(buildRemoteStub()));
+function buildNewConnectedRemoteStub(remoteStub) {
+  remoteStub = remoteStub || buildRemoteStub();
+  sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remoteStub));
+  sinon.stub(Utils, 'getNewConnectedAdminRemote').returns(Q(remoteStub));
 }
 
 function buildNewClientEventEmitterSpy(socket) {
@@ -413,5 +431,5 @@ exports.buildArrayPropertyPromiseFunction = buildArrayPropertyPromiseFunction;
 exports.restoreRippleWalletGenerate = restoreRippleWalletGenerate;
 exports.restoreAll = restoreAll;
 exports.restoreClientEventEmitterSpy = restoreClientEventEmitterSpy;
-exports.buildAliceAlanAndBob = buildAliceAlanAndBob;
+exports.buildGenericSetup = buildGenericSetup;
 exports.seedBankAndUser = seedBankAndUser;

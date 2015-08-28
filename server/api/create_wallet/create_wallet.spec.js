@@ -21,30 +21,21 @@ var debug = require('debug')('CreateWallet');
 
 describe('Test create_wallet', function () {
 
-    var nonAdminRippleGeneratedWallet, adminMongooseWallet, emitSpy, emitter;
+    var nonAdminRippleGeneratedWallet, emitSpy, emitter;
     var bank1, bank2, nonAdminUser, nonAdminUserWithNoBank, stubs;
 
     beforeEach(function (done) {
-        adminMongooseWallet = TestingUtils.getAdminMongooseWallet();
-        TestingUtils.buildRippleWalletGenerateForNonAdmin();
-
+        stubs = TestingUtils.buildGenericSetup();
         emitter = TestingUtils.buildNewClientEventEmitterSpy();
-        stubs = TestingUtils.buildAliceAlanAndBob();
-        nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
-
-        CreateWallet.register(emitter);
         emitSpy = emitter.emitEvent;
 
-        bank1 = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
-        bank2 = TestingUtils.getMongooseBankAccount('_bank2', 'Test foreing bank', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK_FOREIGN'));
-        nonAdminUser = TestingUtils.getNonAdminMongooseUser('Alice', 'alice@a.com', bank1._id);
-        nonAdminUserWithNoBank = TestingUtils.getNonAdminMongooseUser('NoBank', 'no_bank@example.com', '#_no_id#');
+        nonAdminRippleGeneratedWallet = TestingUtils.getNonAdminRippleGeneratedWallet();
 
-        //TestingUtils.buildUserFindEmailStub(User, nonAdminUser);
-        TestingUtils.buildBankaccountFindById(Bankaccount, [bank1, bank2]);
+        bank1 = stubs.banks.bankA;
+        bank2 = stubs.banks.bankB;
+        nonAdminUser = stubs.users.alice;
+        nonAdminUserWithNoBank = stubs.users.johndoe;
 
-        TestingUtils.buildWalletSpy();
-        TestingUtils.buildNewConnectedRemoteStub();
         TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
 
@@ -52,17 +43,6 @@ describe('Test create_wallet', function () {
       TestingUtils.restoreAll();
       emitSpy.restore();
     });
-
-/*
-    //Tests for Admin users wallets don't make sense anymore
-    it('should create root wallet for admin@admin.com', function (done) {
-        CreateWallet.createWalletForEmail('admin@admin.com').then(function () {
-            expect(Wallet.create).to.have.been.calledWith(TestingUtils.getAdminMongooseWallet());
-            expect(Wallet.create).to.have.callCount(1);
-            done();
-        }).done(null, function (error) { done(error); });
-    });
-*/
 
     it('should create non-root wallet for johndoe@a.com', function (done) {
         CreateWallet.createWalletForEmail(emitter, 'johndoe@a.com').then(function () {

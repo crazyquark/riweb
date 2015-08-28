@@ -18,26 +18,30 @@ function makeRippleTransfer(senderWallet, recvWallet, dstIssuer, amount, srcIssu
   // Can't assume anything about source issuer!
 
   Utils.getNewConnectedRemote(senderWallet.address, senderWallet.secret).then(function (remote) {
-    var paymentData = {
-      account: senderWallet.address,
-      destination: recvWallet.address,
-      amount: amount + '/EUR/' + dstIssuer
-    };
+    try {
+      var paymentData = {
+        account: senderWallet.address,
+        destination: recvWallet.address,
+        amount: amount + '/EUR/' + dstIssuer
+      };
 
-    var orderRequestId = orderInfo ? orderInfo.orderRequestId : null;
+      var orderRequestId = orderInfo ? orderInfo.orderRequestId : null;
 
-    var transaction = MTUtils.createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount);
+      var transaction = MTUtils.createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount);
 
-    transaction.submit(function (err, res) {
-      if (err) {
-        debug('transaction seems to have failed: ', err);
-        deferred.reject(err);
-      }
-      if (res) {
-        deferred.resolve({ status: 'success', transaction: transaction });
-      }
-    });
+      transaction.submit(function (err, res) {
+        if (err) {
+          debug('transaction seems to have failed: ', err);
+          deferred.reject(err);
+        }
+        if (res) {
+          deferred.resolve({ status: 'success', transaction: transaction });
+        }
+      });
 
+    } catch (err) {
+      deferred.reject(err);
+    }
   });
   return deferred.promise;
 }

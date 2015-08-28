@@ -22,28 +22,23 @@ var debug = require('debug')('TMakeTransfer');
 
 describe('Test make_transfer', function () {
 
-    var remote, emitSpy, aliceWallet, bobWallet, emitter;
+    var remote, emitSpy, aliceWallet, alanWallet, emitter;
     var bank1, bankWithNoWallet, nonAdminUser, nonAdminUserWithNoBank;
 
     beforeEach(function (done) {
-        remote = TestingUtils.buildRemoteStub();
-        sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
-
         emitter = TestingUtils.buildNewClientEventEmitterSpy();
 
         emitSpy = emitter.emitEvent;
-        aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@a.com', 'Alice');
-        bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@b.com', 'Bob');
 
-        TestingUtils.buildAliceAlanAndBob();
+        var stubs = TestingUtils.buildGenericSetup();
+        aliceWallet = stubs.wallets.alice;
+        alanWallet = stubs.wallets.alan;
+        bank1 = stubs.banks.bankA;
+        remote = stubs.remote;
 
-        bank1 = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getNonAdminMongooseWallet('dumy@nothing.com', '_BANK1'));
         bankWithNoWallet = TestingUtils.getMongooseBankAccount('_bank1', 'Test bank #1', TestingUtils.getBadMongooseWallet('dumy@nothing.com'));
         nonAdminUser = TestingUtils.getNonAdminMongooseUser('Alice', 'alice@a.com', bank1._id);
         nonAdminUserWithNoBank = TestingUtils.getNonAdminMongooseUser('NoBank', 'no_bank@example.com', '#_no_id#');
-
-        //TestingUtils.buildUserFindEmailStub(User, nonAdminUser);
-        TestingUtils.buildBankaccountFindById(Bankaccount, [bank1]);
 
         sinon.mock(remote, 'createTransaction');
 
@@ -56,13 +51,13 @@ describe('Test make_transfer', function () {
     });
 
 
-    it('should send 50 EURO from Alice to Bob', function (done) {
+    it('should send 50 EURO from Alice to Alan', function (done) {
         var amount = 50;
 
-        MakeTransfer.makeTransfer(emitter, 'alice@a.com', 'bob@b.com', amount).then(function () {
+        MakeTransfer.makeTransfer(emitter, 'alice@a.com', 'alan@a.com', amount).then(function () {
             expect(remote.createTransaction).to.have.been.calledWith('Payment', {
                 account: aliceWallet.address,
-                destination: bobWallet.address,
+                destination: alanWallet.address,
                 amount: amount + '/EUR/' + bank1.hotWallet.address
             });
 
@@ -70,7 +65,7 @@ describe('Test make_transfer', function () {
 
             expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
                 fromEmail: 'alice@a.com',
-                toEmail: 'bob@b.com',
+                toEmail: 'alan@a.com',
                 amount: 50,
                 issuer: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
                 status: 'success'}
@@ -120,13 +115,13 @@ describe('Test make_transfer', function () {
 
         remote._stub_transaction.submit.yields(rippleError, {});
 
-        MakeTransfer.makeTransfer(emitter, 'alice@a.com', 'bob@b.com', amount).fail(function (result) {
+        MakeTransfer.makeTransfer(emitter, 'alice@a.com', 'alan@a.com', amount).fail(function () {
             expect(remote.createTransaction).to.have.callCount(1);
             expect(Utils.getNewConnectedRemote).to.have.callCount(1);
 
             expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
                 fromEmail: 'alice@a.com',
-                toEmail: 'bob@b.com',
+                toEmail: 'alan@a.com',
                 amount: amount,
                 issuer: bank1.hotWallet.address,
                 message: 'Ripple error',
@@ -147,13 +142,13 @@ describe('Test make_transfer', function () {
         sinon.mock(remote, 'createTransaction');
         User.findByEmail.restore();
 
-        MakeTransfer.makeTransfer(emitter, 'alice@a.com', 'bob@b.com', amount).fail(function () {
+        MakeTransfer.makeTransfer(emitter, 'alice@a.com', 'alan@a.com', amount).fail(function () {
             expect(remote.createTransaction).to.have.callCount(0);
             expect(Utils.getNewConnectedRemote).to.have.callCount(0);
 
             expect(emitSpy).to.have.been.calledWith('post:make_transfer', {
                 fromEmail: 'alice@a.com',
-                toEmail: 'bob@b.com',
+                toEmail: 'alan@a.com',
                 amount: amount,
                 issuer: undefined,
                 status: 'error',
