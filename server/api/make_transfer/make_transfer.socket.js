@@ -175,7 +175,7 @@ function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderReque
     var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
     var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank
 
-    var promiseFindSenderRealBankAccount = RealBankAccount.getRealBankAccountForEmail(toEmail);
+    var promiseFindSenderRealBankAccount = RealBankAccount.getRealBankAccountForEmail(fromEmail);
     var promiseFindRecvRealBankAccount = RealBankAccount.getRealBankAccountForEmail(toEmail);
 
     var currentMakeTransferWithRippleWallets = buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId);
