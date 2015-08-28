@@ -64,9 +64,9 @@ describe('Test create_wallet', function () {
     });
 */
 
-    it('should create non-root wallet for adamdoe@a.com', function (done) {
-        CreateWallet.createWalletForEmail(emitter, 'adamdoe@a.com').then(function () {
-            expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('adamdoe@a.com'));
+    it('should create non-root wallet for johndoe@a.com', function (done) {
+        CreateWallet.createWalletForEmail(emitter, 'johndoe@a.com').then(function () {
+            expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('johndoe@a.com'));
             expect(Wallet.create).to.have.callCount(1);
             done();
         }).done(null, function (error) {
@@ -75,10 +75,13 @@ describe('Test create_wallet', function () {
         });
     });
 
-    it('should not create duplicate wallet for adamdoe@a.com', function (done) {
-        CreateWallet.createWalletForEmail(emitter, 'adamdoe@a.com').then(function () {
-            CreateWallet.createWalletForEmail(emitter, 'adamdoe@a.com').then(function () {
-                expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('adamdoe1@a.com'));
+    it('should not create duplicate wallet for johndoe@a.com', function (done) {
+        //let's use the real finder this time
+        Wallet.findByOwnerEmail.restore();
+
+        CreateWallet.createWalletForEmail(emitter, 'johndoe@a.com').then(function () {
+            CreateWallet.createWalletForEmail(emitter, 'johndoe@a.com').then(function () {
+                expect(Wallet.create).to.have.been.calledWith(TestingUtils.getNonAdminMongooseWallet('johndoe@a.com'));
                 expect(Wallet.create).to.have.callCount(1);
                 done();
             });
@@ -103,19 +106,8 @@ describe('Test create_wallet', function () {
         }).done(null, function (error) { debug(error); done(error); });
     });
 
-/*
-    //Tests for Admin users wallets don't make sense anymore
-    it('should set root flag when create new admin@admin.com wallet', function (done) {
-        CreateWallet.createWalletForEmail('admin@admin.com').then(function () {
-            expect(emitSpy).to.have.callCount(1);
-            expect(emitSpy).to.have.been.calledWith('set_root_flags', {});
-            done();
-        }).done(null, function (error) { done(error); });
-    });
-*/
-
     it('should emit post:create_wallet flag when create new wallet', function (done) {
-        CreateWallet.createWalletForEmail(emitter, 'bankonlyuser@a.com').then(function () {
+        CreateWallet.createWalletForEmail(emitter, 'johndoe@a.com').then(function () {
             //expect(emitSpy).to.have.callCount(2);
             expect(emitSpy).to.have.been.calledWith('set_trust', {
                 rippleDestinationAddr: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh_BANK1',
