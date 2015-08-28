@@ -86,7 +86,8 @@ function listTransactions(clientEventEmitter, ownerEmail) {
 						debug(rippleTx);
 						if (rippleTx.tx.TransactionType === 'Payment' &&
 							typeof rippleTx.tx.Amount === 'object' &&
-							rippleTx.meta.TransactionResult === 'tesSUCCESS' /* no failed transactions */) {
+							rippleTx.meta.TransactionResult === 'tesSUCCESS' /* no failed transactions */ &&
+							rippleTx.tx.Memos /* list only order transactions */) {
 							transactionPromises.push(convertRippleTxToHuman(rippleTx));
 						}
 					});
