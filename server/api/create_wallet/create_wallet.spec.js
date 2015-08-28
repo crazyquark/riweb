@@ -129,12 +129,9 @@ describe('Test create_wallet', function () {
         }).done(null, function (error) { done(error); });
     });
 
-    it('should fail when user doesn\'t have a bank', function (done) {
-        //replace the generic 'good'  stub with an invalid user stub
-        User.findByEmail.restore();
-        TestingUtils.buildUserFindEmailStub(User, nonAdminUserWithNoBank);
 
-        CreateWallet.createWalletForEmail(emitter, nonAdminUserWithNoBank.email).then(function () { done(); },
+    it('should fail when user does not have a bank', function (done) {
+        CreateWallet.createWalletForEmail(emitter, 'johndoe@a.com').then(function () { done(); },
             function () {
                 expect(emitSpy).to.have.callCount(1);
                 expect(emitSpy).to.have.been.calledWith('post:create_wallet', {
