@@ -51,7 +51,7 @@ function getPreTransferAction(transfer) {
  amount: amount*/
     transfer.senderRealBankAccount.account.depositToRipple(transfer.amount).then(function() {
         // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
-        return makeRippleTransfer(transfer.sourceBank.bank.hotWallet, transfer.sourceBank.bank.hotWallet.address, transfer.senderWallet, transfer.amount);
+        return makeRippleTransfer(transfer.sourceBank.bank.hotWallet, transfer.senderWallet, transfer.sourceBank.bank.hotWallet.address, transfer.amount);
     },
     function(err){
       return Q({status: 'error', error: err});
