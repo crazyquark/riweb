@@ -36,11 +36,13 @@ angular.module('riwebApp')
         $scope.purchase.merchantEmail = orderRequest.receiverEmail;
         $scope.purchase.price = orderRequest.amount;
         $scope.purchase.details = orderRequest.details;
+        $scope.purchase.timestamp = new Date(orderRequest.timestamp);
         
         $scope.returnUrl = orderRequest.returnUrl;
         $scope.cancelUrl = orderRequest.cancelUrl;
       });
     }
+    
     loadOrderRequest($routeParams.orderRequestId);
     $scope.purchaseProduct = purchaseProduct;
     $scope.ro = $routeParams.ro;
