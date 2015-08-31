@@ -93,32 +93,23 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
             return deferred.promise;
         }
 
-        //TODO: also add the equivalent for destination
-        var preTransferPromise = MTUtils.getPreTransferAction({
+        MTUtils.getPreTransferAction({
             sourceBank: sourceBank,
             senderWallet: senderWallet,
             senderRealBankAccount: senderRealBankAccount,
             amount: amount
-        });
-
-        preTransferPromise.then(function (depositResult) {
+        }).then(function (depositResult) {
             var deposit = Q.defer();
 
             if (depositResult.status === 'success') {
                 makeRippleTransfer(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transactionStatus) {
 
                     if (transactionStatus.status === 'success') {
-                        // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
-                        makeRippleTransfer(recvWallet, destUserBank.hotWallet, destUserBank.hotWallet.address, amount).then(function () {
-                            recvRealBankAccount.account.withdrawFromRipple(amount).then(function () {
-                                if (orderInfo) {
-                                    orderInfo.status = 'rippleSuccess';
-                                    MTUtils.saveOrderToDB(orderInfo);
-                                }
-
-                                deposit.resolve(transactionStatus);
-                            })
-                        });
+                       MTUtils.getPostTransferAction(recvWallet, destUserBank, recvRealBankAccount, amount, orderInfo).then(function(postTransferRes) {
+                          if (postTransferRes.status === 'success') {
+                              deposit.resolve(transactionStatus);
+                          } 
+                       });
                     }
                 }, function (err) {
                     if (orderInfo) {
