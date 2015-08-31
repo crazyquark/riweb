@@ -9,6 +9,7 @@ var Utils = require('./../../server/utils/utils');
 var config = require('../../server/config/environment');
 var ClientEventEmitter = require('../../server/utils/ClientEventEmitter/ClientEventEmitter.service');
 var Bankaccount = require('./../../server/api/bankaccount/bankaccount.model');
+var RippleUtils = require('ripple-lib').utils;
 
 var mongoose = require('mongoose-q')(require('mongoose'));
 var io = require('socket.io');
@@ -80,7 +81,14 @@ function getNewPaymentTransaction(fromAddress, toAddress, amount) {
       Fee: 12,
       date: '123456',
       TransactionType: 'Payment',
-      Amount:  { currency: 'EUR', issuer: 'ROOT', value: amount }
+      Amount:  { currency: 'EUR', issuer: 'ROOT', value: amount },
+      Memos: [
+        {
+          Memo: {
+            MemoData: ''
+          }
+        }
+      ]
     }
   };
 }
@@ -89,7 +97,7 @@ function getNonAdminMongooseWallet(email_address, sufix) {
     email_address = email_address || 'joe@danger.io';
     sufix = sufix || '';
     return {
-        ownerEmail: email_address,
+        email: email_address,
         secret: 'NONADMINssphrase' + sufix,
         address: 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyTh' + sufix
     };
@@ -112,7 +120,19 @@ function buildGenericSetup() {
   var bankA = getMongooseBankAccount('_bank1', 'Bank A', getNonAdminMongooseWallet('admin@a.com', '_BANK1'));
   var bankB = getMongooseBankAccount('_bank2', 'Bank B', getNonAdminMongooseWallet('admin@b.com', '_BANK2'));
   var bankC = getMongooseBankAccount('_bank3', 'Bank C', getBadMongooseWallet('joedanger@c.com', '_BANK3'));
+
   buildBankaccountFindById(Bankaccount, [bankA, bankB, bankC]);
+
+  var bankARippleAddress = bankA.hotWallet.address;
+  var bankBRippleAddress = bankB.hotWallet.address;
+  var bankCRippleAddress = bankC.hotWallet.address;
+  var bankAddressKeyValue = [];
+
+  bankAddressKeyValue[bankARippleAddress] = bankA.hotWallet;
+  bankAddressKeyValue[bankBRippleAddress] = bankB.hotWallet;
+  bankAddressKeyValue[bankCRippleAddress] = bankC.hotWallet;
+
+  sinon.stub(BankAccount, 'findByRippleAddress', buildKeyValuePromiseFunction(bankAddressKeyValue));
 
   var aliceWallet = getNonAdminMongooseWallet('alice@a.com', 'Alice');
   var alanWallet = getNonAdminMongooseWallet('alan@example.com', 'Alan');
@@ -125,7 +145,10 @@ function buildGenericSetup() {
     'bob@b.com': bobWallet
   };
 
-  sinon.stub(Wallet, 'findByOwnerEmail', buildKeyValuePromiseFunction(wallets));
+  sinon.stub(Wallet, 'findByEmail', buildKeyValuePromiseFunction(wallets));
+
+  sinon.stub(Wallet, 'findByRippleAddress', buildArrayPropertyPromiseFunction([
+      aliceWallet, alanWallet, bobWallet], 'address'));
 
   var aliceUser = getNonAdminMongooseUser('Alice', 'alice@a.com', bankA._id);
   var alanUser = getNonAdminMongooseUser('Alan', 'alan@a.com', bankA._id);
@@ -141,6 +164,22 @@ function buildGenericSetup() {
   };
 
   sinon.stub(User, 'findByEmail', buildKeyValuePromiseFunction(aliceAlanAndBobUsers));
+
+  var realBankAccounts = {
+    'alice@a.com': aliceUser,
+    'alan@a.com': alanUser,
+    'johndoe@a.com': newUser,
+    'bob@b.com': bobUser,
+  };
+
+  sinon.stub(RealBankAccount, 'findByIban', function(){
+    var realBankAccount = new RealBankAccount({
+      name: 'alpha',
+      iban: 'AL47212110090000000235698741',
+      balance: '100'
+    });
+    return Q(realBankAccount);
+  });
 
   var data = {
     banks: {
@@ -168,7 +207,7 @@ function buildGenericSetup() {
 
 function getBadMongooseWallet(email_address) {
     return {
-        ownerEmail: email_address,
+        email: email_address,
         secret: undefined,
         address: undefined
     };
@@ -177,16 +216,16 @@ function getBadMongooseWallet(email_address) {
 
 function getAdminMongooseWallet() {
     return {
-        ownerEmail: 'admin@admin.com',
+        email: 'admin@admin.com',
         secret: 'masterpassphrase',
         address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
     };
 }
 
-function buildFindByOwnerEmailForAdmin(wallet) {
-  sinon.stub(Wallet, 'findByOwnerEmail', buildKeyValuePromiseFunction({
+function buildFindByEmailForAdmin(wallet) {
+  sinon.stub(Wallet, 'findByEmail', buildKeyValuePromiseFunction({
     'admin@admin.com': {
-      ownerEmail: 'admin@admin.com',
+      email: 'admin@admin.com',
       secret: 'masterpassphrase',
       address: 'rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh'
     }
@@ -198,8 +237,8 @@ function buildCreateForEmailStub(wallet, email) {
     sinon.stub(wallet, 'create').returns(Q(getNonAdminMongooseWallet(email)));
 }
 
-function buildFindByOwnerEmailForUnexisting(wallet) {
-    sinon.stub(wallet, 'findByOwnerEmail').returns(Q({}));
+function buildFindByEmailForUnexisting(wallet) {
+    sinon.stub(wallet, 'findByEmail').returns(Q({}));
 }
 
 function buildGenericSpy(objectToSpyOn, methods) {
@@ -225,7 +264,7 @@ function buildBankaccountSpy() {
 }
 
 function restoreWalletSpy() {
-    restoreGenericSpy(Wallet, ['create', 'findByOwnerEmail', 'findByRippleAddress']);
+    restoreGenericSpy(Wallet, ['create', 'findByEmail', 'findByRippleAddress']);
 }
 
 function restoreBankaccountSpy() {
@@ -347,6 +386,7 @@ function restoreAll() {
     restoreRippleWalletGenerate();
     restoreGenericSpy(User, ['findByEmail']);
     restoreGenericSpy(Bankaccount, ['findById']);
+    restoreGenericSpy(RealBankAccount, ['findByIban']);
 }
 
 function createRealBankUser(bankName, iban, balance) {
@@ -424,8 +464,8 @@ exports.getNonAdminMongooseWallet = getNonAdminMongooseWallet;
 exports.getNewPaymentTransaction = getNewPaymentTransaction;
 exports.getBadMongooseWallet = getBadMongooseWallet;
 exports.getAdminMongooseWallet = getAdminMongooseWallet;
-exports.buildFindByOwnerEmailForAdmin = buildFindByOwnerEmailForAdmin;
-exports.buildFindByOwnerEmailForUnexisting = buildFindByOwnerEmailForUnexisting;
+exports.buildFindByEmailForAdmin = buildFindByEmailForAdmin;
+exports.buildFindByEmailForUnexisting = buildFindByEmailForUnexisting;
 exports.buildRippleWalletGenerateForNonAdmin = buildRippleWalletGenerateForNonAdmin;
 exports.getNonAdminMongooseUser = getNonAdminMongooseUser;
 exports.getMongooseBankAccount = getMongooseBankAccount;

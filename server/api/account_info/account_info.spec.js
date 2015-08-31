@@ -34,7 +34,7 @@ describe('Test account_info', function () {
     });
 
     it('should get account_info for unexisting email', function (done) {
-        TestingUtils.buildFindByOwnerEmailForUnexisting(Wallet);
+        TestingUtils.buildFindByEmailForUnexisting(Wallet);
 
         AccountInfo.getAccountInfo('not_exist@example.com', emitter).then(function () {
             expect(emitSpy).to.have.been.calledWith('post:account_info', { info: 'User does not exist!'});
@@ -44,7 +44,7 @@ describe('Test account_info', function () {
     });
 
     it('should get account_info for admin email', function (done) {
-        TestingUtils.buildFindByOwnerEmailForAdmin(Wallet);
+        TestingUtils.buildFindByEmailForAdmin(Wallet);
 
         AccountInfo.getAccountInfo('admin@admin.com', emitter).then(function () {
             expect(emitSpy).to.have.callCount(1);

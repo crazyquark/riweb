@@ -47,7 +47,7 @@ function ClientEventEmitter(socket) {
   };
 
   emitter.emitEvent = function(eventName, event) {
-    debug('emitEvent', eventName);
+    debug('emitEvent', eventName, event);
     emitter.emit(eventName, event);
   };
 

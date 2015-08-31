@@ -24,35 +24,17 @@ describe('Test list_transactions', function() {
       fromBank1ToAliceTx, emitter;
 
     beforeEach(function (done) {
-        remote = TestingUtils.buildRemoteStub();
-        sinon.stub(Utils, 'getNewConnectedRemote').returns(Q(remote));
-        emitter = TestingUtils.buildNewClientEventEmitterSpy();
-        emitSpy = emitter.emitEvent;
-
-        aliceWallet = TestingUtils.getNonAdminMongooseWallet('alice@a.com', 'Alice');
-        bobWallet = TestingUtils.getNonAdminMongooseWallet('bob@b.com', 'Bob');
-
-        bank1 = {
-            'email': 'bank1@example.com',
-            'hotWallet': {
-                'address': 'rNON_ADMIN4rj91VRWn96DkukG4bwdtyThBank',
-                'secret': 'NONADMINssphraseBank'
-            }
-        };
-
-      sinon.stub(Wallet, 'findByOwnerEmail', TestingUtils.buildKeyValuePromiseFunction({
-          'alice@a.com': aliceWallet,
-          'bob@b.com': bobWallet
-      }));
-
-      sinon.stub(Wallet, 'findByRippleAddress', TestingUtils.buildArrayPropertyPromiseFunction([
-          aliceWallet, bobWallet], 'address'));
-
-      sinon.stub(BankAccount, 'findByRippleAddress', TestingUtils.buildArrayPropertyPromiseFunction([bank1], 'address'));
+      var stubs = TestingUtils.buildGenericSetup();
+      aliceWallet = stubs.wallets.alice;
+      bobWallet = stubs.wallets.bob;
+      remote = stubs.remote;
+      emitter = stubs.emitter;
+      emitSpy = emitter.emitEvent;
+      bank1 = stubs.banks.bankA;
 
       fromAliceToBobTx = TestingUtils.getNewPaymentTransaction(aliceWallet.address, bobWallet.address, 100);
       fromBobToAliceTx = TestingUtils.getNewPaymentTransaction(bobWallet.address, aliceWallet.address, 99);
-      fromBank1ToAliceTx = TestingUtils.getNewPaymentTransaction(bank1.address, aliceWallet.address, 98);
+      fromBank1ToAliceTx = TestingUtils.getNewPaymentTransaction(bank1.hotWallet.address, aliceWallet.address, 98);
 
       TestingUtils.dropMongodbDatabase().then(function(){done();});
     });
@@ -105,11 +87,11 @@ describe('Test list_transactions', function() {
     });
 
 
-    it('should list transactions from bank1 to Alice', function (done) {
+    it('should list transactions from bank A to Alice', function (done) {
         remote.requestAccountTransactions.yields(null, { transactions: [fromBank1ToAliceTx] });
 
         var expectedHumanTransactions = [{
-					source: 'bank1@example.com',
+					source: 'admin@a.com',
 					destination: 'alice@a.com',
 					amount: 98 + '€',
                     orderRequestId: '',

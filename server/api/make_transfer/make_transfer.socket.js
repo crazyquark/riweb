@@ -139,6 +139,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
                             deposit.resolve({ status: 'ripple error', message: 'Ripple error & Critical error - money lost!! ' });
                         }
                     });
+                  deferred.reject(throwMissingError(err, issuingAddress));
                 });
             } else {
                 deposit.resolve({ status: 'error', message: depositResult.message });
@@ -158,6 +159,16 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
             } else {
                 deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
             }
+        }).fail(function(err){
+          clientEventEmitter.emitEvent('post:make_transfer', {
+            fromEmail: fromEmail,
+            toEmail: toEmail,
+            amount: amount,
+            issuer: issuingAddress,
+            message: "Ripple error",
+            status: "ripple error"
+          });
+          deferred.reject(err);
         });
 
         return deferred.promise;
@@ -169,8 +180,8 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
 
 function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId) {
-    var promiseFindSenderWallet = Wallet.findByOwnerEmail(fromEmail);
-    var promiseFindRecvWallet = Wallet.findByOwnerEmail(toEmail);
+    var promiseFindSenderWallet = Wallet.findByEmail(fromEmail);
+    var promiseFindRecvWallet = Wallet.findByEmail(toEmail);
 
     var promiseFindIssuingBank = CreateWallet.getBankForUser(fromEmail);
     var promiseFindDestUserBank = CreateWallet.getBankForUser(toEmail); // If the destination user is from another bank

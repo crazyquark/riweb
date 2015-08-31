@@ -42,9 +42,9 @@ describe('ITest create wallet for user', function () {
         debug('fundWallet');
         CreateWallet.createWalletForEmail(emitter, theUser.email).then(function () {
           debug('createWalletForEmail');
-          Wallet.findByOwnerEmail(theUser.email).then(function (wallet) {
-            debug('findByOwnerEmail');
-            expect(wallet.ownerEmail).to.eql('james.bond@mi6.com');
+          Wallet.findByEmail(theUser.email).then(function (wallet) {
+            debug('findByEmail');
+            expect(wallet.email).to.eql('james.bond@mi6.com');
 
             debug('call getNewConnectedRemote');
             Utils.getNewConnectedRemote().then(function (remote) {

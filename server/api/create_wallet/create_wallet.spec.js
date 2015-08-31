@@ -57,7 +57,7 @@ describe('Test create_wallet', function () {
 
     it('should not create duplicate wallet for johndoe@a.com', function (done) {
         //let's use the real finder this time
-        Wallet.findByOwnerEmail.restore();
+        Wallet.findByEmail.restore();
 
         CreateWallet.createWalletForEmail(emitter, 'johndoe@a.com').then(function () {
             CreateWallet.createWalletForEmail(emitter, 'johndoe@a.com').then(function () {

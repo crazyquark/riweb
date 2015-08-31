@@ -26,11 +26,11 @@ angular.module('riwebApp')
     .factory('Wallet', function ($resource) {
         return $resource('/api/wallets/:id', {id: '@_id'},
             {
-                getByOwnerEmail: {
+                getByEmail: {
                     method: 'GET',
-                    url: '/api/wallets/ownerEmail',
+                    url: '/api/wallets/email',
                     params: {
-                        ownerEmail: '@_ownerEmail'
+                        email: '@_email'
                     },
                     isArray: true
                 }

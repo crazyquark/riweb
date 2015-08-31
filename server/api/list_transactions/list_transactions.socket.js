@@ -16,7 +16,7 @@ var debug = require('debug')('ListTransactions');
 
 function findEmailFromAddress(rippleAddress) {
 	return Wallet.findByRippleAddress(rippleAddress).then(function (foundWallet) {
-		return foundWallet ? foundWallet.ownerEmail : null;
+		return foundWallet ? foundWallet.email : null;
 	})
 }
 
@@ -38,10 +38,10 @@ function convertRippleTxToHuman(transaction){
 
 	  var sourceEmail = sourceUserEmail?sourceUserEmail:sourceBankEmail;
 	  var destinationEmail = destinationUserEmail?destinationUserEmail:destinationBankEmail;
-	  
+
 	  var orderRequestId = transaction.tx.Memos && RippleUtils.hexToString(transaction.tx.Memos[0].Memo.MemoData);
-	  
-      var transactionHuman = {
+
+    var transactionHuman = {
 					source: sourceEmail ? sourceEmail:'<<< deleted account >>>',
 					destination: destinationEmail ? destinationEmail:'<<< deleted account >>>',
 					amount: transaction.tx.Amount.value + '€',
@@ -52,12 +52,12 @@ function convertRippleTxToHuman(transaction){
   });
 }
 
-function listTransactions(clientEventEmitter, ownerEmail) {
+function listTransactions(clientEventEmitter, email) {
   var deferred = Q.defer();
 
 	function buildMissingError() {
 		var result = {
-			ownerEmail: ownerEmail,
+			email: email,
 			status: 'error',
 			message: 'missing account'
 		};
@@ -104,7 +104,7 @@ function listTransactions(clientEventEmitter, ownerEmail) {
 
 	var wallet;
 	// TODO Bank admins do not have wallets!
-	Wallet.findByOwnerEmail(ownerEmail).then(function (wallets) {
+	Wallet.findByEmail(email).then(function (wallets) {
 		if (wallets && wallets.constructor === Array) {
 			if (wallets.length !== 1) {
 				buildMissingError();
@@ -122,7 +122,7 @@ function listTransactions(clientEventEmitter, ownerEmail) {
 			listRippleTransactions();
 		} else {
 			// OK, could be a bank
-			BankAccount.findOneQ({email: ownerEmail}).then(function(bank) {
+			BankAccount.findOneQ({email: email}).then(function(bank) {
 				if (bank) {
 					wallet = bank.hotWallet;
 
@@ -144,7 +144,7 @@ exports.register = function(clientEventEmitter) {
 
   clientEventEmitter.forwardFromEventEmitterToSocket('post:list_transactions');
 
-  clientEventEmitter.onSocketEvent('list_transactions', function (ownerEmail) {
-		listTransactions(clientEventEmitter, ownerEmail);
+  clientEventEmitter.onSocketEvent('list_transactions', function (email) {
+		listTransactions(clientEventEmitter, email);
 	});
 };

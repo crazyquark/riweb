@@ -5,7 +5,7 @@ var controller = require('./wallet.controller');
 
 var router = express.Router();
 
-router.get('/ownerEmail', controller.showByOwnerEmail);
+router.get('/email', controller.showByEmail);
 router.get('/:id', controller.show);
 router.get('/', controller.index);
 router.post('/', controller.create);

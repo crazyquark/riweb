@@ -20,8 +20,8 @@ exports.show = function(req, res) {
   });
 };
 
-exports.showByOwnerEmail = function(req, res) {
-  Wallet.find({ownerEmail: req.query.ownerEmail}, function (err, wallet) {
+exports.showByEmail = function(req, res) {
+  Wallet.find({email: req.query.email}, function (err, wallet) {
     if(err) { return handleError(res, err); }
     if(!wallet) { return res.send(404); }
     return res.json(wallet);

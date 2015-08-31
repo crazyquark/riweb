@@ -29,11 +29,11 @@ describe('Test make_transfer', function () {
         var stubs = TestingUtils.buildGenericSetup();
         aliceWallet = stubs.wallets.alice;
         alanWallet = stubs.wallets.alan;
-        bank1 = stubs.banks.bankA;
         remote = stubs.remote;
-
         emitter = stubs.emitter;
         emitSpy = emitter.emitEvent;
+
+        bank1 = stubs.banks.bankA;
 
         bankWithNoWallet = stubs.banks.bankC;
 

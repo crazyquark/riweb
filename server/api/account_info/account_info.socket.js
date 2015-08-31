@@ -42,8 +42,8 @@ function getRippleAccountInfo(rippleAddress) {
   return deferred.promise;
 }
 
-function getAccountInfo(ownerEmail, clientEventEmitter) {
-  return Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet) {
+function getAccountInfo(email, clientEventEmitter) {
+  return Wallet.findByEmail(email).then(function(foundWallet) {
       var deferred = Q.defer();
 
      if (foundWallet && foundWallet.address) { // There should be only one
@@ -73,8 +73,8 @@ exports.register = function(clientEventEmitter) {
 
   clientEventEmitter.forwardFromEventEmitterToSocket('post:account_info');
 
-  clientEventEmitter.onSocketEvent('account_info', function(ownerEmail) {
-    console.log('account_info ' + ownerEmail);
-    getAccountInfo(ownerEmail, clientEventEmitter);
+  clientEventEmitter.onSocketEvent('account_info', function(email) {
+    console.log('account_info ' + email);
+    getAccountInfo(email, clientEventEmitter);
   });
 };

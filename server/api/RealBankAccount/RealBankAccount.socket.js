@@ -8,8 +8,8 @@ var RealBankAccount = require('./RealBankAccount.model');
 var User = require('./../user/user.model');
 var debug = require('debug')('RealBankAccountSocket');
 
-function getRealBankAccountForEmail(ownerEmail) {
-  var promise = User.findByEmail(ownerEmail).then(function(foundUser) {
+function getRealBankAccountForEmail(email) {
+  var promise = User.findByEmail(email).then(function(foundUser) {
 
     if (foundUser) {
       return RealBankAccount.findByIban(foundUser.iban).then(function(foundRealAccount) {
@@ -22,7 +22,7 @@ function getRealBankAccountForEmail(ownerEmail) {
       });
     }
     else {
-      debug('cannot find user for email ', ownerEmail);
+      debug('cannot find user for email ', email);
       return { status: 'error', message: 'user not found'};
     }
   });

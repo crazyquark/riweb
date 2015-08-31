@@ -81,16 +81,16 @@ function createNewWallet(){
     return Q.fcall(ripple.Wallet.generate);
 }
 
-function getCreateWallet(ownerEmail){
-    if (ownerEmail === 'admin@admin.com') {
+function getCreateWallet(email){
+    if (email === 'admin@admin.com') {
         return createAdminWallet;
     } else {
         return createNewWallet;
     }
 }
 
-function getBankForUser(ownerEmail) {
-  var promise = User.findByEmail(ownerEmail).then(function(foundUser) {
+function getBankForUser(email) {
+  var promise = User.findByEmail(email).then(function(foundUser) {
 
     if (foundUser) {
       return BankAccount.findById(foundUser.bank).then(function(foundBank) {
@@ -107,7 +107,7 @@ function getBankForUser(ownerEmail) {
       });
     }
     else {
-      debug('cannot find user for email ', ownerEmail);
+      debug('cannot find user for email ', email);
       return { status: 'error', message: 'user not found', sourceRole: undefined };
     }
   });
@@ -116,10 +116,10 @@ function getBankForUser(ownerEmail) {
 }
 
 
-function convertRippleToRiwebWallet(ownerEmail){
+function convertRippleToRiwebWallet(email){
   var walletConverterFunction = function(rippleWallet) {
         return {
-            ownerEmail: ownerEmail,
+            email: email,
             address: rippleWallet.address,
             secret: rippleWallet.secret
         };
@@ -127,31 +127,31 @@ function convertRippleToRiwebWallet(ownerEmail){
     return walletConverterFunction;
 }
 
-function createWalletForEmail(clientEventEmitter, ownerEmail, role) {
-  debug('createWalletForEmail', ownerEmail);
+function createWalletForEmail(clientEventEmitter, email, role) {
+  debug('createWalletForEmail', email);
 
   var deferred = Q.defer();
 
-  Wallet.findByOwnerEmail(ownerEmail).then(function(foundWallet){
+  Wallet.findByEmail(email).then(function(foundWallet){
     if (!foundWallet) {
       if (role === 'admin') {
         // Admin users have their wallet stored in the bankaccount doc, created apriori
-        var existingBankWallet = BankAccount.findOneQ({ email: ownerEmail }).then(function (bank) {
+        var existingBankWallet = BankAccount.findOneQ({ email: email }).then(function (bank) {
           return Q(bank.hotWallet);
         });
 
         return existingBankWallet;
       }
 
-      var bankWalletQ = getBankForUser(ownerEmail).then(function (foundBank) {
+      var bankWalletQ = getBankForUser(email).then(function (foundBank) {
         if (foundBank.status === 'error') {
           return Q.reject(foundBank.message);
         } else {
 
-          var createWalletQ = getCreateWallet(ownerEmail);
+          var createWalletQ = getCreateWallet(email);
 
           var promise = createWalletQ()
-            .then(convertRippleToRiwebWallet(ownerEmail))
+            .then(convertRippleToRiwebWallet(email))
             .then(function(wallet) {
               return fundWallet(clientEventEmitter, wallet, foundBank.bank.hotWallet, 60);
             })
@@ -188,6 +188,6 @@ exports.register = function(clientEventEmitter) {
   clientEventEmitter.forwardFromEventEmitterToSocket('post:create_wallet');
 
   clientEventEmitter.onSocketEvent('create_wallet', function(data) {
-      createWalletForEmail(clientEventEmitter, data.ownerEmail, data.role);
+      createWalletForEmail(clientEventEmitter, data.email, data.role);
   });
 };

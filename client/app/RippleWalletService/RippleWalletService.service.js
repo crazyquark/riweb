@@ -27,7 +27,7 @@ angular.module('riwebApp')
                 callback();
             });
 
-            socket.socket.emit('create_wallet', { ownerEmail: currentUser.email, role: currentUser.role });
+            socket.socket.emit('create_wallet', { email: currentUser.email, role: currentUser.role });
         }
 
         function loadCurrentUserBalance() {
