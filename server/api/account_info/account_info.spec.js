@@ -19,14 +19,11 @@ var ClientEventEmitter = require('../../utils/ClientEventEmitter/ClientEventEmit
 describe('Test account_info', function () {
     var emitSpy, emitter;
     beforeEach(function (done) {
-        TestingUtils.buildRippleWalletGenerateForNonAdmin();
-        emitter = TestingUtils.buildNewClientEventEmitterSpy();
+        var stubs = TestingUtils.buildGenericSetup();
+        //TestingUtils.buildRippleWalletGenerateForNonAdmin();
+        emitter = stubs.emitter;
         emitSpy = emitter.emitEvent;
 
-        AccountInfo.register(emitter);
-
-        TestingUtils.buildNewConnectedRemoteStub();
-        TestingUtils.buildWalletSpy();
         TestingUtils.dropMongodbDatabase().then(function () { done(); });
     });
     afterEach(function () {
@@ -34,6 +31,7 @@ describe('Test account_info', function () {
     });
 
     it('should get account_info for unexisting email', function (done) {
+        Wallet.findByEmail.restore();
         TestingUtils.buildFindByEmailForUnexisting(Wallet);
 
         AccountInfo.getAccountInfo('not_exist@example.com', emitter).then(function () {
@@ -44,6 +42,7 @@ describe('Test account_info', function () {
     });
 
     it('should get account_info for admin email', function (done) {
+        Wallet.findByEmail.restore();
         TestingUtils.buildFindByEmailForAdmin(Wallet);
 
         AccountInfo.getAccountInfo('admin@admin.com', emitter).then(function () {
