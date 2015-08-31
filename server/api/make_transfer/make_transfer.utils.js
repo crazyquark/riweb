@@ -60,16 +60,24 @@ function getPreTransferAction(transfer) {
 }
 
 function getPostTransferAction(recvWallet, destUserBank, recvRealBankAccount, amount, orderInfo) {
+    function orderError(msg) {
+        if (orderInfo) {
+            orderInfo.status = 'bankError';
+            saveOrderToDB(orderInfo);
+        }
+    }
+
     // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
     return makeRippleTransfer(recvWallet, destUserBank.hotWallet, destUserBank.hotWallet.address, amount).then(function () {
         return recvRealBankAccount.account.withdrawFromRipple(amount).then(function () {
-            if (orderInfo) {
-                orderInfo.status = 'rippleSuccess';
-                saveOrderToDB(orderInfo);
-            }
+            orderError('rippleSuccess');
 
             return Q({ status: 'success' });
-        })
+        }, function (err) {
+            orderError('bankError');
+        });
+    }, function (err) {
+        orderError('rippleError');
     });
 }
 
