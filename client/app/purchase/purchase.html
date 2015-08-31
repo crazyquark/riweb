@@ -1,9 +1,9 @@
 <div ng-include="'components/navbar/navbar.html'"></div>
 
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-12">
-        <div>
+<div class="container">
+  <div class="row">
+    <div class="col-sm-12">
+      <div>
         <h1>Purchase</h1>
         <p ng-show="message">{{ message }}</p>
         <form class="form col-sm-4" name="form" ng-submit="purchaseProduct()" novalidate>
@@ -25,6 +25,13 @@
             <label class="col-sm-6">Details</label>
             <span class="col-sm-6">
               <input type="text" name="details" class="form-control" ng-model="purchase.details"
+                     required ng-readonly="true"/>
+            </span>
+          </div>
+          <div class="row">
+            <label class="col-sm-6">Date</label>
+            <span class="col-sm-6">
+              <input type="text" name="details" class="form-control" ng-model="purchase.timestamp"
                      required ng-readonly="true"/>
             </span>
           </div>

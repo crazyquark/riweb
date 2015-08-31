@@ -14,7 +14,7 @@ var Q = require('q');
 var debug = require('debug')('MakeTransfer');
 
 function saveOrderToDB(orderInfo) {
-    OrderRequests.findOneQ({ _id: orderInfo.orderRequestId }).then(function (orderRequest) {
+    return OrderRequests.findOneQ({ _id: orderInfo.orderRequestId }).then(function (orderRequest) {
         debug('found order request: ', orderRequest);
         Order.createQ(orderInfo).then(function (savedOrder) {
             debug('Saved order: ', savedOrder);
@@ -44,23 +44,41 @@ function isDestinationOnDifferentBank(destUserBank, issuingAddress) {
 
 
 function getPreTransferAction(transfer) {
-/*{
- sourceBank : sourceBank,
- senderWallet: senderWallet,
- senderRealBankAccount: senderRealBankAccount,
- amount: amount
-}*/
-    return transfer.senderRealBankAccount.account.depositToRipple(transfer.amount).then(function() {
+    /*{
+     sourceBank : sourceBank,
+     senderWallet: senderWallet,
+     senderRealBankAccount: senderRealBankAccount,
+     amount: amount
+    }*/
+    return transfer.senderRealBankAccount.account.depositToRipple(transfer.amount).then(function () {
         // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
         return makeRippleTransfer(transfer.sourceBank.bank.hotWallet, transfer.senderWallet, transfer.sourceBank.bank.hotWallet.address, transfer.amount);
     },
-    function(err){
-      return Q({status: 'error', error: err});
-    });
+        function (err) {
+            return Q({ status: 'error', error: err });
+        });
 }
 
-function getPostTransferAction(destAccount, destBankAccount, realBankAccount, amount) {
-    return realBankAccount && realBankAccount.account.withdrawFromRipple(amount);
+function getPostTransferAction(recvWallet, destUserBank, recvRealBankAccount, amount, orderInfo) {
+    function orderError(msg) {
+        if (orderInfo) {
+            orderInfo.status = msg;
+            saveOrderToDB(orderInfo);
+        }
+    }
+
+    // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
+    return makeRippleTransfer(recvWallet, destUserBank.hotWallet, destUserBank.hotWallet.address, amount).then(function () {
+        return recvRealBankAccount.account.withdrawFromRipple(amount).then(function () {
+            orderError('rippleSuccess');
+
+            return Q({ status: 'success' });
+        }, function (err) {
+            orderError('bankError');
+        });
+    }, function (err) {
+        orderError('rippleError');
+    });
 }
 
 function getRollbackTransferAction(sourceBank, realBankAccount, amount) {
@@ -113,5 +131,6 @@ exports.saveOrderToDB = saveOrderToDB;
 exports.checkSufficientBalance = checkSufficientBalance;
 exports.isDestinationOnDifferentBank = isDestinationOnDifferentBank;
 exports.getPreTransferAction = getPreTransferAction;
+exports.getPostTransferAction = getPostTransferAction;
 exports.getRollbackTransferAction = getRollbackTransferAction;
 exports.createPaymentTransaction = createPaymentTransaction;

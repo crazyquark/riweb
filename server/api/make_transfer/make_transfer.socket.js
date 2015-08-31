@@ -86,6 +86,13 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
             };
         }
 
+        function orderError(msg) {
+            if (orderInfo) {
+                orderInfo.status = msg;
+                MTUtils.saveOrderToDB(orderInfo);
+            }
+        }
+
         //we need to check if the user really does have the necessary funds
         var check = MTUtils.checkSufficientBalance(senderRealBankAccount, amount);
         if (check.status !== 'success') {
@@ -93,38 +100,26 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
             return deferred.promise;
         }
 
-        //TODO: also add the equivalent for destination
-        var preTransferPromise = MTUtils.getPreTransferAction({
+        MTUtils.getPreTransferAction({
             sourceBank: sourceBank,
             senderWallet: senderWallet,
             senderRealBankAccount: senderRealBankAccount,
             amount: amount
-        });
-
-        preTransferPromise.then(function (depositResult) {
+        }).then(function (depositResult) {
             var deposit = Q.defer();
 
             if (depositResult.status === 'success') {
                 makeRippleTransfer(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transactionStatus) {
 
                     if (transactionStatus.status === 'success') {
-                        // senderWallet, recvWallet, dstIssuer, amount, srcIssuer, orderInfo
-                        makeRippleTransfer(recvWallet, destUserBank.hotWallet, destUserBank.hotWallet.address, amount).then(function () {
-                            recvRealBankAccount.account.withdrawFromRipple(amount).then(function () {
-                                if (orderInfo) {
-                                    orderInfo.status = 'rippleSuccess';
-                                    MTUtils.saveOrderToDB(orderInfo);
-                                }
-
+                        MTUtils.getPostTransferAction(recvWallet, destUserBank, recvRealBankAccount, amount, orderInfo).then(function (postTransferRes) {
+                            if (postTransferRes.status === 'success') {
                                 deposit.resolve(transactionStatus);
-                            })
+                            }
                         });
                     }
                 }, function (err) {
-                    if (orderInfo) {
-                        orderInfo.status = 'rippleError';
-                        MTUtils.saveOrderToDB(orderInfo);
-                    }
+                    orderError('rippleError');
 
                     //undo the deposit action (if needed)
                     var rollbackTransferActionPromise = MTUtils.getRollbackTransferAction(sourceBank, senderRealBankAccount, amount);
@@ -136,6 +131,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
                             deposit.resolve({ status: 'ripple error', message: 'Ripple error' });
                         } else {
                             debug('makeTransferWithRipple - unrecoverable transfer error', amount);
+                            // Drama!
                             deposit.resolve({ status: 'ripple error', message: 'Ripple error & Critical error - money lost!! ' });
                         }
                     });
@@ -147,28 +143,43 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
             return deposit.promise;
         }).then(function (transferResult) {
-            if (transferResult.status === 'success') {
-                clientEventEmitter.emitEvent('post:make_transfer', {
-                    fromEmail: fromEmail,
-                    toEmail: toEmail,
-                    amount: amount,
-                    issuer: issuingAddress,
-                    status: 'success'
-                });
-                deferred.resolve({ status: 'success', transaction: transferResult.transaction });
-            } else {
-                deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
-            }
-        }).fail(function(err){
-          clientEventEmitter.emitEvent('post:make_transfer', {
-            fromEmail: fromEmail,
-            toEmail: toEmail,
-            amount: amount,
-            issuer: issuingAddress,
-            message: "Ripple error",
-            status: "ripple error"
-          });
-          deferred.reject(err);
+
+        //  if (transferResult.status === 'success') {
+        //    clientEventEmitter.emitEvent('post:make_transfer', {
+        //      fromEmail: fromEmail,
+        //      toEmail: toEmail,
+        //      amount: amount,
+        //      issuer: issuingAddress,
+        //      status: 'success'
+        //    });
+        //    deferred.resolve({ status: 'success', transaction: transferResult.transaction });
+        //  } else {
+        //    deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
+        //  }
+        //}).fail(function(err){
+        //  clientEventEmitter.emitEvent('post:make_transfer', {
+        //    fromEmail: fromEmail,
+        //    toEmail: toEmail,
+        //    amount: amount,
+        //    issuer: issuingAddress,
+        //    message: "Ripple error",
+        //    status: "ripple error"
+        //  });
+        //  deferred.reject(err);
+        //});
+
+          if (transferResult.status === 'success') {
+            clientEventEmitter.emitEvent('post:make_transfer', {
+              fromEmail: fromEmail,
+              toEmail: toEmail,
+              amount: amount,
+              issuer: issuingAddress,
+              status: 'success'
+            });
+            deferred.resolve({ status: 'success', transaction: transferResult.transaction });
+          } else {
+            deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
+          }
         });
 
         return deferred.promise;
