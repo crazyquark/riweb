@@ -62,7 +62,7 @@ function getPreTransferAction(transfer) {
 function getPostTransferAction(recvWallet, destUserBank, recvRealBankAccount, amount, orderInfo) {
     function orderError(msg) {
         if (orderInfo) {
-            orderInfo.status = 'bankError';
+            orderInfo.status = msg;
             saveOrderToDB(orderInfo);
         }
     }
