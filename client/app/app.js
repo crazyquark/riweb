@@ -7,8 +7,13 @@ angular.module('riwebApp', [
   'ngRoute',
   'btford.socket-io',
   'ui.bootstrap',
-  'mm.iban'
+  'mm.iban',
+  'angularSpinner'
 ])
+  .config(['usSpinnerConfigProvider', function (usSpinnerConfigProvider) {
+    usSpinnerConfigProvider.setDefaults({color: '#337AB7'});
+  }])
+
   .config(function ($routeProvider, $locationProvider, $httpProvider) {
     $routeProvider
       .otherwise({

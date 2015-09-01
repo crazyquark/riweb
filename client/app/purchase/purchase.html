@@ -1,12 +1,13 @@
 <div ng-include="'components/navbar/navbar.html'"></div>
 
 <div class="container">
+  <span us-spinner spinner-key="purchase-spinner"></span>
   <div class="row">
     <div class="col-sm-12">
       <div>
         <h1>Purchase</h1>
         <p ng-show="message">{{ message }}</p>
-        <form class="form col-sm-4" name="form" ng-submit="purchaseProduct()" novalidate>
+        <form class="form col-sm-8" name="form" ng-submit="purchaseProduct()" novalidate>
           <div class="row">
             <label class="col-sm-6">Merchant email</label>
             <span class="col-sm-6">
