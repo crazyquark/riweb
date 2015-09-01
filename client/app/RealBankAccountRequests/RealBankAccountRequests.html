@@ -1,0 +1,28 @@
+<div ng-include="'components/navbar/navbar.html'"></div>
+<div class="container">
+	<div class="row">
+		<table class="table" ng-show="realBankAccountRequests.requests">
+			<thead>
+				<tr>
+					<th>Email</th>
+					<th>IBAN</th>
+					<th>Bank</th>
+					<th>Balance</th>
+					<th>Status</th>
+					<th>Message</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="request in realBankAccountRequests.requests">
+					<td>{{request.email}}</td>
+					<td>{{request.iban}}</td>
+					<td>{{request.name}}</td>
+					<td>{{request.balance}}</td>
+					<td>{{request.status}}</td>
+					<td>{{request.message}}</td>				
+				</tr>
+			</tbody>
+		</table>
+
+	</div>
+</div>

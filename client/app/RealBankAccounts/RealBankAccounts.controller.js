@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('RealBankAccountsCtrl', function ($scope, RealBankAccountsService) {
+    .controller('RealBankAccountsCtrl', function ($scope, RealBankAccountsService) {
     $scope.realBankAccounts = {};
     
     function init() {
