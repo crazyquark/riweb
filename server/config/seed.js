@@ -68,6 +68,11 @@ function createRealbankUsers() {
       balance: '101'
     },
     {
+      name: 'alpha',
+      iban: 'LV80BANK0000435195001',
+      balance: '0'
+    },
+    {
       name: 'brd',
       iban: 'BA391290079401028494',
       balance: '102'

@@ -14,7 +14,7 @@
 			</thead>
 			<tbody>
 				<tr ng-repeat="request in realBankAccountRequests.requests">
-					<td>{{request.email}}</td>
+					<td>{{request.email||'not found'}}</td>
 					<td>{{request.iban}}</td>
 					<td>{{request.name}}</td>
 					<td>{{request.balance}}</td>
