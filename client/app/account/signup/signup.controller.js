@@ -2,7 +2,18 @@
 
 angular.module('riwebApp')
   .controller('SignupCtrl', function ($scope, Auth, $location, BankAccountService) {
-    $scope.user = {};
+    $scope.availableRoleTypes = [{
+      role: 'user',
+      label: 'Regular User'
+     }, 
+     {
+      role: 'merchant',
+      label: 'Merchant User'  
+     }];
+
+    $scope.user = {
+      role: $scope.availableRoleTypes[0]
+    };
     $scope.errors = {};
 
     $scope.availableBanks = [];
@@ -25,7 +36,8 @@ angular.module('riwebApp')
           email: $scope.user.email,
           password: $scope.user.password,
           iban: $scope.user.iban,
-          bank: $scope.user.bank._id
+          bank: $scope.user.bank._id,
+          role: $scope.user.role.role
         })
         .then( function() {
           // Account created, redirect to home

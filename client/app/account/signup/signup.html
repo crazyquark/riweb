@@ -12,11 +12,19 @@
                                             'has-error': form.name.$invalid && submitted }">
           <label>Name</label>
 
-          <input type="text" name="name" class="form-control" ng-model="user.name"
-                 required/>
+          <input type="text" name="name" class="form-control" ng-model="user.name" required/>
           <p class="help-block" ng-show="form.name.$error.required && submitted">
             A name is required
           </p>
+        </div>
+
+        <div class="form-group" ng-class="{ 'has-success': form.roleType.$valid && submitted,
+                                            'has-error': form.roleType.$invalid && submitted }">
+          <label>Account Type</label>
+
+          <select name="role" class="form-control" ng-model="user.role" ng-options="roleType.label for roleType in availableRoleTypes">
+          </select>
+
         </div>
 
         <div class="form-group" ng-class="{ 'has-success': form.bank.$valid && submitted,
@@ -36,8 +44,7 @@
         <div class="form-group" ng-class="{ 'has-success': form.iban.$valid && submitted,
                                             'has-error': form.iban.$invalid && submitted }">
           <label>IBAN</label>
-          <input type="text" name="iban" class="form-control" ng-model="user.iban"
-                 required ng-iban/>
+          <input type="text" name="iban" class="form-control" ng-model="user.iban" required ng-iban/>
           <p class="help-block" ng-show="form.iban.$error.iban && submitted">
             Doesn't look like a valid IBAN.
           </p>
@@ -50,9 +57,7 @@
                                             'has-error': form.email.$invalid && submitted }">
           <label>Email</label>
 
-          <input type="email" name="email" class="form-control" ng-model="user.email"
-                 required
-                 mongoose-error/>
+          <input type="email" name="email" class="form-control" ng-model="user.email" required mongoose-error/>
           <p class="help-block" ng-show="form.email.$error.email && submitted">
             Doesn't look like a valid email.
           </p>
@@ -68,12 +73,8 @@
                                             'has-error': form.password.$invalid && submitted }">
           <label>Password</label>
 
-          <input type="password" name="password" class="form-control" ng-model="user.password"
-                 ng-minlength="3"
-                 required
-                 mongoose-error/>
-          <p class="help-block"
-             ng-show="(form.password.$error.minlength || form.password.$error.required) && submitted">
+          <input type="password" name="password" class="form-control" ng-model="user.password" ng-minlength="3" required mongoose-error/>
+          <p class="help-block" ng-show="(form.password.$error.minlength || form.password.$error.required) && submitted">
             Password must be at least 3 characters.
           </p>
           <p class="help-block" ng-show="form.password.$error.mongoose">
@@ -87,13 +88,13 @@
           </button>
         </div>
 
-          <ul ng-show="submitted">
-              <li ng-repeat="(key, errors) in form.$error track by $index"> <strong>{{ key }}</strong> errors
-                  <ul>
-                      <li ng-repeat="e in errors">{{ e.$name }} has an error: <strong>{{ key }}</strong>.</li>
-                  </ul>
-              </li>
-          </ul>
+        <ul ng-show="submitted">
+          <li ng-repeat="(key, errors) in form.$error track by $index"> <strong>{{ key }}</strong> errors
+            <ul>
+              <li ng-repeat="e in errors">{{ e.$name }} has an error: <strong>{{ key }}</strong>.</li>
+            </ul>
+          </li>
+        </ul>
 
       </form>
     </div>
