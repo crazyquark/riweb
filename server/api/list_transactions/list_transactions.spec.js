@@ -41,7 +41,6 @@ describe('Test list_transactions', function() {
 
     afterEach(function () {
         TestingUtils.restoreAll();
-        emitSpy.restore();
     });
 
     it('should list transactions from Alice to Bob', function (done) {
