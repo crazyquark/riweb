@@ -25,6 +25,7 @@ function onConnect(socket) {
   var clientEventEmitter = new ClientEventEmitter(socket);
 
   // Insert sockets below
+  require('../api/BankTrust/BankTrust.socket').register(socket);
   require('../api/RealBankAccountRequest/RealBankAccountRequest.socket').register(socket);
   require('../api/Order/Order.socket').register(clientEventEmitter);
   require('../api/order_request/order_request.socket').register(clientEventEmitter);
