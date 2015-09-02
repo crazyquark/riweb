@@ -91,6 +91,24 @@ function getRollbackTransferAction(sourceBank, realBankAccount, amount) {
     }
 }
 
+function performRollbackAction(deferred, deposit, sourceBank, issuingAddress, senderRealBankAccount, amount, throwMissingError, err) {
+    //undo the deposit action (if needed)
+    var rollbackTransferActionPromise = getRollbackTransferAction(sourceBank, senderRealBankAccount, amount);
+
+    debug('makeTransferWithRipple - ripple error', err);
+
+    rollbackTransferActionPromise.then(function (withdrawResult) {
+        if (withdrawResult.status === 'success') {
+            deposit.resolve({ status: 'ripple error', message: 'Ripple error' });
+        } else {
+            debug('makeTransferWithRipple - unrecoverable transfer error', amount);
+            // Drama!
+            deposit.resolve({ status: 'ripple error', message: 'Ripple error & Critical error - money lost!! ' });
+        }
+    });
+
+    deferred.reject(throwMissingError(err, issuingAddress));
+}
 
 function createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount) {
     var transaction = remote.createTransaction('Payment', paymentData);
@@ -163,3 +181,4 @@ exports.getRollbackTransferAction = getRollbackTransferAction;
 exports.createPaymentTransaction = createPaymentTransaction;
 exports.processTransferResult = processTransferResult;
 exports.processTransferFailure = processTransferFailure;
+exports.performRollbackAction = performRollbackAction;
