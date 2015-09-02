@@ -1,75 +1,80 @@
 <div ng-include="'components/navbar/navbar.html'"></div>
 
 <div class="container">
-    <div class="panel panel-info">
-        <div class="panel-heading">
-            <h3 id="panel-title" class="panel-title">My account: <strong>{{getMyAccountUser().email}}</strong></h3>
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 id="panel-title" class="panel-title">My account: <strong>{{getMyAccountUser().email}}</strong></h3>
+    </div>
+    <div class="panel-body">
+      <h4 id="panel-title" class="panel-title" ng-show="walletInfo.wallet">Account:
+        <strong>{{getMyAccountUser().name}}</strong></h4>
+      <h4 ng-show="accountInfo.iban">IBAN: <strong>{{accountInfo.iban}}</strong></h4>
+      <!--<h4 ng-show="accountInfo.balance">Current balance: <strong>{{accountInfo.balance}}</strong> €</h4>-->
+
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="alert alert-warning" ng-hide="walletInfo.wallet" role="alert">Please wait, you do not have an
+            wallet yet.
+          </div>
         </div>
-        <div class="panel-body">
-            <h4 id="panel-title" class="panel-title" ng-show="walletInfo.wallet">Account: <strong>{{getMyAccountUser().name}}</strong></h4>            
-            <h4 ng-show="accountInfo.iban">IBAN: <strong>{{accountInfo.iban}}</strong></h4>            
-            <!--<h4 ng-show="accountInfo.balance">Current balance: <strong>{{accountInfo.balance}}</strong> €</h4>-->
+      </div>
 
-            <div class="row">
-                <div class="col-xs-12">
-                    <div class="alert alert-warning" ng-hide="walletInfo.wallet" role="alert">Please wait, you do not have an wallet yet.</div>
-                </div>
-            </div>
-
-            <div class="row" ng-hide="true">
-                <div class="col-xs-12">
-                    <button ng-show="walletInfo.wallet" type="button" class="btn btn-default btn-lg btn-success"
-                            aria-label="Left Align"
-                            ng-click="transferMoney()">
-                        <span class="glyphicon glyphicon-euro" aria-hidden="true"></span>
-                        Transfer money
-                    </button>
+      <div class="row" ng-hide="true">
+        <div class="col-xs-12">
+          <button ng-show="walletInfo.wallet" type="button" class="btn btn-default btn-lg btn-success"
+                  aria-label="Left Align"
+                  ng-click="transferMoney()">
+            <span class="glyphicon glyphicon-euro" aria-hidden="true"></span>
+            Transfer money
+          </button>
                 <span ng-show="walletInfo.wallet">
                     Amount to transfer <input ng-model="amountToTransfer"></input>
                 </span>
-                </div>
-            </div>
         </div>
+      </div>
+
     </div>
     <div class="panel panel-info" ng-show="accountInfo.transactions">
-        <div class="panel-heading">
-            <h3 id="panel-title" class="panel-title">Transactions</strong></h3>
-        </div>
-        <div class="panel-body">
-            <div class="alert alert-warning" ng-hide="accountInfo.transactions" role="alert">No transactions yet</div>
+      <div class="panel-heading">
+        <h3 id="panel-title" class="panel-title">Transactions</strong></h3>
+      </div>
+      <div class="panel-body">
+        <div class="alert alert-warning" ng-hide="accountInfo.transactions" role="alert">No transactions yet</div>
 
-            <table class="table" ng-show="accountInfo.transactions">
-                <thead>
-                <tr>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Amount</th>
-                    <th ng-hide="true">Fee</th>
-                    <th>Order</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="transaction in accountInfo.transactions">
-                    <td>{{transaction.source}}</td>
-                    <td>{{transaction.destination}}</td>
-                    <td>{{transaction.amount}}</td>
-                    <td ng-hide="true">{{transaction.fee}}</td>
-                    <td><a ng-show="transaction.orderRequestId" href="/purchase?orderRequestId={{transaction.orderRequestId}}&ro=1">{{transaction.orderRequestId}}</a></td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+        <table class="table" ng-show="accountInfo.transactions">
+          <thead>
+          <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Amount</th>
+            <th ng-hide="true">Fee</th>
+            <th>Order</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr ng-repeat="transaction in accountInfo.transactions">
+            <td>{{transaction.source}}</td>
+            <td>{{transaction.destination}}</td>
+            <td>{{transaction.amount}}</td>
+            <td ng-hide="true">{{transaction.fee}}</td>
+            <td><a ng-show="transaction.orderRequestId"
+                   href="/purchase?orderRequestId={{transaction.orderRequestId}}&ro=1">{{transaction.orderRequestId}}</a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div class="panel panel-info" ng-hide="true">
-        <div class="panel-heading">
-            <h3 id="panel-title" class="panel-title">Network status</strong></h3>
-        </div>
-        <div class="panel-body">
-            <div class="alert alert-warning" ng-hide="serverInfo.server_name" role="alert">Not connected to server yet</div>
-            <h4 ng-show="serverInfo.server_name">Connected to server: <strong>{{serverInfo.server_name}}</strong></h4>
-            <h4 ng-show="serverInfo.ledgerClosed">Last ledger closed: <strong>{{serverInfo.ledgerClosed}}</strong></h4>
-            <h4>{{serverInfo.error}}</h4>
-        </div>
+      <div class="panel-heading">
+        <h3 id="panel-title" class="panel-title">Network status</strong></h3>
+      </div>
+      <div class="panel-body">
+        <div class="alert alert-warning" ng-hide="serverInfo.server_name" role="alert">Not connected to server yet</div>
+        <h4 ng-show="serverInfo.server_name">Connected to server: <strong>{{serverInfo.server_name}}</strong></h4>
+        <h4 ng-show="serverInfo.ledgerClosed">Last ledger closed: <strong>{{serverInfo.ledgerClosed}}</strong></h4>
+        <h4>{{serverInfo.error}}</h4>
+      </div>
     </div>
     <!--<div class="panel panel-info" ng-show="serverInfo.server_name">
         <div class="panel-heading">
