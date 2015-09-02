@@ -50,6 +50,7 @@ function createUserForBank(user, bankAdmin) {
     email: user.email,
     password: user.email,
     iban: user.iban,
+    role: user.role,
     bank: bankAdmin.bank
   }).then(function (newUser) {
     return CreateWallet.createWalletForEmail(emitter, newUser.email, 'user');
@@ -112,6 +113,7 @@ TestingUtils.dropMongodbDatabase().then(function () {
         return createUserForBank({
             name: 'Alice',
             email: 'alice@alpha.com',
+            role: 'user',
             iban: 'AL47212110090000000235698741'
         }, bankAdmin)
             .then(function (wallet) {
@@ -120,6 +122,7 @@ TestingUtils.dropMongodbDatabase().then(function () {
                 return createUserForBank({
                     name: 'Alan',
                     email: 'alan@alpha.com',
+                    role: 'user',
                     iban: 'AZ21NABZ00000000137010001944'
                 }, bankAdmin);
             });
@@ -129,6 +132,7 @@ TestingUtils.dropMongodbDatabase().then(function () {
         return createUserForBank({
             name: 'Bob',
             email: 'bob@brd.com',
+            role: 'user',
             iban: 'BA391290079401028494'
         }, bankAdmin);
     });
