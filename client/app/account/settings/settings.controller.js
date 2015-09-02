@@ -19,25 +19,4 @@ angular.module('riwebApp')
       }
     };
 
-    $scope.setTrust = {
-      amountToTrust: 1000,
-    };
-
-    $scope.trustBank = function () {
-      RiwebSocketService.emit('set_bank_trust', {
-        bank: $scope.setTrust.bank
-      });
-    };
-
-    $scope.availableBanks = [];
-
-    function listAvailableBanks() {
-      BankAccountService.query().$promise.then(function (allBanks) {
-        $scope.availableBanks = allBanks;
-        $scope.setTrust.bank = $scope.availableBanks[0];
-      });
-    }
-
-    listAvailableBanks();
-
   });
