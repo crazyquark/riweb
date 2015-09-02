@@ -93,7 +93,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
             }
         }
 
-        //we need to check if the user really does have the necessary funds
+        // We need to check if the user really does have the necessary funds
         var check = MTUtils.checkSufficientBalance(senderRealBankAccount, amount);
         if (check.status !== 'success') {
             deferred.reject(throwMissingError(check.error, issuingAddress));
@@ -110,7 +110,6 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
             if (depositResult.status === 'success') {
                 makeRippleTransfer(senderWallet, recvWallet, issuingAddress, amount, sourceIssuingAddressIfDifferent, orderInfo).then(function (transactionStatus) {
-
                     if (transactionStatus.status === 'success') {
                         MTUtils.getPostTransferAction(recvWallet, destUserBank, recvRealBankAccount, amount, orderInfo).then(function (postTransferRes) {
                             if (postTransferRes.status === 'success') {
@@ -121,21 +120,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
                 }, function (err) {
                     orderError('rippleError');
 
-                    //undo the deposit action (if needed)
-                    var rollbackTransferActionPromise = MTUtils.getRollbackTransferAction(sourceBank, senderRealBankAccount, amount);
-
-                    debug('makeTransferWithRipple - ripple error', err);
-
-                    rollbackTransferActionPromise.then(function (withdrawResult) {
-                        if (withdrawResult.status === 'success') {
-                            deposit.resolve({ status: 'ripple error', message: 'Ripple error' });
-                        } else {
-                            debug('makeTransferWithRipple - unrecoverable transfer error', amount);
-                            // Drama!
-                            deposit.resolve({ status: 'ripple error', message: 'Ripple error & Critical error - money lost!! ' });
-                        }
-                    });
-                  deferred.reject(throwMissingError(err, issuingAddress));
+                    MTUtils.performRollbackAction(deferred, deposit, sourceBank, issuingAddress, senderRealBankAccount, amount, throwMissingError, err);
                 });
             } else {
                 deposit.resolve({ status: 'error', message: depositResult.message });
@@ -143,29 +128,9 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
             return deposit.promise;
         }).then(function (transferResult) {
-
-          if (transferResult.status === 'success') {
-            clientEventEmitter.emitEvent('post:make_transfer', {
-              fromEmail: fromEmail,
-              toEmail: toEmail,
-              amount: amount,
-              issuer: issuingAddress,
-              status: 'success'
-            });
-            deferred.resolve({ status: 'success', transaction: transferResult.transaction });
-          } else {
-            deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
-          }
+            MTUtils.processTransferResult(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, throwMissingError, transferResult);         
         }).fail(function(err){
-          clientEventEmitter.emitEvent('post:make_transfer', {
-            fromEmail: fromEmail,
-            toEmail: toEmail,
-            amount: amount,
-            issuer: issuingAddress,
-            message: "Ripple error",
-            status: "ripple error"
-          });
-          deferred.reject(err);
+            MTUtils.processTransferFailure(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, err);
         });
 
         return deferred.promise;
@@ -173,8 +138,6 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
     return makeTransferWithRippleWallets;
 }
-
-
 
 function makeTransfer(clientEventEmitter, fromEmail, toEmail, amount, orderRequestId) {
     var promiseFindSenderWallet = Wallet.findByEmail(fromEmail);

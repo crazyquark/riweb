@@ -91,6 +91,24 @@ function getRollbackTransferAction(sourceBank, realBankAccount, amount) {
     }
 }
 
+function performRollbackAction(deferred, deposit, sourceBank, issuingAddress, senderRealBankAccount, amount, throwMissingError, err) {
+    //undo the deposit action (if needed)
+    var rollbackTransferActionPromise = getRollbackTransferAction(sourceBank, senderRealBankAccount, amount);
+
+    debug('makeTransferWithRipple - ripple error', err);
+
+    rollbackTransferActionPromise.then(function (withdrawResult) {
+        if (withdrawResult.status === 'success') {
+            deposit.resolve({ status: 'ripple error', message: 'Ripple error' });
+        } else {
+            debug('makeTransferWithRipple - unrecoverable transfer error', amount);
+            // Drama!
+            deposit.resolve({ status: 'ripple error', message: 'Ripple error & Critical error - money lost!! ' });
+        }
+    });
+
+    deferred.reject(throwMissingError(err, issuingAddress));
+}
 
 function createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer, amount) {
     var transaction = remote.createTransaction('Payment', paymentData);
@@ -127,6 +145,33 @@ function createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer
     return transaction;
 }
 
+function processTransferResult(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, throwMissingError, transferResult) {
+    if (transferResult.status === 'success') {
+        clientEventEmitter.emitEvent('post:make_transfer', {
+            fromEmail: fromEmail,
+            toEmail: toEmail,
+            amount: amount,
+            issuer: issuingAddress,
+            status: 'success'
+        });
+        deferred.resolve({ status: 'success', transaction: transferResult.transaction });
+    } else {
+        deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
+    }
+}
+
+function processTransferFailure(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, err) {
+    clientEventEmitter.emitEvent('post:make_transfer', {
+        fromEmail: fromEmail,
+        toEmail: toEmail,
+        amount: amount,
+        issuer: issuingAddress,
+        message: "Ripple error",
+        status: "ripple error"
+    });
+    deferred.reject(err);
+}
+
 exports.saveOrderToDB = saveOrderToDB;
 exports.checkSufficientBalance = checkSufficientBalance;
 exports.isDestinationOnDifferentBank = isDestinationOnDifferentBank;
@@ -134,3 +179,6 @@ exports.getPreTransferAction = getPreTransferAction;
 exports.getPostTransferAction = getPostTransferAction;
 exports.getRollbackTransferAction = getRollbackTransferAction;
 exports.createPaymentTransaction = createPaymentTransaction;
+exports.processTransferResult = processTransferResult;
+exports.processTransferFailure = processTransferFailure;
+exports.performRollbackAction = performRollbackAction;
