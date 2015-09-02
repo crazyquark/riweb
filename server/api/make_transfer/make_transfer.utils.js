@@ -127,6 +127,33 @@ function createPaymentTransaction(remote, paymentData, orderRequestId, srcIssuer
     return transaction;
 }
 
+function processTransferResult(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, throwMissingError, transferResult) {
+    if (transferResult.status === 'success') {
+        clientEventEmitter.emitEvent('post:make_transfer', {
+            fromEmail: fromEmail,
+            toEmail: toEmail,
+            amount: amount,
+            issuer: issuingAddress,
+            status: 'success'
+        });
+        deferred.resolve({ status: 'success', transaction: transferResult.transaction });
+    } else {
+        deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
+    }
+}
+
+function processTransferFailure(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, err) {
+    clientEventEmitter.emitEvent('post:make_transfer', {
+        fromEmail: fromEmail,
+        toEmail: toEmail,
+        amount: amount,
+        issuer: issuingAddress,
+        message: "Ripple error",
+        status: "ripple error"
+    });
+    deferred.reject(err);
+}
+
 exports.saveOrderToDB = saveOrderToDB;
 exports.checkSufficientBalance = checkSufficientBalance;
 exports.isDestinationOnDifferentBank = isDestinationOnDifferentBank;
@@ -134,3 +161,5 @@ exports.getPreTransferAction = getPreTransferAction;
 exports.getPostTransferAction = getPostTransferAction;
 exports.getRollbackTransferAction = getRollbackTransferAction;
 exports.createPaymentTransaction = createPaymentTransaction;
+exports.processTransferResult = processTransferResult;
+exports.processTransferFailure = processTransferFailure;

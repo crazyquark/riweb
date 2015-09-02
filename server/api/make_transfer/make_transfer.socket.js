@@ -143,29 +143,9 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
             return deposit.promise;
         }).then(function (transferResult) {
-
-          if (transferResult.status === 'success') {
-            clientEventEmitter.emitEvent('post:make_transfer', {
-              fromEmail: fromEmail,
-              toEmail: toEmail,
-              amount: amount,
-              issuer: issuingAddress,
-              status: 'success'
-            });
-            deferred.resolve({ status: 'success', transaction: transferResult.transaction });
-          } else {
-            deferred.reject(throwMissingError(transferResult.message, issuingAddress, transferResult.status));
-          }
+            MTUtils.processTransferResult(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, throwMissingError, transferResult);         
         }).fail(function(err){
-          clientEventEmitter.emitEvent('post:make_transfer', {
-            fromEmail: fromEmail,
-            toEmail: toEmail,
-            amount: amount,
-            issuer: issuingAddress,
-            message: "Ripple error",
-            status: "ripple error"
-          });
-          deferred.reject(err);
+            MTUtils.processTransferFailure(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, err);
         });
 
         return deferred.promise;
