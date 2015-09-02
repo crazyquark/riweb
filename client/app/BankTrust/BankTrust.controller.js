@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('BankTrustCtrl', function ($scope, Auth, BankAccountService) {
+  .controller('BankTrustCtrl', function ($scope, Auth, BankAccountService, RiwebSocketService) {
     $scope.bankAccounts = {};
 
     function init() {
@@ -25,7 +25,8 @@ angular.module('riwebApp')
 
     $scope.trustBank = function () {
       RiwebSocketService.emit('set_bank_trust', {
-        bank: $scope.setTrust.bank
+        bank: $scope.setTrust.bank,
+        amount: $scope.setTrust.amountToTrust
       });
     };
 

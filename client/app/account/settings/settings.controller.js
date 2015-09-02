@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('riwebApp')
-  .controller('SettingsCtrl', function ($scope, User, Auth, BankAccountService, RiwebSocketService) {
+  .controller('SettingsCtrl', function ($scope, User, Auth) {
     $scope.errors = {};
 
     $scope.changePassword = function (form) {
