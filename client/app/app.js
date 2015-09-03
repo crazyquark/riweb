@@ -8,7 +8,8 @@ angular.module('riwebApp', [
   'btford.socket-io',
   'ui.bootstrap',
   'mm.iban',
-  'angularSpinner'
+  'angularSpinner',
+  'angularMoment'
 ])
   .config(['usSpinnerConfigProvider', function (usSpinnerConfigProvider) {
     usSpinnerConfigProvider.setDefaults({color: '#337AB7'});
