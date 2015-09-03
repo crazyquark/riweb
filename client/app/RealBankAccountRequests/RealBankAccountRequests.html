@@ -4,25 +4,25 @@
 		<table class="table" ng-show="realBankAccountRequests.requests">
 			<thead>
 				<tr>
-					<th>Email</th>
+					<th class="hidden-xs">Email</th>
 					<th>IBAN</th>
-					<th>Bank</th>
+					<th class="hidden-xs">Bank</th>
 					<th>Balance</th>
-					<th>Status</th>
+					<th class="hidden-xs">Status</th>
 					<th>Message</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr ng-repeat="request in realBankAccountRequests.requests">
-					<td>{{request.email||'not found'}}</td>
+					<td class="hidden-xs">{{request.email||'not found'}}</td>
 					<td>{{request.iban}}</td>
-					<td>{{request.name}}</td>
+					<td class="hidden-xs">{{request.name}}</td>
 					<td>{{request.balance}}</td>
-					<td>{{request.status}}</td>
-					<td>{{request.message}}</td>				
+					<td class="hidden-xs">{{request.status}}</td>
+					<td>{{request.message}}</td>
 				</tr>
 			</tbody>
-		</table>	
+		</table>
 
 	</div>
 </div>
