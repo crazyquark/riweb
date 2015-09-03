@@ -113,7 +113,7 @@ TestingUtils.dropMongodbDatabase().then(function () {
         return createUserForBank({
             name: 'Alice',
             email: 'alice@alpha.com',
-            role: 'user',
+            role: 'merchant',
             iban: 'AL47212110090000000235698741'
         }, bankAdmin)
             .then(function (wallet) {
@@ -132,7 +132,7 @@ TestingUtils.dropMongodbDatabase().then(function () {
         return createUserForBank({
             name: 'Bob',
             email: 'bob@brd.com',
-            role: 'user',
+            role: 'merchant',
             iban: 'BA391290079401028494'
         }, bankAdmin);
     });

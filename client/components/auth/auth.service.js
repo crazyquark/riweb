@@ -158,6 +158,15 @@ angular.module('riwebApp')
       },
 
       /**
+       * Check if a user is a merchant
+       *
+       * @return {Boolean}
+       */
+      isMerchant: function() {
+        return currentUser.role === 'merchant';
+      },
+
+      /**
        * Get auth token
        */
       getToken: function() {
