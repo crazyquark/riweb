@@ -27,7 +27,6 @@
         <li ng-show="isLoggedIn()" ng-class="{active: isActive('/settings')}"><a href="/settings"><span class="glyphicon glyphicon-cog"></span></a></li>
         <li ng-hide="isMerchant()" ng-class="{active: isActive('/testpurchases')}"><a href="/testpurchases">Test Purchases</a></li>
         <li ng-class="{active: isActive('/RealBankAccounts')}"><a href="/RealBankAccounts">Bank Info</a></li>
-        <li ng-show="isAdmin()" ng-class="{active: isActive('/BankTrust')}"><a href="/BankTrust">Bank Trust</a></li>
         <li ng-class="{active: isActive('/RealBankAccountRequests')}"><a href="/RealBankAccountRequests">Bank API Requests</a></li>
         <li ng-show="isLoggedIn()" ng-class="{active: isActive('/logout')}"><a href="" ng-click="logout()">Logout</a></li>
       </ul>
