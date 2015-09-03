@@ -1,22 +1,26 @@
 <div ng-include="'components/navbar/navbar.html'"></div>
 <div class="container">
-	<div class="row">
-		<table class="table" ng-show="realBankAccounts.accounts">
-			<thead>
-				<tr>
-					<th>Bank</th>
-					<th>IBAN</th>
-					<th>Balance</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr ng-repeat="account in realBankAccounts.accounts">
-					<td>{{account.name}}</td>
-					<td>{{account.iban}}</td>
-					<td>{{account.balance}}</td>
-				</tr>
-			</tbody>
-		</table>
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 id="panel-title" class="panel-title">Bank info</h3>
+    </div>
+    <div class="panel-body">
+      <table class="table" ng-show="realBankAccounts.accounts">
+        <thead>
+        <tr>
+          <th>Bank</th>
+          <th>IBAN</th>
+          <th>Balance</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="account in realBankAccounts.accounts">
+          <td>{{account.name}}</td>
+          <td>{{account.iban}}</td>
+          <td>{{account.balance}}</td>
+        </tr>
+        </tbody>
+      </table>
 
-	</div>
-</div>
+    </div>
+  </div>
