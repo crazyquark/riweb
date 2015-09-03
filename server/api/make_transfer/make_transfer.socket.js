@@ -81,6 +81,8 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
                 orderRequestId: orderRequestId,
                 senderEmail: fromEmail,
                 receiverEmail: toEmail,
+                senderIban: senderRealBankAccount.account.iban,
+                recvIban: recvRealBankAccount.account.iban,
                 amount: amount,
                 status: ''
             };
@@ -128,7 +130,7 @@ function buildMakeTransferWithRippleWallets(clientEventEmitter, fromEmail, toEma
 
             return deposit.promise;
         }).then(function (transferResult) {
-            MTUtils.processTransferResult(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, throwMissingError, transferResult);         
+            MTUtils.processTransferResult(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, throwMissingError, transferResult);
         }).fail(function(err){
             MTUtils.processTransferFailure(clientEventEmitter, deferred, fromEmail, toEmail, amount, issuingAddress, err);
         });

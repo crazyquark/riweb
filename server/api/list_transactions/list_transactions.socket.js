@@ -10,6 +10,7 @@ var Q = require('q');
 var Utils = require('./../../utils/utils');
 var RippleUtils = require('ripple-lib').utils;
 var Wallet = require('./../wallet/wallet.model');
+var User = require('./../user/user.model');
 var BankAccount = require('../bankaccount/bankaccount.model');
 
 var debug = require('debug')('ListTransactions');
@@ -65,6 +66,10 @@ function listTransactions(clientEventEmitter, email) {
 		clientEventEmitter.emitEvent('post:list_transactions', result);
 		deferred.resolve(result);
 	}
+
+  User.findByEmail(email).then(function(foundUser) {
+
+  });
 
 	function listRippleTransactions() {
 		Utils.getNewConnectedRemote(wallet.address, wallet.secret).then(function (remote) {

@@ -10,6 +10,8 @@ var OrderSchema = new Schema({
   amount: Number,
   details: String,
   status: String,
+  senderIban: String,
+  recvIban: String,
   timestamp: { type : Date, default: Date.now }
 });
 
